@@ -35,6 +35,9 @@
         width: 56px;
         height: 60px;
     }
+    .kueIue:hover {
+        border: 1.5px solid rgb(34, 34, 34);
+        background-color: white;
 }
 .verification_frame {
     background: rgb(255, 255, 255);
