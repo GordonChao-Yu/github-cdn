@@ -1,193 +1,193 @@
-body {
-    font-size: 100%;
-    font-weight: 400;
-    color: #4a4a4a;
-    line-height: 1.6;
-    scroll-behavior: smooth;
-}
-#shopify-section-header {
-    top: 0px;
-}
-#shopify-section-header {
-  position: sticky;
-  z-index: 10;
-  border-top: none;
-}
-.page__container {
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    min-height: 100vh;
-    height: 100%;
-    background: #fff;
-}
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.cs3-header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  text-align: center;
-  padding: 0;
-}
-.cs3-header .container .mixx-header__logo {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-}
-@media (min-width: 1200px) {
-    body.cs-body .container {
-        width: 1200px;
+<style>
+    body {
+        font-size: 100%;
+        font-weight: 400;
+        color: #4a4a4a;
+        line-height: 1.6;
+        scroll-behavior: smooth;
     }
-}
-@media (min-width: 992px) {
-    body.cs-body .container {
-        padding-left: 0;
-        padding-right: 0;
+    #shopify-section-header {
+        top: 0px;
     }
-}
-@media screen and (min-width: 768px) {
-    .cs3-header {
-        position: relative;
-        height: auto;
-        background-color: #fff;
-        box-shadow: 0 20px 20px -20px #00000026;
-        transition: height .1s;
-        z-index: 1;
+    #shopify-section-header {
+      position: sticky;
+      z-index: 10;
+      border-top: none;
+    }
+    .page__container {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        min-height: 100vh;
+        height: 100%;
+        background: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .cs3-header .container {
-        position: static;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      text-align: center;
+      padding: 0;
     }
-    a.mixx-header__logo {
-      text-decoration: none;
-    }
-    a.feature__item, a.shopping-cart{
-      text-decoration: none;
-    }
-    
     .cs3-header .container .mixx-header__logo {
-        position: relative;
-        top: unset;
-        left: unset;
-        -ms-transform: unset;
-        transform: unset;
-        order: 1;
-        width: 20%;
-        height: 80px;
-        justify-content: flex-start;
-    }
-    .cs3-header .container .cs-header__feature {
-        order: 2;
-        width: 20%;
-        height: 80px;
-    }
-    .cs3-header .container .cs-header__feature .feature__item.member {
-        display: flex;
-    }
-    .cs3-header .container .cs-header__feature .feature__item {
-        width: 60px;
-        height: 60px;
-        margin-left: 8px;
-    }
-    .cs3-header .container .cs-header__feature #feature-item-member img {
-      width: 32px;
-    }
-    .cs3-header .container .mixx-header__logo i {
-        font-size: 22.6px;
-    }
-}
-.cs3-header .container .cs-header__feature .feature__item {
-      margin: 0;
       display: flex;
       align-items: center;
+      padding: 8px 0;
+    }
+    @media (min-width: 1200px) {
+        body.cs-body .container {
+            width: 1200px;
+        }
+    }
+    @media (min-width: 992px) {
+        body.cs-body .container {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+    @media screen and (min-width: 768px) {
+        .cs3-header {
+            position: relative;
+            height: auto;
+            background-color: #fff;
+            box-shadow: 0 20px 20px -20px #00000026;
+            transition: height .1s;
+            z-index: 1;
+        }
+        .cs3-header .container {
+            position: static;
+        }
+        a.mixx-header__logo {
+          text-decoration: none;
+        }
+        a.feature__item, a.shopping-cart{
+          text-decoration: none;
+        }
+        
+        .cs3-header .container .mixx-header__logo {
+            position: relative;
+            top: unset;
+            left: unset;
+            -ms-transform: unset;
+            transform: unset;
+            order: 1;
+            width: 20%;
+            height: 80px;
+            justify-content: flex-start;
+        }
+        .cs3-header .container .cs-header__feature {
+            order: 2;
+            width: 20%;
+            height: 80px;
+        }
+        .cs3-header .container .cs-header__feature .feature__item.member {
+            display: flex;
+        }
+        .cs3-header .container .cs-header__feature .feature__item {
+            width: 60px;
+            height: 60px;
+            margin-left: 8px;
+        }
+        .cs3-header .container .cs-header__feature #feature-item-member img {
+          width: 32px;
+        }
+        .cs3-header .container .mixx-header__logo i {
+            font-size: 22.6px;
+        }
+    }
+    .cs3-header .container .cs-header__feature .feature__item {
+          margin: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+    }
+    .cs3-header .container .cs-header__feature {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    .cs3-header .container .cs-header__feature .feature__item.shopping-cart .cart-icon-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .cart-icon-wrapper {
+        position: relative;
+        text-align: center;
+    }
+    .cs-header__feature {
+        overflow: visible;
+    }
+    .header__wrapper {
+        position: relative;
+        table-layout: fixed;
+        border-collapse: collapse;
+        z-index: 1;
+    }
+    .dropdown, .dropup {
+        position: relative;
+    }
+    .dropdown-menu {
+        position: absolute;
+        z-index: 1000;
+        display: none;
+        float: left;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        font-size: 14px;
+        text-align: left;
+        list-style: none;
+        background-color: #fff;
+        background-clip: padding-box;
+    }
+    .cs3-header .container .mixx-header__logo i {
+      color: #121314;
+    }
+    .cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
+        font-size: 24px;
+    }
+    
+    i.icon-cart {
+      /* use !important to prevent issues with browser extensions that change fonts */
+      font-family: 'icomoon' !important;
+      speak: never;
+      font-style: normal;
+      font-weight: 400;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1;
       justify-content: center;
-}
-.cs3-header .container .cs-header__feature {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-.cs3-header .container .cs-header__feature .feature__item.shopping-cart .cart-icon-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.cart-icon-wrapper {
-    position: relative;
-    text-align: center;
-}
-.cs-header__feature {
-    overflow: visible;
-}
-.header__wrapper {
-    position: relative;
-    table-layout: fixed;
-    border-collapse: collapse;
-    z-index: 1;
-}
-.dropdown, .dropup {
-    position: relative;
-}
-.dropdown-menu {
-    position: absolute;
-    z-index: 1000;
-    display: none;
-    float: left;
-    padding: 5px 0;
-    margin: 2px 0 0;
-    font-size: 14px;
-    text-align: left;
-    list-style: none;
-    background-color: #fff;
-    background-clip: padding-box;
-}
-.cs3-header .container .mixx-header__logo i {
-  color: #121314;
-}
-.cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
-    font-size: 24px;
-}
-
-i.icon-cart {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'icomoon' !important;
-  speak: never;
-  font-style: normal;
-  font-weight: 400;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  justify-content: center;
-  align-items: center;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-i.icon-us-font {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'usfont' !important;
-  speak: never;
-  font-style: normal;
-  font-weight: 400;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.icon-us-font:before {
-  content: "\e900";
-}
-.icon-cart:before {
-  content: "\e900";
-}
-
+      align-items: center;
+    
+      /* Better Font Rendering =========== */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    i.icon-us-font {
+      /* use !important to prevent issues with browser extensions that change fonts */
+      font-family: 'usfont' !important;
+      speak: never;
+      font-style: normal;
+      font-weight: 400;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1;
+    
+      /* Better Font Rendering =========== */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    .icon-us-font:before {
+      content: "\e900";
+    }
+    .icon-cart:before {
+      content: "\e900";
+    }
 </style>
