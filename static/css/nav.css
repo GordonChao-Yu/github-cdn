@@ -68,13 +68,13 @@ body {
     border-collapse: collapse;
     z-index: 1;
 }
+
 .cs3-header .container .mixx-header__logo i {
   color: #121314;
 }
 .cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
     font-size: 24px;
 }
-
 i.icon-cart {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
@@ -111,6 +111,10 @@ i.icon-us-font {
 }
 .icon-cart:before {
   content: "\e900";
+}
+.dropdown-menu li {
+    overflow: hidden;
+    position: relative;
 }
 @media (min-width: 1200px) {
     body.cs-body .container {
@@ -203,6 +207,24 @@ i.icon-us-font {
         border-radius: 3px;
         background-color: #ed5c56;
         color: #fff;
+    }
+    .cs-header__feature .dropdown .dropdown-menu-text-login {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        min-height: 50px;
+    }
+    .dropdown-menu>li>a {
+        display: block;
+        padding: 3px 20px;
+        clear: both;
+        font-weight: 400;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        line-height: 1.42857143;
+        color: #333;
+        white-space: nowrap;
     }
 }
 
