@@ -76,7 +76,6 @@ body {
     font-size: 24px;
 }
 i.icon-cart {
-  /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
   speak: never;
   font-style: normal;
@@ -84,15 +83,11 @@ i.icon-cart {
   font-variant: normal;
   text-transform: none;
   line-height: 1;
-  justify-content: center;
-  align-items: center;
-
-  /* Better Font Rendering =========== */
+  
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 i.icon-us-font {
-  /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'usfont' !important;
   speak: never;
   font-style: normal;
@@ -101,7 +96,6 @@ i.icon-us-font {
   text-transform: none;
   line-height: 1;
 
-  /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
