@@ -112,10 +112,10 @@ i.icon-us-font {
 .icon-cart:before {
   content: "\e900";
 }
-.feature__item.member:hover #login-dropdown,
+/* .feature__item.member:hover #login-dropdown,
 .dropdown:hover .dropdown-menu {
     display: block !important;
-}
+} */
 @media (min-width: 1200px) {
     body.cs-body .container {
         width: 1200px;
@@ -140,7 +140,7 @@ i.icon-us-font {
     box-shadow: 0 0 30px #00000026;
   }
  .cs-header__feature .dropdown:hover .dropdown-menu {
-    display: block;
+    display: block !important;
   }
  .cs-header__feature .dropdown .dropdown-menu-text-login {
     display: flex;
