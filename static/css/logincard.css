@@ -125,7 +125,7 @@
                     border: 1.5px solid rgb(244, 244, 244);
                     font-size: 14px !important;
                 }
-                /* .btn-primary {
+                .btn-primary {
                     --bs-btn-color: #fff;
                     --bs-btn-bg: rgb(34, 34, 34);
                     --bs-btn-border-color: rgb(34, 34, 34);
@@ -135,4 +135,4 @@
                     --bs-btn-active-border-color : rgb(34, 34, 34);
                     --bs-btn-disabled-bg: rgb(34, 34, 34);
                     --bs-btn-disabled-border-color: rgb(34, 34, 34);
-                } */
+                }
