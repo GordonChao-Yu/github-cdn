@@ -39,7 +39,7 @@ dropdown
     color: #333;
     white-space: nowrap;
 }
-.dropdown-menu li a:hover {
+.dropdown-menu>li>a:hover {
     background-color: transparent;
     color: #00c795;
 }
