@@ -116,9 +116,6 @@ i.icon-us-font {
     overflow: hidden;
     position: relative;
 }
-.dropdown-menu a {
-    transition: color 0.3s ease, background-color 0.3s ease;
-}
 @media (min-width: 1200px) {
     body.cs-body .container {
         width: 1200px;
@@ -231,7 +228,7 @@ i.icon-us-font {
         padding: 3px 20px;
         clear: both;
         font-weight: 400;
-        transition: background-color 0.2s ease;
+        transition: color 0.3s ease, background-color 0.3s ease;
         text-decoration: none;
         line-height: 1.42857143;
         color: #333;
