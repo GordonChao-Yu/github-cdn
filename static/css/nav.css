@@ -177,5 +177,21 @@ i.icon-us-font {
         font-size: 22.6px;
     }
 }
+@media only screen and (min-width: 768px) {
+    .cs-header__feature .dropdown .dropdown-menu {
+        top: 90%;
+        min-width: 140px;
+        left: -32px;
+        border-radius: 6px;
+        box-shadow: 0 0 30px #00000026;
+    }
+    .cs-header__feature .dropdown .dropdown-menu-login {
+        max-width: 170px !important;
+        left: -45px !important;
+    }
+    .cs-header__feature .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+}
 
 
