@@ -28,10 +28,6 @@
     -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
     box-shadow: 0 6px 12px rgba(0,0,0,.175)
 }
-.dropdown-menu li a:hover {
-    background-color: transparent;
-    color: #00c795;
-}
 .dropdown-menu>li>a {
     display: block;
     padding: 3px 20px;
