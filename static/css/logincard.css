@@ -1,3 +1,18 @@
+html * {
+    font-family: Inter, Helvetica Neue, Arial, PingFang TC, Microsoft JhengHei, sans-serif;
+}
+a {
+    transition: all .25s ease-in-out;
+}
+a {
+    color: inherit;
+    background-color: #0000;
+    text-decoration: none;
+}
+a, a:hover, a:focus {
+    color: #00c795;
+}
+
 .dropdown-menu {
     border: 0;
 }
