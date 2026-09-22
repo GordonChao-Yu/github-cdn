@@ -196,3 +196,11 @@ i.icon-us-font {
 .icon-cart:before {
   content: "\e900";
 }
+.feature__item.member:hover #login-dropdown,
+.dropdown:hover .dropdown-menu {
+    display: block !important;
+}
+#login-dropdown, 
+.dropdown-menu {
+    display: none;
+}
