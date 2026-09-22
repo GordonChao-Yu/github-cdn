@@ -42,6 +42,8 @@ body {
 .cs3-header .container .cs-header__feature .feature__item {
       margin: 0;
       display: flex;
+      width: 54px;
+      height: 54px;
       align-items: center;
       justify-content: center;
 }
@@ -74,6 +76,14 @@ body {
 }
 .cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
     font-size: 24px;
+}
+a {
+    transition: all .25s ease-in-out;
+}
+a {
+    color: inherit;
+    background-color: #0000;
+    text-decoration: none;
 }
 i {
   /* use !important to prevent issues with browser extensions that change fonts */
