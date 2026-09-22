@@ -62,7 +62,7 @@ body {
     border-radius: 6px;
     box-shadow: 0 0 30px #00000026;
   }
- .dropdown:hover {
+ .cs-header__feature .dropdown:hover .dropdown-menu {
     display: block;
   }
  .cs-header__feature .dropdown .dropdown-menu-text-login {
