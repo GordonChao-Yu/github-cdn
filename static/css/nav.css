@@ -215,6 +215,14 @@ i.icon-us-font {
         cursor: pointer;
         min-height: 50px;
     }
+    .cs-header__feature .dropdown .dropdown-menu-text-personalize {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        min-height: 50px;
+        flex-direction: row;
+    }
     .dropdown-menu>li>a {
         display: block;
         padding: 3px 20px;
