@@ -50,6 +50,29 @@ body {
         padding-right: 0;
     }
 }
+@media only screen and (min-wdth: 768px) {
+  .cs-header__feature .dropdown .dropdown-menu-login {
+    max-width: 170px !important;
+    left: -45px !important;
+  }
+  .cs-header__feature .dropdown .dropdown-menu {
+    top: 90%;
+    min-width: 140px;
+    left: -32px;
+    border-radius: 6px;
+    box-shadow: 0 0 30px #00000026;
+  }
+ .dropdown:hover {
+    display: block;
+  }
+ .cs-header__feature .dropdown .dropdown-menu-text-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    min-height: 50px;
+  }
+}
 @media screen and (min-width: 768px) {
     .cs3-header {
         position: relative;
@@ -128,22 +151,6 @@ body {
     table-layout: fixed;
     border-collapse: collapse;
     z-index: 1;
-}
-.dropdown, .dropup {
-    position: relative;
-}
-.dropdown-menu {
-    position: absolute;
-    z-index: 1000;
-    display: none;
-    float: left;
-    padding: 5px 0;
-    margin: 2px 0 0;
-    font-size: 14px;
-    text-align: left;
-    list-style: none;
-    background-color: #fff;
-    background-clip: padding-box;
 }
 .cs3-header .container .mixx-header__logo i {
   color: #121314;
