@@ -1,10 +1,6 @@
 html * {
     font-family: Inter, Helvetica Neue, Arial, PingFang TC, Microsoft JhengHei, sans-serif;
 }
-
-a, a:hover, a:focus {
-    color: #00c795;
-}
 .dropdown-menu {
     border: 0;
 }
@@ -16,6 +12,7 @@ a, a:hover, a:focus {
     /* ✨ 順便加上這一行，實現你上一題問的「柔和」漸變效果 ✨ */
     transition: color 0.3s ease; 
 }
+
 @media (min-width: 768px) {
                     .login__frame {
                         width: 410px;
