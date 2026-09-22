@@ -75,36 +75,26 @@ body {
 .cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
     font-size: 24px;
 }
-i.icon-cart {
-  font-family: 'icomoon' !important;
-  speak: never;
-  font-style: normal;
-  font-weight: 400;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-i.icon-us-font {
+i {
+  /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'usfont' !important;
   speak: never;
   font-style: normal;
-  font-weight: 400;
+  font-weight: normal;
   font-variant: normal;
   text-transform: none;
   line-height: 1;
 
+  /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-us-font:before {
+.icon-urbansocial:before {
   content: "\e900";
 }
 .icon-cart:before {
-  content: "\e900";
+  content: "\e901";
 }
 .dropdown-menu li {
     overflow: hidden;
