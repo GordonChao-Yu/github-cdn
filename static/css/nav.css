@@ -39,6 +39,83 @@ body {
   align-items: center;
   padding: 8px 0;
 }
+.cs3-header .container .cs-header__feature .feature__item {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+}
+.cs3-header .container .cs-header__feature {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.cs3-header .container .cs-header__feature .feature__item.shopping-cart .cart-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.cart-icon-wrapper {
+    position: relative;
+    text-align: center;
+}
+.cs-header__feature {
+    overflow: visible;
+}
+.header__wrapper {
+    position: relative;
+    table-layout: fixed;
+    border-collapse: collapse;
+    z-index: 1;
+}
+.cs3-header .container .mixx-header__logo i {
+  color: #121314;
+}
+.cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
+    font-size: 24px;
+}
+
+i.icon-cart {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: 400;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  justify-content: center;
+  align-items: center;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+i.icon-us-font {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'usfont' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: 400;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-us-font:before {
+  content: "\e900";
+}
+.icon-cart:before {
+  content: "\e900";
+}
+.feature__item.member:hover #login-dropdown,
+.dropdown:hover .dropdown-menu {
+    display: block !important;
+}
 @media (min-width: 1200px) {
     body.cs-body .container {
         width: 1200px;
@@ -123,81 +200,5 @@ body {
         font-size: 22.6px;
     }
 }
-.cs3-header .container .cs-header__feature .feature__item {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-}
-.cs3-header .container .cs-header__feature {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-.cs3-header .container .cs-header__feature .feature__item.shopping-cart .cart-icon-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.cart-icon-wrapper {
-    position: relative;
-    text-align: center;
-}
-.cs-header__feature {
-    overflow: visible;
-}
-.header__wrapper {
-    position: relative;
-    table-layout: fixed;
-    border-collapse: collapse;
-    z-index: 1;
-}
-.cs3-header .container .mixx-header__logo i {
-  color: #121314;
-}
-.cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
-    font-size: 24px;
-}
 
-i.icon-cart {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'icomoon' !important;
-  speak: never;
-  font-style: normal;
-  font-weight: 400;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  justify-content: center;
-  align-items: center;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-i.icon-us-font {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'usfont' !important;
-  speak: never;
-  font-style: normal;
-  font-weight: 400;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.icon-us-font:before {
-  content: "\e900";
-}
-.icon-cart:before {
-  content: "\e900";
-}
-.feature__item.member:hover #login-dropdown,
-.dropdown:hover .dropdown-menu {
-    display: block !important;
-}
 
