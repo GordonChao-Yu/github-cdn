@@ -195,6 +195,15 @@ i.icon-us-font {
         margin: 9px 0 7px;
         background-color: #e7e7e7;
     }
+    .cs-header__feature .dropdown .dropdown-menu-text-personalize .new-label {
+        margin: 0 0 0 4px;
+        font-size: 10px;
+        line-height: 18px;
+        padding: 0 4px;
+        border-radius: 3px;
+        background-color: #ed5c56;
+        color: #fff;
+    }
 }
 
 
