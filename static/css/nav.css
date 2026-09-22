@@ -200,7 +200,4 @@ i.icon-us-font {
 .dropdown:hover .dropdown-menu {
     display: block !important;
 }
-#login-dropdown, 
-.dropdown-menu {
-    display: none;
-}
+
