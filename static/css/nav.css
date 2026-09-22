@@ -188,6 +188,13 @@ i.icon-us-font {
     .cs-header__feature .dropdown:hover .dropdown-menu {
         display: block;
     }
+    .cs-header__feature .dropdown .dropdown-menu-hr {
+        width: 170px;
+        height: 1px;
+        flex-grow: 0;
+        margin: 9px 0 7px;
+        background-color: #e7e7e7;
+    }
 }
 
 
