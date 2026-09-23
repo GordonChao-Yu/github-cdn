@@ -1,3 +1,6 @@
+html * {
+    font-family: Inter, Helvetica Neue, Arial, PingFang TC, Microsoft JhengHei, sans-serif;
+}
 body {
     font-size: 100%;
     font-weight: 400;
