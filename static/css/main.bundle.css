@@ -312,6 +312,9 @@ i {
     .cs3-header .container .mixx-header__logo i {
         font-size: 22.6px;
     }
+    .cs-myAccountHeader .cs-myAccountHeader-nav .cs-myAccountHeader-navTable .navTab a {
+        padding: 0 36px;
+    }
 }
 @media only screen and (min-width: 768px) {
     .cs-header__feature .dropdown .dropdown-menu {
