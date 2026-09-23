@@ -5,6 +5,11 @@ body {
     line-height: 1.6;
     scroll-behavior: smooth;
 }
+.main {
+    -webkit-flex: 1 0 auto;
+    -ms-flex: 1 0 auto;
+    flex: 1 0 auto;
+}
 #shopify-section-header {
     top: 0px;
 }
@@ -110,6 +115,10 @@ i {
     overflow: hidden;
     position: relative;
 }
+
+/* Account page  */
+
+
 @media (min-width: 1200px) {
     body.cs-body .container {
         width: 1200px;
