@@ -27,10 +27,6 @@ body {
     height: 100%;
     background: #fff;
 }
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
 .cs3-header .container {
   display: flex;
   justify-content: space-between;
