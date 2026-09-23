@@ -10,6 +10,11 @@ body {
     -ms-flex: 1 0 auto;
     flex: 1 0 auto;
 }
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style-position: inside;
+}
 #shopify-section-header {
     top: 0px;
 }
