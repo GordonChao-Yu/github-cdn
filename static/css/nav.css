@@ -117,7 +117,122 @@ i {
 }
 
 /* Account page  */
-
+.cs-myAccountHeader {
+    position: relative;
+    background-color: #eaebeb;
+    background-image: url(https://www.citiesocial.com/cdn/shop/files/Visual-2.png?3541039300956669622);
+    background-repeat: no-repeat;
+    background-position: right top;
+    min-height: 250px;
+}
+.cs-myAccountHeader>.container {
+    height: 200px;
+    display: table;
+    text-align: left;
+    position: relative;
+    margin: 0 auto;
+}
+.cs-myAccountHeader>.container .myAccountHeader-info {
+    width: calc(100% - 120px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 16px;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+.cs-myAccountHeader>.container .myAccountHeader-info h1 {
+    text-align: left;
+    font-size: 24px;
+    line-height: 28px;
+    margin: 0;
+}
+.cs-myAccountHeader>.container .myAccountHeader-info button {
+    width: fit-content;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 28px;
+    padding: 0 16px;
+    border-radius: 8px;
+    margin-top: 12px;
+    color: #00000080;
+    background-color: #fff9;
+    border: unset;
+}
+.cs-myAccountHeader>.container .header-icon {
+    height: 80px;
+    border-radius: 50%;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    padding: 0 12px;
+}
+.cs-myAccountHeader>.container .header-icon i {
+    line-height: 80px;
+    padding: 0;
+    font-size: 40px;
+    background: #fff;
+    border-radius: 50%;
+    color: #00c795;
+}
+.cs-myAccountHeader>.container .header-icon span {
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #fff;
+    border-radius: 50%;
+    text-align: center;
+}
+.cs-myAccountHeader .cs-myAccountHeader-nav {
+    height: 50px;
+}
+.cs-myAccountHeader-nav {
+    background-color: #fff9;
+    line-height: 50px;
+    font-size: 15px;
+}
+.cs-myAccountHeader .cs-myAccountHeader-nav>.container {
+    padding: 0;
+}
+.cs-myAccountHeader .cs-myAccountHeader-nav .cs-myAccountHeader-navTable {
+    display: flex;
+    white-space: nowrap;
+    overflow-x: auto;
+    border-bottom: 2px solid #e6e6e6;
+    scrollbar-width: none;
+}
+.account ul, .account li, .cs-myAccountHeader ul, .cs-myAccountHeader li {
+    list-style: none;
+    display: inline-block;
+}
+.cs-myAccountHeader-navTable {
+    width: 100%;
+}
+.cs-myAccountHeader .cs-myAccountHeader-nav .cs-myAccountHeader-navTable .navTab:first-child {
+    margin-left: 0;
+}
+.cs-myAccountHeader .cs-myAccountHeader-nav .cs-myAccountHeader-navTable .navTab {
+    height: 50px;
+    margin-left: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cs-myAccountHeader .cs-myAccountHeader-nav .cs-myAccountHeader-navTable .navTab a {
+    height: 50px;
+    padding: 0 16px;
+    line-height: 50px;
+}
+.cs-myAccountHeader-navBtn {
+    display: inline-block;
+    color: #333;
+    box-sizing: border-box;
+    height: 50px;
+}
 
 @media (min-width: 1200px) {
     body.cs-body .container {
