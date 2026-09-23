@@ -1,0 +1,7 @@
+.dropdown-menu li a:hover, 
+.dropdown-menu li a:focus {
+    color: #00c795;
+    background: transparent;
+    /* ✨ 順便加上這一行，實現你上一題問的「柔和」漸變效果 ✨ */
+    transition: color 0.3s ease; 
+}
