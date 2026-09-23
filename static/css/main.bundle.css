@@ -235,6 +235,19 @@ i {
     box-sizing: border-box;
     height: 50px;
 }
+.cs-myAccountHeader-navBtn.is-active {
+    border-bottom: 3px solid #00c795;
+    pointer-events: none;
+    cursor: default;
+}
+.cs-myAccountHeader-navBtn:hover {
+    cursor: pointer;
+    color: #333;
+    border-bottom: 3px solid #00c795;
+    text-decoration: none;
+    transition: none;
+    -webkit-transition: none;
+}
 @media (min-width: 992px) {
     body.cs-body .container {
         width: 990px;
