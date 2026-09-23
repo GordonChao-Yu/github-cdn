@@ -29,6 +29,7 @@ body {
 }
 .cs3-header .container {
   display: flex;
+  position: relative;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
@@ -347,6 +348,11 @@ i {
         line-height: 1.42857143;
         color: #333;
         white-space: nowrap;
+    }
+}
+@media screen and (min-width: 801px) {
+    .inner, .container {
+        padding: 0;
     }
 }
 @media (min-width: 1200px) {
