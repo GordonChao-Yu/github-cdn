@@ -233,12 +233,6 @@ i {
     box-sizing: border-box;
     height: 50px;
 }
-
-@media (min-width: 1200px) {
-    body.cs-body .container {
-        width: 1200px;
-    }
-}
 @media (min-width: 992px) {
     body.cs-body .container {
         width: 990px;
@@ -352,6 +346,11 @@ i {
         line-height: 1.42857143;
         color: #333;
         white-space: nowrap;
+    }
+}
+@media (min-width: 1200px) {
+    body.cs-body .container {
+        width: 1200px;
     }
 }
 
