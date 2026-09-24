@@ -41,13 +41,6 @@ input, textarea {
 input {
     line-height: normal;
 }
-button, input, optgroup, select, textarea {
-    color: inherit;
-    font: inherit;
-    margin: 0;
-}
-
-
 label.control-label {
     font-size: 12px;
     line-height: 1.07142857;
