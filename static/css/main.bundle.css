@@ -273,6 +273,11 @@ i {
     color: #646464;
     padding-bottom: 32px;
 }
+.account-form-footer {
+    max-width: 650px;
+    margin: 0 auto;
+    text-align: center;
+}
 @media (min-width: 992px) {
     body.cs-body .container {
         width: 990px;
