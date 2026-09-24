@@ -8,6 +8,52 @@ body {
     line-height: 1.6;
     scroll-behavior: smooth;
 }
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    display: inline-block;
+    width: 100%;
+    height: 48px;
+    padding-left: 24px;
+    padding-right: 65px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    background: #fff;
+    color: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    line-height: normal;
+}
+input, select, select:focus, option, input[type=text], input[type=number], textarea {
+    font-size: 16px;
+}
+input, textarea {
+    width: 100%;
+    padding: 14px 15px 15px;
+    color: inherit;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    font-size: 14px;
+    background: #fff;
+    -webkit-appearance: none;
+}
+input {
+    line-height: normal;
+}
+button, input, optgroup, select, textarea {
+    color: inherit;
+    font: inherit;
+    margin: 0;
+}
+
+
+label.control-label {
+    font-size: 12px;
+    line-height: 1.07142857;
+    font-weight: 400;
+    margin: 16px 0 0;
+}
 .main {
     -webkit-flex: 1 0 auto;
     -ms-flex: 1 0 auto;
@@ -17,6 +63,28 @@ ul, ol {
     margin: 0;
     padding: 0;
     list-style-position: inside;
+}
+.btn-link-primary {
+    color: #00c795;
+    cursor: pointer;
+}
+.btn-primary {
+    box-shadow: none !important;
+    width: 100%;
+    padding: 8px 16px;
+    background: #00c795;
+    color: #fff !important;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 16px;
+}
+.cs-btn {
+    width: 100%;
+    height: 50px;
+    box-shadow: none !important;
+    letter-spacing: 1.5px;
+    font-size: 16px;
 }
 #shopify-section-header {
     top: 0px;
@@ -264,6 +332,12 @@ i {
     transition: none;
     -webkit-transition: none;
 }
+.cs-anchorPlaceHolder {
+    display: block;
+    height: 138px;
+    margin-top: -138px;
+    visibility: hidden;
+}
 .account .text {
     font-size: 14px;
     line-height: normal;
@@ -280,6 +354,13 @@ i {
 .cs-editCustomerForm {
     margin-bottom: 0;
 }
+.cs-editCustomerForm .status {
+    display: inline-block;
+    margin-left: 12px;
+}
+.cs-editCustomerForm .customer_phone .country_code {
+    margin-right: 8px;
+}
 .cs-editCustomerForm .label {
     font-size: 12px;
     color: #b3b3b3;
@@ -291,6 +372,30 @@ i {
 .cs-editCustomerForm .customer_id .copy_customer_id {
     margin-left: 12px;
     cursor: pointer;
+}
+ .u-whitespaceNoWrap {
+    white-space: nowrap;
+    font-size: 0;
+}
+.u-displayInlineBlock {
+    display: inline-block;
+}
+.u-width50 {
+    width: 50%;
+}
+.u-width5 {
+    width: 5%;
+}
+.u-width45 {
+    width: 45%;
+}
+.cs-editCustomerForm .gender {
+    border: 0px;
+    border-bottom: 1px solid #e6e6e6;
+}
+.cs-editCustomerForm .form-group .form-control, .cs-editCustomerForm .form-group select {
+    margin-bottom: 32px;
+    padding: 0;
 }
 .account-form-footer {
     max-width: 650px;
