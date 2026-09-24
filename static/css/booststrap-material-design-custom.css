@@ -136,13 +136,13 @@
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
 }
 .form-control {
-    margin-bottom: 7px;
-}
-.form-control {
     height: 38px;
     padding: 7px 0;
     font-size: 16px;
     line-height: 1.42857143;
+}
+.form-control {
+    margin-bottom: 7px;
 }
 .form-control[disabled], .form-group .form-control[disabled], fieldset[disabled] .form-control, fieldset[disabled] .form-group .form-control {
     background-image: none;
