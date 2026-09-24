@@ -124,6 +124,9 @@ i {
     overflow: hidden;
     position: relative;
 }
+.icon-checkmark:before {
+  content: "\e903";
+}
 
 /* Account page  */
 .container {
