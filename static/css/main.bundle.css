@@ -25,6 +25,11 @@ select {
     text-transform: uppercase;
     line-height: normal;
 }
+button, input, optgroup, select, textarea {
+    color: inherit;
+    font: inherit;
+    margin: 0;
+}
 input, select, select:focus, option, input[type=text], input[type=number], textarea {
     font-size: 16px;
 }
