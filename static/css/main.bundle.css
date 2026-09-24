@@ -146,6 +146,7 @@ i {
     position: relative;
     margin: 0 auto;
 }
+
 .cs-myAccountHeader>.container .myAccountHeader-info {
     width: calc(100% - 120px);
     display: flex;
@@ -259,6 +260,15 @@ i {
     text-decoration: none;
     transition: none;
     -webkit-transition: none;
+}
+.account .text {
+    font-size: 14px;
+    line-height: normal;
+}
+.cs-editCustomerForm .text {
+    font-size: 16px;
+    color: #646464;
+    padding-bottom: 32px;
 }
 @media (min-width: 992px) {
     body.cs-body .container {
