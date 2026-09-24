@@ -274,11 +274,11 @@ i {
     padding-bottom: 32px;
 }
 .cs-editCustomerForm {
-    margin-bottom: 0;
-}
-.cs-editCustomerForm {
     max-width: 650px;
     margin: 30px auto;
+}
+.cs-editCustomerForm {
+    margin-bottom: 0;
 }
 .cs-editCustomerForm .label {
     font-size: 12px;
