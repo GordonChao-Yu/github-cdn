@@ -1,0 +1,203 @@
+* {
+    z-index: 10;
+    margin: 0;
+    padding: 0;
+}
+td {
+    display: table-cell;
+    vertical-align: inherit;
+    unicode-bidi: isolate;
+}
+.datepicker-dropdown-container {
+    margin: 0;
+    margin-top: 50%;
+    background-color: #424242;
+    width: 328px;
+    height: 380px;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    z-index: 2;
+    background: linear-gradient(180deg, #4a4a4a 0%, #3d3d3d 100%);
+}
+
+.datepicker-main {
+    padding-top: 10px;
+    padding: 12px;
+    color: rgba(0, 0, 0, 0.64);
+}
+
+.datepicker-date-controls {
+    padding: 10px 12px 0 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.datepicker-view-change-button {
+    padding: 10px;
+    color: #fff;
+    font-weight: 500;
+    font-size: .9rem;
+    border-radius: 10px;
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 0;
+    outline: none;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+.datepicker-previous-button {
+    position: relative;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border: none;
+    outline: none;
+    margin: 0;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0);
+    margin-right: 8px;
+    border-radius: 50%;
+    transition: background-color .2s ease, box-shadow .2s ease;
+}
+
+.datepicker-next-button {
+    position: relative;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border: none;
+    outline: none;
+    margin: 0;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 50%;
+    transition: background-color .2s ease, box-shadow .2s ease;
+}
+
+.datepicker-arrow-controls {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.datepicker-view {
+    padding-left: 12px;
+    padding-right: 12px;
+    outline: none;
+    display: flex;
+}
+
+.datepicker-table {
+    margin-right: auto;
+    margin-left: auto;
+    width: 304px;
+}
+
+.datepicker-day-heading {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 400;
+    color: #fff;
+}
+.datepicker-cell.disabled {
+    color: rgba(255, 255, 255, .5);
+    cursor: default;
+    pointer-events: none;
+}
+
+.datepicker-small-cell {
+    width: 40px;
+    height: 40px;
+}
+
+.datepicker-cell {
+    text-align: center;
+}
+.datepicker-cell:hover {
+    background-color: rgb(59.7, 59.7, 59.7);
+}
+
+.datepicker-small-cell-content {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    font-size: 13px;
+}
+
+button:not(:disabled), [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled) {
+    cursor: pointer;
+}
+thead,
+tbody,
+tfoot,
+tr,
+td,
+th {
+    border-color: inherit;
+    border-style: solid;
+    border-width: 0;
+}
+
+body {
+
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    font-family: "Inter", system-ui, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+*,
+::before,
+::after {
+    box-sizing: border-box;
+}
+
+.datepicker-view-change-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.datepicker-previous-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.datepicker-next-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+
+
+@media (max-width:992px) {
+    body {
+        padding: 24px;
+    }
+
+    .datepicker-dropdown-container {
+        width: 100%;
+        max-width: 328px;
+    }
+}
+
+
+
+@media (max-width:480px) {
+    body {
+        padding: 16px;
+    }
+
+    .datepicker-dropdown-container {
+        max-width: 100%;
+    }
+}
