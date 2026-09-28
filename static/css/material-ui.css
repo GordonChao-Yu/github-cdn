@@ -17,9 +17,7 @@ th {
     border-style: solid;
     border-width: 0px;
 }
-i:not(.datepicker-toggle-icon) {
-    color: #fff;
-}
+
 
 table {
     caption-side: bottom;
