@@ -62,6 +62,12 @@ body:before {
     background: rgb(var(--bs-dark-rgb));
     user-select: none;
 }
+.animation {
+    animation-fill-mode: both;
+}
+.fade-in {
+    animation-name: fade-in;
+}
 
 .datepicker-main {
     color: rgba(0, 0, 0, 0.64);
