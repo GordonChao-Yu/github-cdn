@@ -141,6 +141,7 @@ daysTag.addEventListener('click', (e) => {
     // 使用 setState 更新月份並切換視圖
     setState({ month: selectedMonth, view: 'dates' });
   } else if (state.view === 'dates') {
+    const birth = document.getElementById('#birthday');
     const cell = e.target.closest('.datepicker-day-cell');
     if (!cell || cell.classList.contains('other-month')) return;
 
@@ -162,8 +163,7 @@ daysTag.addEventListener('click', (e) => {
     const weekDay = selectedDate.getDay() // 0~6
     const weekName = weekNames[weekDay];
 
-    console.log(`選到：${yyyy}-${mm}-${dd}（${weekName}）`);
-
+    birth.setAttribute('value', `${yyyy}-${mm}-${dd}`);
   }
 })
 
