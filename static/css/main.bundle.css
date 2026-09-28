@@ -162,7 +162,7 @@ a {
     background-color: #0000;
     text-decoration: none;
 }
-i {
+i:not(.datepicker-toggle-icon) {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'usfont' !important;
   speak: never;
