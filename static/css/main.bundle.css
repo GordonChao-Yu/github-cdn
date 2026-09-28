@@ -162,7 +162,7 @@ a {
     background-color: #0000;
     text-decoration: none;
 }
-i:not(.datepicker-toggle-icon) {
+i {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'usfont' !important;
   speak: never;
@@ -176,7 +176,6 @@ i:not(.datepicker-toggle-icon) {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 
 .icon-urbansocial:before {
   content: "\e900";
@@ -194,7 +193,9 @@ i:not(.datepicker-toggle-icon) {
 .icon-checkmark:before {
   content: "\e903";
 }
-
+.icon-calendar:before {
+  content: "\e905";
+}
 /* Account page  */
 .container {
     max-width: 1200px;
