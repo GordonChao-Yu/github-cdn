@@ -73,6 +73,18 @@ body:before {
     justify-content: space-between;
     align-items: center;
 }
+.datepicker-toggle-button {
+    position: absolute;
+    outline: none;
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+    right: -10px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding-inline: 6px;
+}
+
+
 .datepicker-view-change-button {
     padding: 10px;
     color: #fff;
