@@ -69,6 +69,9 @@
     -webkit-appearance: none;
     appearance: none;
 }
+.form-group.label-floating {
+    position: relative;
+}
 .form-group.label-static label.control-label, .form-group.label-floating.is-focused label.control-label, .form-group.label-floating:not(.is-empty) label.control-label {
     top: -30px;
     left: 0;
@@ -148,4 +151,7 @@
 .form-control[disabled], .form-group .form-control[disabled], fieldset[disabled] .form-control, fieldset[disabled] .form-group .form-control {
     background-image: none;
     border-bottom: 1px dotted #D2D2D2;
+}
+.form-control.hasDatepicker {
+    padding-right: 44px;
 }
