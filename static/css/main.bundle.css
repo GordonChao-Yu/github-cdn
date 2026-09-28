@@ -393,6 +393,12 @@ i {
     border: 0px;
     border-bottom: 1px solid #e6e6e6;
 }
+.cs-editCustomerForm .form-group .form-control {
+  margin-bottom: 0;
+}
+.cs-editCustomerForm .form-group {
+  margin-bottom: 32px;   /* 維持原本欄距 */
+}
 .cs-editCustomerForm .form-group .form-control, .cs-editCustomerForm .form-group select {
     margin-bottom: 32px;
     padding: 0;
