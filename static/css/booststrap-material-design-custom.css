@@ -162,7 +162,7 @@
     pointer-events: none;
 }
 
-.form-outline .form-control~.form-notch .form-notch-leading {
+.form-outline .form-control.form-notch .form-notch-leading {
     left: 0;
     top: 0;
     height: 100%;
@@ -171,7 +171,7 @@
     border-radius: .25rem 0 0 .25rem;
 }
 
-.form-outline .form-control~.form-notch div {
+.form-outline .form-control.form-notch div {
     pointer-events: none;
     border: 1px solid;
     border-color: var(--mdb-form-control-border-color);
@@ -180,7 +180,7 @@
     transition: all .2s linear;
 }
 
-.form-outline .form-control~.form-notch .form-notch-middle {
+.form-outline .form-control.form-notch .form-notch-middle {
     flex: 0 0 auto;
     width: auto;
     max-width: calc(100% - 1rem);
@@ -189,7 +189,7 @@
     border-left: none;
 }
 
-.form-outline .form-control~.form-notch .form-notch-trailing {
+.form-outline .form-control.form-notch .form-notch-trailing {
     flex-grow: 1;
     height: 100%;
     border-left: none;
