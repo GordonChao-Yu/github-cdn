@@ -24,7 +24,8 @@ table {
     border-collapse: collapse;
 }
 
-.datepicker-dropdown-container {  
+.datepicker-dropdown-container {
+    position: absolute;
     width: 328px;
     height: 380px;
     border-radius: 0.5rem;
@@ -32,13 +33,6 @@ table {
     background: rgb(var(--bs-dark-rgb));
     user-select: none;
 }
-.animation {
-    animation-fill-mode: both;
-}
-.fade-in {
-    animation-name: fade-in;
-}
-
 .datepicker-main {
     color: rgba(0, 0, 0, 0.64);
 }
