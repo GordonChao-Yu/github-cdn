@@ -11,6 +11,7 @@ const currentDate = document.querySelector('.datepicker-view-change-button');
 const prevnexIcon = document.querySelectorAll('.datepicker-arrow-controls span');
 const daysTag = document.querySelector('.datepicker-table tbody');
 const weekHead = document.querySelector('.datepicker-table thead');
+const birth = document.getElementById('birthday');
 const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -141,7 +142,6 @@ daysTag.addEventListener('click', (e) => {
     // 使用 setState 更新月份並切換視圖
     setState({ month: selectedMonth, view: 'dates' });
   } else if (state.view === 'dates') {
-    const birth = document.getElementById('#birthday');
     const cell = e.target.closest('.datepicker-day-cell');
     if (!cell || cell.classList.contains('other-month')) return;
 
@@ -163,7 +163,7 @@ daysTag.addEventListener('click', (e) => {
     const weekDay = selectedDate.getDay() // 0~6
     const weekName = weekNames[weekDay];
 
-    birth.setAttribute('value', `${yyyy}-${mm}-${dd}`);
+    birth.value = `${yyyy}-${mm}-${dd}`;
   }
 })
 
