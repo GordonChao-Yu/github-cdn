@@ -1,6 +1,3 @@
-html * {
-    font-family: Inter, Helvetica Neue, Arial, PingFang TC, Microsoft JhengHei, sans-serif;
-}
 body {
     font-size: 100%;
     font-weight: 400;
@@ -413,6 +410,9 @@ i {
     transform: translateY(-50%);
     z-index: 2;
     pointer-events: auto;
+}
+html * {
+    font-family: Inter, Helvetica Neue, Arial, PingFang TC, Microsoft JhengHei, sans-serif;
 }
 @media (min-width: 992px) {
     body.cs-body .container {
