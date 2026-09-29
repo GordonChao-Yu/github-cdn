@@ -1,3 +1,7 @@
+a, a:hover, a:focus {
+    color: #00c795;
+}
+
 .dropdown-menu li a:hover, 
 .dropdown-menu li a:focus, 
 .icon-calendar:hover {
