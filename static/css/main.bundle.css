@@ -1,3 +1,11 @@
+a {
+    transition: all .25s ease-in-out;
+}
+a {
+    color: inherit;
+    background-color: #0000;
+    text-decoration: none;
+}
 body {
     font-size: 100%;
     font-weight: 400;
@@ -150,14 +158,6 @@ ul, ol {
 }
 .cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
     font-size: 50px;
-}
-a {
-    transition: all .25s ease-in-out;
-}
-a {
-    color: inherit;
-    background-color: #0000;
-    text-decoration: none;
 }
 i {
   /* use !important to prevent issues with browser extensions that change fonts */
