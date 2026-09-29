@@ -6,6 +6,9 @@
     /* ✨ 順便加上這一行，實現你上一題問的「柔和」漸變效果 ✨ */
     transition: color 0.3s ease; 
 }
+a, a:hover, a:focus {
+    color: #00c795;
+}
 .btn {
     display: inline-block;
     margin-bottom: 0;
@@ -150,6 +153,4 @@
     background-image: none;
     border-bottom: 1px dotted #D2D2D2;
 }
-a, a:hover, a:focus {
-    color: #00c795;
-}
+
