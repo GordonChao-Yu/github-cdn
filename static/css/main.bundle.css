@@ -397,9 +397,6 @@ i {
     margin-bottom: 32px;
     padding: 0;
 }
-.form-control.hasDatepicker {
-    margin-bottom: 28px;
-}
 .account-form-footer {
     max-width: 650px;
     margin: 0 auto;
@@ -449,6 +446,18 @@ i {
     height: 100%;
     border-left: none;
     border-radius: 0 .25rem .25rem 0;
+}
+.cs-editCustomerForm .form-group .form-control.hasDatepicker {
+    margin-bottom: 28px;
+    padding: 0 40px 0 0;   /* 右側留 40px 給日曆圖示 */
+}
+.cs-editCustomerForm .form-group .datepicker-toggle-button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    z-index: 2;
+    pointer-events: auto;
 }
 @media (min-width: 992px) {
     body.cs-body .container {
@@ -568,6 +577,7 @@ i {
         white-space: nowrap;
     }
 }
+
 @media screen and (min-width: 801px) {
     .inner, .container {
         padding: 0;
