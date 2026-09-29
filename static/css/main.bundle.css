@@ -436,10 +436,6 @@ i {
     a.mixx-header__logo {
       text-decoration: none;
     }
-    a.feature__item, a.shopping-cart{
-      text-decoration: none;
-    }
-    
     .cs3-header .container .mixx-header__logo {
         position: relative;
         top: unset;
