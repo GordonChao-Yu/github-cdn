@@ -74,10 +74,18 @@ ul, ol {
     cursor: pointer;
 }
 .btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: rgb(0, 199, 149);
+    --bs-btn-border-color: rgb(0, 199, 149);
+    --bs-btn-hover-bg: rgb(0, 199, 149);
+    --bs-btn-hover-border-color: rgb(0, 199, 149);
+    --bs-btn-active-bg: rgb(0, 199, 149);
+    --bs-btn-active-border-color : rgb(0, 199, 149);
+    --bs-btn-disabled-bg: rgb(0, 199, 149);
+    --bs-btn-disabled-border-color: rgb(0, 199, 149);
     box-shadow: none !important;
     width: 100%;
     padding: 8px 16px;
-    background: #00c795;
     color: #fff !important;
     border-radius: 4px;
     text-align: center;
