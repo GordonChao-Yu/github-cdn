@@ -133,14 +133,23 @@ html * {
                     border: 1.5px solid rgb(244, 244, 244);
                     font-size: 14px !important;
                 }
-                .btn-primary {
-                    --bs-btn-color: #fff;
-                    --bs-btn-bg: rgb(34, 34, 34);
-                    --bs-btn-border-color: rgb(34, 34, 34);
-                    --bs-btn-hover-bg: rgb(34, 34, 34);
-                    --bs-btn-hover-border-color: rgb(34, 34, 34);
-                    --bs-btn-active-bg: rgb(34, 34, 34);
-                    --bs-btn-active-border-color : rgb(34, 34, 34);
-                    --bs-btn-disabled-bg: rgb(34, 34, 34);
-                    --bs-btn-disabled-border-color: rgb(34, 34, 34);
+                .fNtYng {
+                    background-color: rgb(34, 34, 34);
+                    color: rgb(255, 255, 255);
+                    font-size: 16px;
+                    line-height: 50px;
+                    text-align: center;
+                    display: flex;
+                    -webkit-box-align: center;
+                    align-items: center;
+                    -webkit-box-pack: center;
+                    justify-content: center;
+                    width: 100%;
+                    height: 50px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    outline: none;
+                    border: unset;
+                    font-weight: 600;
+                    position: relative;
                 }
