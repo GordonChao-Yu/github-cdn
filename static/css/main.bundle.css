@@ -165,6 +165,9 @@ ul, ol {
 .cs3-header .container .mixx-header__logo i {
   color: #121314;
 }
+.cs3-header .container .cs-header__feature .feature__item.member i {
+    font-size: 24px;
+}
 .cs3-header .container .cs-header__feature .feature__item.shopping-cart i {
     font-size: 50px;
 }
