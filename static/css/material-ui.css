@@ -3,9 +3,6 @@ td {
     vertical-align: inherit;
     unicode-bidi: isolate;
 }
-button:not(:disabled), [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled) {
-    cursor: pointer;
-}
 
 thead,
 tbody,
