@@ -42,7 +42,7 @@ input, select, select:focus, option, input[type=text], input[type=number], texta
 input {
     line-height: normal;
 }
-input, textarea {
+input:not(#remember), textarea {
     width: 100%;
     padding: 14px 15px 15px;
     color: inherit;
