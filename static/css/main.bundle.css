@@ -52,10 +52,6 @@ input, textarea {
     background: #fff;
     -webkit-appearance: none;
 }
-span.remember_frame>#remember {
-    color: inherit;
-}
-
 label.control-label {
     font-size: 12px;
     line-height: 1.07142857;
