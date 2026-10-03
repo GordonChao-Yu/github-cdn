@@ -52,6 +52,14 @@ input, textarea {
     background: #fff;
     -webkit-appearance: none;
 }
+input#remember{
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+    width: auto !important;     
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 0 0 5px;   
+}
 label.control-label {
     font-size: 12px;
     line-height: 1.07142857;
