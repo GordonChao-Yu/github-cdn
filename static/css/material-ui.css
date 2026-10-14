@@ -37,7 +37,7 @@ table {
 }
 
 .datepicker-date-controls {
-    padding: 10px 12px 0 12px;
+    padding: 10px 8px 10px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
