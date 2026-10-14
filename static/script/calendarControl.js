@@ -164,6 +164,12 @@ daysTag.addEventListener('click', (e) => {
     const weekName = weekNames[weekDay];
 
     birth.value = `${yyyy}-${mm}-${dd}`;
+    container.style.display = 'none';
+    const birthFormGroup = birthInput.closest('.form-group');
+      if (birthFormGroup) {
+        birthFormGroup.classList.remove('is-focused');
+        
+      }
   }
 })
 
