@@ -23,8 +23,8 @@ table {
 
 .datepicker-dropdown-container {
     position: absolute;
-    width: 328px;
-    height: 380px;
+    width: 272px;
+    height: auto;
     border-radius: 0.5rem;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
     background: rgb(var(--bs-dark-rgb));
