@@ -156,4 +156,11 @@ a:hover, a:focus {
 .form-control[disabled], fieldset[disabled] .form-control {
     cursor: not-allowed;
 }
+.form-group.is-focused .form-control {
+    outline: none;
+    background-image: linear-gradient(#00c795, #00c795), linear-gradient(#d2d2d2, #d2d2d2);
+    background-size: 100% 2px, 100% 1px;
+    box-shadow: none;
+    transition-duration: .3s;
+}
 
