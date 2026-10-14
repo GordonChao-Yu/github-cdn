@@ -115,8 +115,6 @@ table {
 
 .datepicker-view {
     background: hsla(264 2.3% 73.4% / 0.2);
-    padding-left: 12px;
-    padding-right: 12px;
     outline: none;
     display: flex;
     
