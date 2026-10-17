@@ -218,6 +218,7 @@ i {
 }
 .icon-account-avatar:before {
   content: "\e906";
+  color: rgb(255, 255, 255);
 }
 /* Account page  */
 .container {
