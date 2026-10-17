@@ -225,7 +225,7 @@ i {
 .cs-myAccountHeader {
     position: relative;
     background-color: #eaebeb;
-    background-image: url(shop/files/Visual-2.png);
+    background-image: url(https://cdn.jsdelivr.net/gh/GordonChao-Yu/github-cdn@ef63dd4/shop/files/Visual-2.png);
     background-repeat: no-repeat;
     background-position: right top;
     min-height: 250px;
