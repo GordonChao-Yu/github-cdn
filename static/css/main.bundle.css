@@ -206,6 +206,9 @@ i {
 .icon-avatar:before {
   content: "\e902";
 }
+.icon-account-avatar:before {
+  content: "\e906";
+}
 .dropdown-menu li {
     overflow: hidden;
     position: relative;
