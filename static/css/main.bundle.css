@@ -206,9 +206,6 @@ i {
 .icon-avatar:before {
   content: "\e902";
 }
-.icon-account-avatar:before {
-  content: "\e906";
-}
 .dropdown-menu li {
     overflow: hidden;
     position: relative;
@@ -218,6 +215,9 @@ i {
 }
 .icon-calendar:before {
   content: "\e905";
+}
+.icon-account-avatar:before {
+  content: "\e906";
 }
 /* Account page  */
 .container {
