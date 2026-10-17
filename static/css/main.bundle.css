@@ -217,8 +217,8 @@ i {
   content: "\e905";
 }
 .icon-account-avatar:before {
-  content: "\e906";
-  color: rgb(221, 221, 221);
+  content: "\e907";
+  color: rgb(255, 255, 255);
 }
 /* Account page  */
 .container {
