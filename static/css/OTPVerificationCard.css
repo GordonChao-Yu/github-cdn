@@ -40,7 +40,6 @@
         background-color: white;
 }
 .verification_frame{
-    display: block;
     background: rgb(255, 255, 255);
 }
 .verification_frame.frame-hidden {
