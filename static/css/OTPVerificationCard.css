@@ -43,7 +43,6 @@
     background: rgb(255, 255, 255);
 }
 .verification_frame.frame-hidden {
-    position: absolute;
     opacity: 0;
     visibility: hidden;
     z-index: -1;
