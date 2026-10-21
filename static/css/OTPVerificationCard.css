@@ -42,12 +42,7 @@
 .verification_frame {
     background: rgb(255, 255, 255);
 }
-.verification_frame.frame-hidden {
-    opacity: 0;
-    visibility: hidden;
-    z-index: -1;
-    pointer-events: none;
-}
+
 .verification_message {
     margin-top: 32px;
     font-size: 14px;
