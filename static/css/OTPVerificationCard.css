@@ -40,6 +40,10 @@
         background-color: white;
 }
 .verification_frame{
+    position: absolute;
+    opacity: 1;
+    visibility: visible;
+    z-index: 1000;
     background: rgb(255, 255, 255);
 }
 .verification_frame.frame-hidden {
