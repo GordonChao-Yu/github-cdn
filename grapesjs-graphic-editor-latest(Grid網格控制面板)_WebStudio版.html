@@ -6626,7 +6626,6 @@
             border-radius: 6px;
             background: #ffffff;
             color: #2f2f35;
-            padding: 0 34px 0 10px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             font-size: 12px;
         }
@@ -10866,7 +10865,7 @@
     <style>
         /* ---------- u-combobox 浅色主题适配（与 Studio 主题一致） ---------- */
         .st-ly__select.st-uc {
-            height: 28px;
+            height: var(--size-controlHeight);
             font-size: 12px;
             --uc-bg: var(--studio-active, #f5f5f7);
             --uc-bg-hover: var(--studio-hover, #ececef);
@@ -18734,25 +18733,6 @@
     padding: 0 6px 0 8px;
     cursor: pointer;
 }
-.st-bg-layer__toggle {
-    flex: 0 0 auto;
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--studio-text-3);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px;
-    transform: rotate(-90deg);
-    transition: transform .15s ease;
-}
-.st-bg-layer__toggle.is-open { transform: rotate(0); }
-.st-bg-layer__toggle:hover { color: var(--studio-text-1); background: var(--studio-hover-soft); }
-.st-bg-layer__toggle svg { width: 14px; height: 14px; display: block; }
 .st-bg-layer__icon {
     flex: 0 0 auto;
     display: flex;
@@ -19608,14 +19588,9 @@
                     return [
                         '<div class="st-bg-layer" data-idx="' + i + '">',
                         '  <div class="st-bg-layer__head">',
-                        '    <button type="button" class="st-bg-layer__toggle" data-layer-toggle title="展開/收起">',
-                        ICO.chev,
-                        '    </button>',
                         '    <span class="st-bg-layer__icon" data-layer-icon>' + ICO.img + '</span>',
                         '    <span class="st-bg-layer__name" data-layer-name>Background ' + (i + 1) + '</span>',
                         '    <div class="st-bg-layer__actions">',
-                        '      <button type="button" class="st-bg-layer__act" data-act="up" title="向上移動">' + ICO.up + '</button>',
-                        '      <button type="button" class="st-bg-layer__act" data-act="down" title="向下移動">' + ICO.down + '</button>',
                         '      <button type="button" class="st-bg-layer__act" data-act="del" title="刪除圖層">' + ICO.trash + '</button>',
                         '    </div>',
                         '  </div>',
@@ -19885,8 +19860,6 @@
                         /* 展开状态 */
                         const body = el.querySelector('[data-layer-body]');
                         if (body) body.hidden = !expanded.has(i);
-                        const tog = el.querySelector('[data-layer-toggle]');
-                        if (tog) tog.classList.toggle('is-open', expanded.has(i));
                         /* 名称 */
                         let name = 'Background ' + (i + 1);
                         const kind = layerKind(l);
@@ -20525,18 +20498,11 @@
                     const layerEl = e.target.closest('.st-bg-layer');
                     if (!layerEl) return;
                     const idx = parseInt(layerEl.getAttribute('data-idx'), 10);
-                    if (e.target.closest('[data-layer-toggle]')) {
-                        if (expanded.has(idx)) expanded.delete(idx); else expanded.add(idx);
-                        render();
-                        return;
-                    }
                     const actEl = e.target.closest('.st-bg-layer__act');
                     if (actEl) {
                         e.stopPropagation();
                         const act = actEl.getAttribute('data-act');
-                        if (act === 'up') moveLayer(idx, -1);
-                        else if (act === 'down') moveLayer(idx, 1);
-                        else if (act === 'del') removeLayer(idx);
+                        if (act === 'del') removeLayer(idx);
                         return;
                     }
                     /* 點圖層列標題區（名稱／圖示／空白處）→ 顯示 Background layer 彈窗編輯該圖層 */
