@@ -1572,7 +1572,7 @@
             color: #fff;
         }
 
-        .st-ly__dot:not([data-dot="sector"]) {
+        .st-ly__dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
@@ -2192,7 +2192,9 @@
 
         .st-gc__mapcell {
             box-sizing: border-box;
-            width: var(--st-gc-cell, 20px);
+            /* 欄寬改由容器寬度等分（1fr）→ 棋盤格左右撐滿版面；
+               高度仍吃 JS 換算的方形邊長，維持工整方格 */
+            width: 100%;
             height: var(--st-gc-cell, 20px);
             min-height: 0;
             margin: 0;
@@ -13613,11 +13615,9 @@
                 if (!ref) {
                     ref = refs[key] = {
                         btn: root.querySelector('[data-blk="' + key + '"]'),
-                        dot: root.querySelector('.st-ly__dot[data-dot="' + key + '"]'),
                     };
                 }
                 if (ref.btn) ref.btn.classList.toggle('is-set', state);
-                if (ref.dot) ref.dot.classList.toggle('is-on', state);
             }
 
             /* Popover 內的「Reset value」：還原成初始預設值。
@@ -13861,7 +13861,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span role="button" class="st-ly__head-title">Layout</span>',
                     ICO.chev,
                     '</button>',
@@ -15154,8 +15153,6 @@
                        右側下拉控件不高亮（比照 Transitions 扇區標題鈕的 .is-set） */
                     const dispSet = STUDIO_BLOCKS.display.isSet(String(display || '').trim());
                     studioPaintBlock(root, 'display', dispSet);
-                    const anyOn = !!display || LAYOUT_PROPS.some(p => p !== 'display' && !!read(p));
-                    $('[data-dot="sector"]').classList.toggle('is-on', anyOn);
                     const showFlex = isFlex(display);
                     const isGrid = display === 'grid';
                     root.classList.toggle('is-flexmode', showFlex);
@@ -15447,7 +15444,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Flex child</span>',
                     ICO.chev,
                     '</button>',
@@ -15593,15 +15589,6 @@
                     const isFlexChild = parentIsFlex();
                     root.hidden = !isFlexChild;
                     if (!isFlexChild) return;
-
-                    const hasAny = FC_PROPS.some(p => {
-                        const v = String(read(p) || '').trim();
-                        if (p === 'flex-grow') return v && v !== '0';
-                        if (p === 'flex-shrink') return v && v !== '1';
-                        if (p === 'flex-basis') return v && v !== 'auto';
-                        return !!v && v !== 'auto' && v !== '0';
-                    });
-                    $('[data-dot="sector"]').classList.toggle('is-on', hasAny);
 
                     // Align 按钮高亮
                     const alignRaw = read('align-self');
@@ -15828,7 +15815,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Grid child</span>',
                     ICO.chev,
                     '</button>',
@@ -16231,15 +16217,17 @@
                     }
                     return out;
                 }
-                /* 方形棋盤格：格線邊長同時受「面板可用寬度」與「棋盤最大高度」限制，
-                   欄／列再多都維持工整的正方形格線（參考附圖樣式）。 */
+                /* 方形棋盤格：欄寬由容器寬度等分（1fr）→ 棋盤格左右撐滿版面；
+                   列高取「欄寬 / 棋盤最大高度 / 單格上限」三者最小，維持工整方格不爆高。 */
                 const GRID_MAP_CELL_MIN = 9;
                 const GRID_MAP_CELL_MAX = 32;
                 const GRID_MAP_MAX_H = 260;
                 function gridCellSize(cols, rows, availW) {
                     const w = Math.max(80, availW || 240);
-                    let cell = Math.floor(Math.min(w / cols, GRID_MAP_MAX_H / rows));
-                    cell = Math.max(GRID_MAP_CELL_MIN, Math.min(GRID_MAP_CELL_MAX, cell));
+                    const cellW = w / Math.max(1, cols);
+                    const cellH = GRID_MAP_MAX_H / Math.max(1, rows);
+                    let cell = Math.min(cellW, cellH, GRID_MAP_CELL_MAX);
+                    cell = Math.max(GRID_MAP_CELL_MIN, cell);
                     return cell;
                 }
                 /* 棋盤可用寬度：量的是外層容器（撐滿面板的寬度），不是棋盤本身 */
@@ -16261,17 +16249,17 @@
                     const ce = toInt(read('grid-column-end'));
                     const rs = toInt(read('grid-row-start'));
                     const re = toInt(read('grid-row-end'));
-                    /* 棋盤格：格線為正方形，邊長依父層網格數量與面板寬度換算 */
+                    /* 棋盤格：欄寬由容器等分（1fr）→ 左右撐滿版面；列高維持方形邊長 */
                     const cell = gridCellSize(cols, rows, mapAvailWidth());
                     if (!mapEl.querySelector('.st-gc__board')) {
                         mapEl.innerHTML = '<div class="st-gc__board" data-board></div>';
                     }
                     const board = mapEl.querySelector('.st-gc__board');
-                    /* 格線邊長同步給 cell（CSS 端 width/height 吃這個變數） */
+                    /* 欄寬 1fr 自動撐滿；列高吃 --st-gc-cell（CSS 端 height 用這個變數） */
                     board.style.setProperty('--st-gc-cell', cell + 'px');
-                    board.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cell + 'px)';
+                    board.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
                     board.style.gridTemplateRows = 'repeat(' + rows + ', ' + cell + 'px)';
-                    board.style.width = (cols * cell) + 'px';
+                    board.style.width = '100%';
                     board.style.height = (rows * cell) + 'px';
                     const need = cols * rows;
                     if (board.querySelectorAll('.st-gc__mapcell').length !== need) {
@@ -16490,8 +16478,6 @@
                     const gridOn = STUDIO_BLOCKS.position.isSet(posVals);
                     /* 三組控鍵的值讀一次，按鈕高亮與區塊高亮共用 */
                     const btnsRaw = {};
-                    $('[data-dot="sector"]').classList.toggle('is-on',
-                        FC_PROPS.some(p => !!read(p) && read(p) !== 'auto' && read(p) !== '0') || gridOn);
                     studioPaintBlock(root, 'position', gridOn);
                     $$('.st-ly__btns').forEach(group => {
                         const prop = group.getAttribute('data-prop');
@@ -16730,7 +16716,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Size</span>',
                     ICO.chev,
                     '</button>',
@@ -17021,7 +17006,6 @@
                     $$('.st-sz__pos').forEach(btn => {
                         btn.classList.toggle('is-on', !!posKey && btn.getAttribute('data-val') === posKey);
                     });
-                    $('[data-dot="sector"]').classList.toggle('is-on', SIZE_PROPS.some(p => !!read(p, idx)));
                 }
                 root.addEventListener('click', e => {
                     const tog = e.target.closest('[data-act="toggle"]');
@@ -17124,7 +17108,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Spacing</span>',
                     ICO_CHEV,
                     '</button>',
@@ -17192,7 +17175,6 @@
                     $$('input[data-prop]').forEach(inp => {
                         inp.value = displayVal(read(inp.getAttribute('data-prop')));
                     });
-                    $('[data-dot="sector"]').classList.toggle('is-on', PROPS.some(p => !!read(p)));
                 }
 
                 root.addEventListener('click', e => {
@@ -17229,7 +17211,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Position</span>',
                     ICO.chev,
                     '</button>',
@@ -17310,10 +17291,6 @@
                     $$('input[data-prop]').forEach(inp => {
                         inp.value = read(inp.getAttribute('data-prop'));
                     });
-                    $('[data-dot="sector"]').classList.toggle('is-on', PROPS.some(p => {
-                        const v = read(p);
-                        return p === 'position' ? (v && v !== 'static') : !!v;
-                    }));
                 }
 
                 root.addEventListener('click', e => {
@@ -17423,7 +17400,6 @@
                     /* 扇區標籤容器：與內容容器隔離（比照 Grid child） */
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Typography</span>',
                     ICO.chev,
                     '</button>',
@@ -17742,7 +17718,6 @@
                         if (p === 'text-overflow') v = v || '';
                         advSetVal(p, v);
                     });
-                    $('[data-dot="sector"]').classList.toggle('is-on', PROPS.some(p => !!read(p)));
                     famPaint();
                 }
 
@@ -18254,7 +18229,6 @@
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<div class="st-ts__head">',
                     '  <button type="button" class="st-ly__head" data-act="toggle">',
-                    '    <span class="st-ly__dot" data-dot="sector"></span>',
                     '    <span class="st-ly__head-title">Text shadows</span>',
                     ICO.chev,
                     '  </button>',
@@ -18510,8 +18484,6 @@
                         model = parseList(raw);
                         if (curIdx >= model.length) curIdx = model.length - 1;
                     }
-                    const dot = root.querySelector('[data-dot="sector"]');
-                    if (dot) dot.classList.toggle('is-on', model.length > 0);
                     renderList();
                     if (popOpen && curIdx >= 0 && model[curIdx]) syncFieldsFromModel();
                 }
@@ -19601,8 +19573,7 @@
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<div class="st-bg__head">',
                     '  <button type="button" class="st-ly__head" data-act="toggle">',
-                    '    <span class="st-ly__dot" data-dot="sector"></span>',
-                    '    <span class="st-ly__head-title">Background</span>',
+                    '    <span class="st-ly__head-title">Backgrounds</span>',
                     ICO.chev,
                     '  </button>',
                     '  <button type="button" class="st-bg__add" data-act="add" title="新增背景圖層" aria-label="新增背景圖層">',
@@ -19950,8 +19921,6 @@
                         setVal('[data-f="clip"]', l.clip || 'border-box');
                     });
                     paintSwatch();
-                    const dot = root.querySelector('[data-dot="sector"]');
-                    if (dot) dot.classList.toggle('is-on', bgColor !== 'transparent' || layers.length > 0);
                 }
 
                 /* ---------------- 读取当前元件状态 ---------------- */
@@ -20688,7 +20657,6 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<button type="button" class="st-ly__head" data-act="toggle">',
-                    '  <span class="st-ly__dot" data-dot="sector"></span>',
                     '  <span class="st-ly__head-title">Border</span>',
                     ICO.chev,
                     '</button>',
@@ -21701,16 +21669,6 @@
                         const ckwMenu = cornerKwMenu(k);
                         if (inp && ckwMenu) markKw($$('.st-bd__kw-item', ckwMenu), inp.value, kwState.corner[k]);
                     });
-
-                    /* 扇區標題小圓點 */
-                    const dot = root.querySelector('[data-dot="sector"]');
-                    const anySide = !wLinked
-                        ? !!(wRaw && wRaw.toLowerCase() !== 'medium')
-                        : SIDE_KEYS.some(k => !!String(read(SIDE_PROP[k]) || '').trim());
-                    const anyCorner = !rLinked
-                        ? !!rFirst
-                        : CORNER_KEYS.some(k => !!String(read(CORNER_PROP[k]) || '').trim());
-                    if (dot) dot.classList.toggle('is-on', !!(style || color || anySide || anyCorner));
                 }
 
                 /* ---------------- 事件 ---------------- */
@@ -22226,7 +22184,6 @@
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<div class="st-bs__head">',
                     '  <button type="button" class="st-ly__head" data-act="toggle">',
-                    '    <span class="st-ly__dot" data-dot="sector"></span>',
                     '    <span class="st-ly__head-title">Box shadows</span>',
                     ICO.chev,
                     '  </button>',
@@ -22507,8 +22464,6 @@
                         model = parseList(raw);
                         if (curIdx >= model.length) curIdx = model.length - 1;
                     }
-                    const dot = root.querySelector('[data-dot="sector"]');
-                    if (dot) dot.classList.toggle('is-on', model.length > 0);
                     renderList();
                     if (popOpen && curIdx >= 0 && model[curIdx]) syncFieldsFromModel();
                 }
@@ -22850,7 +22805,6 @@
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<div class="st-fl__head">',
                     '  <button type="button" class="st-ly__head" data-act="toggle">',
-                    '    <span class="st-ly__dot" data-dot="sector"></span>',
                     '    <span class="st-ly__head-title">' + cfg.title + '</span>',
                     ICO.chev,
                     '  </button>',
@@ -23159,8 +23113,6 @@
                         model = parseList(raw);
                         if (curIdx >= model.length) curIdx = model.length - 1;
                     }
-                    const dot = root.querySelector('[data-dot="sector"]');
-                    if (dot) dot.classList.toggle('is-on', model.length > 0);
                     renderList();
                     if (popOpen && curIdx >= 0 && model[curIdx]) {
                         syncFieldsFromModel();
@@ -23516,7 +23468,6 @@
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<div class="st-tr__head">',
                     '  <div class="st-ly__head" data-act="toggle">',
-                    '    <span class="st-ly__dot" data-dot="sector"></span>',
                     '  </div>',
                     '  <button type="button" class="st-ly__head-title" data-act="title" aria-label="Transitions">Transitions</button>',
                     '  <button type="button" class="st-tr__chev" data-act="toggle" aria-label="收合/展開 Transitions">',
@@ -24056,8 +24007,6 @@
                 /* 依「扇區內是否有已設定的轉場規則」同步標題圓點與高亮背景 */
                 function updateSectorState() {
                     const on = model.length > 0;
-                    const dot = root.querySelector('[data-dot="sector"]');
-                    if (dot) dot.classList.toggle('is-on', on);
                     const titleBtn = root.querySelector('.st-ly__head-title');
                     if (titleBtn) titleBtn.classList.toggle('is-set', on);
                 }
@@ -30742,17 +30691,6 @@
             }
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function () { setTimeout(init, 200); });
-            } else {
-                setTimeout(init, 200);
-            }
-            // Also expose for debugging
-            window.__ghPanel = { open: openModal, close: closeModal };
-        })();
-    </script>
-</body>
-
-</html>
-); });
             } else {
                 setTimeout(init, 200);
             }
