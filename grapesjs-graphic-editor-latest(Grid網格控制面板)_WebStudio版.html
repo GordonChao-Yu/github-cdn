@@ -1541,12 +1541,10 @@
         }
 
         .st-ly__head {
-            width: 100%;
-            height: 38px;
-            padding: 0 12px;
+            box-sizing: border-box;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            min-height: 0px;
+            min-width: 0px;
             border: 0;
             background: transparent;
             color: var(--studio-text-1);
@@ -1586,8 +1584,8 @@
         }
 
         .st-ly__head-title {
-            flex: 1 1 auto;
-            text-align: left;
+            flex: 0 1 auto;
+            pointer-events: auto;
         }
 
         .st-ly__chev {
@@ -1875,6 +1873,15 @@
             width: 18px;
             height: 18px;
             display: block;
+        }
+
+        .st-lbl-btn-css {
+            box-sizing: border-box;
+            display: flex;
+            min-height: 0px;
+            min-width: 0px;
+            width: fit-content;
+            max-width: 100%;
         }
 
         /* Layout 容器級門控：Direction / Wrap 是純 flex 專屬（見下方 [data-flexonly]）；
@@ -6220,123 +6227,96 @@
            側邊編輯視窗，扇區內不放任何輸入控制項。
            編輯視窗沿用 .st-tp 深色卡片（與 Text shadows / Box shadows 一致）。
            =================================================*/
-
+        .st-wframe {
+            position: absolute;
+            inset: 0px;
+            pointer-events: none;
+        }
+        .st-wframe-flex {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding-inline-start: var(--panel-paddingInline);
+            padding-inline-end: var(--panel-paddingInline);
+            gap: var(--spacing-5);
+        }
         .st-tr__head {
             display: flex;
             align-items: center;
-            gap: 0;
-            height: 36px;
-            width: 100%;
-        }
-
-        /* 左側 dot 區（保留 data-act=toggle，點空白處仍可折疊） */
-        .st-tr__head>.st-ly__head {
-            flex: 0 0 auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 16px;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-            border: 0;
-            background: transparent;
-            cursor: pointer;
-        }
-
-        /* 獨立的「Transitions」標籤按鈕：緊鄰 dot 左側組；移除所有原生按鈕樣式 */
-        .st-tr__head>.st-ly__head-title {
-            flex: 0 1 auto;
-            display: inline-flex;
-            align-items: center;
-            height: var(--spacing-10);
-            box-sizing: border-box;
-            /* margin: 0 auto 0 0; */
-            padding-block-start: var(--spacing-1);
-            padding-block-end: var(--spacing-1);
-            padding-inline-start: var(--spacing-2);
-            padding-inline-end: var(--spacing-2);
-            /* 移除原生按鈕樣式 */
-            border: 1px solid transparent;
-            border-radius: var(--borderRadius-3);
-            background: transparent;
-            color: var(--studio-text-1);
-            font: inherit;
-            font-weight: 600;
-            line-height: inherit;
-            text-align: left;
-            text-decoration: none;
-            text-transform: none;
-            letter-spacing: inherit;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer;
-            transition: background-color .15s ease, color .15s ease;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            outline: none;
-            box-shadow: none;
-            -webkit-tap-highlight-color: transparent;
+            /*gap: 8px;*/
+            height: 38px;
+            /*padding: 0 12px;*/
+            cursor: pointer;          /* 整條標題列都可點擊收合 */
             user-select: none;
         }
 
-        .st-tr__head>.st-ly__head-title:hover {
-            background: var(--studio-surface-2);
-            color: var(--studio-text-1);
-        }
-
-        /* 扇區已設定值時，標籤按鈕高亮背景 */
-        .st-tr__head>.st-ly__head-title.is-set {
-            background-color: var(--studio-accent);
-            color: #fff;
-        }
-
-        .st-tr__head>.st-ly__head-title.is-set:hover {
-            background-color: var(--studio-accent);
-            color: #fff;
-        }
-
-        /* 右側 chevron 折疊按鈕 */
-        .st-tr__chev {
+        /* 依附圖的扇區標題列：折疊箭頭在左、「Transitions」是獨立按鈕、「+」在右。
+           標題自己是一個 <button>，高亮只作用在它身上，不會染到整條標題列。 */
+        .st-tr__head>.st-ly__head {
             flex: 0 0 auto;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             width: 24px;
             height: 24px;
-            margin: 0 0 0 auto;
+            box-sizing: border-box;
             padding: 0;
+        }
+
+        .st-tr__head>.st-ly__head .st-ly__chev {
+            flex: 0 0 auto;
+        }
+
+        /* 標題按鈕：平時是透明標籤，hover 或已設定時才出現晶片底色 */
+        .st-tr__head>.st-ly__head-title {
+            flex: 0 1 auto;
+            min-width: 0;
+            max-width: 100%;
+            padding: 3px 7px;
             border: 0;
             border-radius: 5px;
             background: transparent;
-            color: var(--studio-text-3);
-            cursor: pointer;
-        }
-
-        .st-tr__chev:hover {
-            background: var(--studio-surface-2);
             color: var(--studio-text-1);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .2px;
+            line-height: 1.35;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background .12s ease, color .12s ease;
         }
 
-        .st-tr__chev .st-ly__chev {
-            width: 16px;
-            height: 16px;
-            transition: transform .15s ease;
+        .st-tr__head>.st-ly__head-title:hover {
+            background: var(--studio-hover-soft);
         }
 
-        .st-ly.is-collapsed .st-tr__chev .st-ly__chev {
-            transform: rotate(-90deg);
+        .st-tr__head>.st-ly__head-title:focus-visible {
+            outline: 2px solid var(--studio-accent, #6d5cf6);
+            outline-offset: 1px;
         }
 
-        /* 全域 .st-ly__chev 折疊旋轉規則在本扇區改由 .st-tr__chev 承接，
-           避免與舊的外層 button 規則衝突 */
-        .st-tr__head>.st-ly__head .st-ly__chev {
-            display: none;
+        /* 扇區內已有轉場規則時，只高亮標題按鈕（不再是整條 .st-ly__head） */
+        .st-tr__head>.st-ly__head-title.is-set {
+            background: color-mix(in srgb, var(--studio-accent, #6d5cf6) 12%, #ffffff);
+            color: var(--studio-accent, #6d5cf6);
+        }
+
+        /* 「+」跟標題列一起排版：垂直置中、靠 auto 外距推到最右緣（不再絕對定位） */
+        .st-ly__addDiv {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            margin-left: auto;
         }
 
         .st-tr__add {
+            box-sizing: border-box;
             flex: 0 0 auto;
             display: inline-flex;
             align-items: center;
@@ -23940,27 +23920,23 @@
                 const root = document.createElement('div');
                 root.className = 'st-ly st-tr gjs-sm-sector';
                 root.innerHTML = [
-                    '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
-                    '<div class="st-tr__head">',
-                    '  <button class="st-ly__head" data-act="toggle">',
-                    '  </button>',
-                    '  <div class="">',
-                    '  <button type="button" class="st-ly__head-title" data-act="title" aria-label="Transitions">Transitions</button>',
-                    '  </div>',
-                    '  <button type="button" class="st-tr__chev" data-act="toggle" aria-label="收合/展開 Transitions">',
+                    '<div class="st-tr__head st-justify-flex-start st-flex-nowrap st-align-center st-direction-row" data-act="toggle">',
+                    '  <button type="button" class="st-ly__head st-align-center st-justify-flex-start st-flex-nowrap st-direction-row" aria-label="收合/展開 Transitions">',
                     ICO.chev,
                     '  </button>',
-                    '  <button type="button" class="st-tr__add" data-act="add" title="新增轉場" aria-label="新增轉場">',
+                    '  <button type="button" class="st-ly__head-title">Transitions</button>',
+                    '  <div class="st-ly__addDiv">',
+                    '    <button type="button" class="st-tr__add" data-act="add" title="新增轉場" aria-label="新增轉場">',
                     ICO.plus,
-                    '  </button>',
-                    '</div>',
+                    '    </button>',
+                    '  </div>',
                     '</div>',
                     '<div class="st-ly__body st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch st-ly-panel-paddingBlock">',
                     '   <div class="c-dbZYJE st-pos-paddingInline st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch">',
                     '  <div class="st-tr__list" data-list></div>',
                     '  <div class="st-tr__empty" data-empty hidden>尚未新增轉場，按右上的「+」新增一條。</div>',
-                    '</div>',
                     '   </div>',
+                    '  </div>',
                 ].join('');
                 host.appendChild(root);
 
@@ -24481,11 +24457,11 @@
 
                 /* ---------------- 扇區標題高亮 / Popover（規則說明 ⊕ Reset value） ---------------- */
 
-                /* 依「扇區內是否有已設定的轉場規則」同步標題圓點與高亮背景 */
+                /* 依「扇區內是否有已設定的轉場規則」同步標題按鈕的高亮（不動整條標題列） */
                 function updateSectorState() {
                     const on = model.length > 0;
-                    const titleBtn = root.querySelector('.st-ly__head-title');
-                    if (titleBtn) titleBtn.classList.toggle('is-set', on);
+                    const titleEl = root.querySelector('.st-tr__head > .st-ly__head-title');
+                    if (titleEl) titleEl.classList.toggle('is-set', on);
                 }
 
                 /* 清空所有 transition CSS 規則（＝清空 model 並寫回樣式） */
@@ -24603,13 +24579,7 @@
                 /* ---------------- 事件 ---------------- */
 
                 root.addEventListener('click', e => {
-                    if (e.target.closest('[data-act="toggle"]')) {
-                        /* Alt + 點擊 = 清空所有轉場規則（等同 Popover 底部的 Reset value） */
-                        if (e.altKey && model.length) { resetAllTransitions(); return; }
-                        root.classList.toggle('is-collapsed');
-                        return;
-                    }
-                    /* 「+」新增一條 200ms 預設，並直接帶出編輯視窗 */
+                    /* 「+」先處理：它位在標題列內，不能讓外層的折疊點擊先攔走 */
                     if (e.target.closest('[data-act="add"]')) {
                         e.stopPropagation();
                         root.classList.remove('is-collapsed');
@@ -24617,6 +24587,13 @@
                         applyModel(false);
                         const row = root.querySelector('[data-idx="' + (model.length - 1) + '"]');
                         if (row) openPop(model.length - 1, row);
+                        return;
+                    }
+                    /* 整條標題列（含標題按鈕）都可展開／收合 */
+                    if (e.target.closest('[data-act="toggle"]')) {
+                        /* Alt + 點擊 = 清空所有轉場規則（等同 Popover 底部的 Reset value） */
+                        if (e.altKey && model.length) { resetAllTransitions(); return; }
+                        root.classList.toggle('is-collapsed');
                         return;
                     }
                     const del = e.target.closest('[data-del]');
