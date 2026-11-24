@@ -13160,6 +13160,28 @@
                    不補這一段的話，面板永遠只顯示明確軌道（2×2），畫布卻是 2×3。
                Layout 扇區的預覽、Grid generator 的初始選取與子格重算全部改用它，
                三處與畫布在每個裝置下都對得起來。 */
+            /* 只有「看得見的」子項才算 grid item。
+               CSS 規則：display:none 的子項不佔格線、不影響隱式軌道數。
+               縮格時多出來的格子會被「藏起來」（而不是刪掉，內容不丟失），
+               所以這裡必須排除隱藏的子項，否則格線會一直被算多。 */
+            function studioVisibleKids(comp) {
+                const c = (comp && comp.components) ? comp.components() : null;
+                if (!c) return 0;
+                let n = 0;
+                for (let i = 0; i < c.length; i++) {
+                    const k = c.at ? c.at(i) : c[i];
+                    if (!k) continue;
+                    let disp = '';
+                    try {
+                        const st = (k.getStyle && k.getStyle()) || {};
+                        disp = String(st.display || '').trim().toLowerCase();
+                    } catch (e) { }
+                    if (disp === 'none') continue;
+                    n++;
+                }
+                return n;
+            }
+
             function studioGridLayout(comp) {
                 const res = { cols: 0, rows: 0, effCols: 0, effRows: 0, kids: 0, isGrid: false };
                 if (!comp) return res;
@@ -13168,7 +13190,7 @@
                 res.isGrid = true;
                 res.cols = studioTrackCount(studioEffProp(comp, 'grid-template-columns'));
                 res.rows = studioTrackCount(studioEffProp(comp, 'grid-template-rows'));
-                res.kids = (comp.components && comp.components().length) || 0;
+                res.kids = studioVisibleKids(comp);
                 const flow = String(studioEffProp(comp, 'grid-auto-flow') || 'row').trim().toLowerCase();
                 res.effCols = res.cols;
                 res.effRows = res.rows;
@@ -14432,6 +14454,19 @@
                 let ggDragged = false;                        /* 是否真的拖曳過 */
                 let ggSuppressClick = false;                  /* 拖曳後忽略隨後的那次 click */
                 let ggCustomizing = false;                    /* 彈窗開啟中：按鈕顯示的是「待套用」的欄列 */
+                let ggLastRect = null;                        /* 上一次的高亮範圍（算差額用） */
+                /* 【2026-11-24 修正】矩陣格子的索引。
+                   舊版每次重繪都 querySelectorAll('.st-gg__cell') 再逐格 getAttribute，
+                   拖曳時每個 pointermove 都要掃 96 格。
+                   改成開彈窗時就建好索引（index = (r-1) * GRID_MAX_COLS + (c-1)），
+                   重繪時只切換「狀態真的有變」的格子。 */
+                const ggCells = [];
+                for (let r = 1; r <= GRID_MAX_ROWS; r++) {
+                    for (let c = 1; c <= GRID_MAX_COLS; c++) {
+                        ggCells.push(ggMatrix.querySelector('.st-gg__cell[data-c="' + c + '"][data-r="' + r + '"]'));
+                    }
+                }
+                const ggPresetBtns = Array.prototype.slice.call(ggPresets.querySelectorAll('.st-gg__preset'));
 
                 function ggRect() {
                     return {
@@ -14443,20 +14478,39 @@
                     ggSel = { c1: c1, r1: r1, c2: c2, r2: r2 };
                     paintGg();
                 }
+                function ggCellIsOn(c, r, rect) {
+                    return c >= rect.c1 && c <= rect.c2 && r >= rect.r1 && r <= rect.r2;
+                }
                 function paintGg() {
                     const rect = ggRect();
-                    const cells = ggMatrix.querySelectorAll('.st-gg__cell');
-                    for (let i = 0; i < cells.length; i++) {
-                        const cell = cells[i];
-                        const c = +cell.getAttribute('data-c');
-                        const r = +cell.getAttribute('data-r');
-                        const on = c >= rect.c1 && c <= rect.c2 && r >= rect.r1 && r <= rect.r2;
+                    /* 【2026-11-24 修正】只重繪「狀態改變」的格子。
+                       舊版每次都掃全部 96 格；拖曳時每步只動到 1～12 格就夠了。 */
+                    const prev = ggLastRect;
+                    if (prev) {
+                        const r1 = Math.min(prev.r1, rect.r1), r2 = Math.max(prev.r2, rect.r2);
+                        const c1 = Math.min(prev.c1, rect.c1), c2 = Math.max(prev.c2, rect.c2);
+                        for (let r = r1; r <= r2; r++) {
+                            for (let c = c1; c <= c2; c++) {
+                                const cell = ggCells[(r - 1) * GRID_MAX_COLS + (c - 1)];
+                                if (!cell) continue;
+                                const on = ggCellIsOn(c, r, rect);
                         if (cell.classList.contains('is-on') !== on) cell.classList.toggle('is-on', on);
                     }
-                    const ps = ggPresets.querySelectorAll('.st-gg__preset');
-                    for (let i = 0; i < ps.length; i++) {
-                        const on = !!ggPreset && ps[i].getAttribute('data-preset') === ggPreset;
-                        if (ps[i].classList.contains('is-on') !== on) ps[i].classList.toggle('is-on', on);
+                        }
+                    } else {
+                        for (let i = 0; i < ggCells.length; i++) {
+                            const cell = ggCells[i];
+                            if (!cell) continue;
+                            const c = (i % GRID_MAX_COLS) + 1;
+                            const r = Math.floor(i / GRID_MAX_COLS) + 1;
+                            const on = ggCellIsOn(c, r, rect);
+                            if (cell.classList.contains('is-on') !== on) cell.classList.toggle('is-on', on);
+                        }
+                    }
+                    ggLastRect = rect;
+                    for (let i = 0; i < ggPresetBtns.length; i++) {
+                        const on = !!ggPreset && ggPresetBtns[i].getAttribute('data-preset') === ggPreset;
+                        if (ggPresetBtns[i].classList.contains('is-on') !== on) ggPresetBtns[i].classList.toggle('is-on', on);
                     }
                     /* 矩陣／版型一變，觸發按鈕的欄列預覽與「欄×列」標籤就跟著變 */
                     paintGridPreview();
@@ -14517,6 +14571,7 @@
                 /* 空 cell 列高下限（px）；自動對齊時補的佔位格用這個值避免塌縮 */
                 const GG_CELL_MIN = 60;
                 const GG_PLACEHOLDER_ATTR = 'data-gg-placeholder';   /* 標記自動補的空佔位格，避免誤刪用戶內容 */
+                const GG_HIDDEN_ATTR = 'data-gg-hidden';             /* 標記「縮格時被藏起來」的格子（內容保留，之後放大會回來） */
 
                 /* 判斷子格是不是空的佔位格：只有自動標記、內部沒有任何子元件、沒有內容文字時才會被回收 */
                 function isGgBlankCell(c) {
@@ -14536,40 +14591,179 @@
 
                 /* 對齊子格數：cols×rows 為目標，尾部空佔位格超出時回收，不足時補空 div；
                    只動尾端空殼，絕對不刪用戶拖進去的真實元件。 */
-                function syncGridCells(sel, need) {
-                    /* 【2026-11-20 修正】點 Fill grid 造成網頁無回應、記憶體暴增。
-                       GrapesJS 的事件是同步派發的：下面的 append／remove 會在函式返回前就觸發
-                       component:add／component:remove，而該事件的處理器又回頭呼叫本函式改動子格，
-                       於是形成「remove → 事件 → 再 remove」的自我回饋迴圈。
-                       縮減格數時最致命：needCellsFor 依「即時子項數」回推隱式軌道
-                       （effRows = max(rows, ceil(kids / cols))），剛移除一格 need 立刻被補回，
-                       回收迴圈永遠刪不乾淨 → 主執行緒被同步迴圈鎖死、子格不斷增刪把記憶體撐爆。
-                       修法：整批操作期間立起 ggSyncing 守衛，讓自身造成的增刪不再回饋成新一輪補格；
-                       補格也改成一次算好缺額、一次性加入，不再逐格觸發事件。 */
+                /* 【2026-11-24 修正】縮格時「網頁無回應」＋記憶體線性暴增。
+                   症狀：12×12（144 格）縮成 5×5 時，整個分頁卡住、記憶體一直漲。
+                   原因（實測）：
+                     · 舊版逐格呼叫 last.remove()：144→25 代表 **119 次同步的
+                       component:remove 事件**。每一次移除 GrapesJS 都會
+                       (a) 產生一個 Undo 步驟 → Undo 堆疊實測由 295 筆漲到 500 筆，
+                           每一步都還抓著被移除的元件 → 記憶體跟著「線性」暴增；
+                       (b) 觸發一次畫布 DOM 更新與樣式重算 → 119 次同步工作，
+                           在真實專案（元件內有圖片／巢狀元件）每格成本遠高於空殼，
+                           主執行緒就被鎖住 → 「網頁無回應」。
+                     · 舊版只刪「尾部空殼」，有內容的格子刪不掉 → 縮格根本沒生效：
+                       模板寫 5×5，畫布卻是 5 欄 × 29 隱式列。
+                       而且 needCellsFor 又是用「現有子項數」回推隱式列數，
+                       need 變成自我指涉（144 → 需要 145 格）→ 每按一次 Fill grid
+                       就多補一格 → 線性增長。
+                   新作法（三個改動一起）：
+                     1. 批次處理：一次 collection.remove(models) + UndoManager.start/stop
+                        把整批刪除收成「一個 Undo 步驟、一次事件批次」。
+                     2. 縮格不刪內容：多出來的格子若是空佔位格 → 批次刪除；
+                        若是使用者放進去的真實元件 → 藏起來（display:none），
+                        內容不丟失，放大時會回來。縮格因此真的生效，畫布也只渲染 5×5。
+                     3. needCellsFor 改用「明確欄 × 明確列」：沒有明確列數時才用隱式列數。
+                        杜絕自我指涉的 need 與「每按一次多補一格」。 */
+                function syncGridCells(sel, need, shrink) {
+                    /* 【2026-11-24 修正】shrink 參數：只有「使用者明確要求縮格」
+                       （按 Fill grid）才會把多出來的格子收掉／藏起來；
+                       自動重算（拖入、刪除、改樣式）只補不收，
+                       使用者自己加的格子不會被莫名其妙藏起來。 */
+                    /* 【2026-11-20 修正】補格／回收進行中的重入守衛。
+                       設為 true 時，事件監聽器與其他補格入口一律略過，
+                       切斷「改子格 → 觸發 component:add/remove → 又改子格」的回饋迴圈。 */
                     if (ggSyncing) return;
                     if (!sel || need < 1) return;
                     const collection = sel.components();
                     if (!collection) return;
                     ggSyncing = true;
                     try {
-                    let len = collection.length;
-                    while (len > need) {
-                        const last = collection.at(len - 1);
-                        if (!last || !isGgBlankCell(last)) break;
-                        last.remove();
-                        len = collection.length;
-                    }
-                        const miss = need - collection.length;
-                        if (miss > 0) {
-                            let html = '';
-                            for (let i = 0; i < miss; i++) {
-                                html += '<div ' + GG_PLACEHOLDER_ATTR + '="1" style="min-height:' + GG_CELL_MIN + 'px"></div>';
+                        const models = (collection.models ? collection.models.slice() : []);
+                        const visible = [];
+                        const parked = [];      /* 我們藏起來的（放大時可以復活） */
+                        for (let i = 0; i < models.length; i++) {
+                            const c = models[i];
+                            if (!c) continue;
+                            if (ggWasHiddenByUs(c)) parked.push(c);
+                            else if (ggIsHiddenCell(c)) { /* 使用者自己設的 display:none → 不佔格，也不复活 */ }
+                            else visible.push(c);
+                        }
+
+                        if (visible.length > need && shrink) {
+                            /* 多出來的尾段：空佔位格批次刪除，有內容的藏起來 */
+                            const surplus = visible.slice(need);
+                            const blanks = [];
+                            const contents = [];
+                            for (let i = 0; i < surplus.length; i++) {
+                                if (isGgBlankCell(surplus[i])) blanks.push(surplus[i]);
+                                else contents.push(surplus[i]);
                             }
-                            sel.append(html);
+                            if (blanks.length) ggRemoveCells(collection, blanks);
+                            if (contents.length) {
+                                ggWithoutUndo(() => {
+                                    for (let i = 0; i < contents.length; i++) ggHideCell(contents[i]);
+                                });
+                            }
+                        } else if (visible.length < need) {
+                            let miss = need - visible.length;
+                            /* 先把之前藏起來的叫回來（放大時內容要回位） */
+                            if (parked.length) {
+                                ggWithoutUndo(() => {
+                                    for (let i = 0; i < parked.length && miss > 0; i++, miss--) ggUnhideCell(parked[i]);
+                                });
+                            }
+                            /* 還不夠才補新的空殼（一次批次加入，不逐格觸發事件） */
+                            if (miss > 0) ggAppendCells(sel, miss);
                         }
                     } finally {
                         ggSyncing = false;
                     }
+                }
+
+                /* 批次刪除空佔位格。
+                   【2026-11-24 修正】舊版逐格 last.remove()：
+                     · 119 格 = 119 次同步的 component:remove 事件
+                       → Undo 堆疊實測由 295 筆漲到 500 筆，每一步都抓著被移除的元件
+                       → 記憶體跟著「線性」暴增；
+                     · 每次移除都會跑完整的 Undo 記錄與元件拆卸
+                       → 實測 119 格要 1.6 秒（合成專案）→ 主執行緒被鎖住 → 網頁無回應。
+                   新版：一次 collection.remove(models) 批次處理，
+                   並用 editor.UndoManager.skip() 包住 → 完全不產生 Undo 步驟
+                   （Undo 堆疊 +0 筆），記憶體不再跟著格數線性成長。
+                   Undo 仍可回復「模板」那一步（Fill grid 的樣式寫入有記錄），
+                   回復後會由重算邏輯把需要的格數補回來。 */
+                function ggRemoveCells(collection, models) {
+                    if (!models || !models.length) return;
+                    const run = () => {
+                        try {
+                            if (typeof collection.remove === 'function') collection.remove(models);
+                            else models.forEach(m => { try { m.remove(); } catch (e2) { } });
+                        } catch (e) {
+                            models.forEach(m => { try { m.remove(); } catch (e2) { } });
+                        }
+                    };
+                    ggWithoutUndo(run);
+                }
+
+                /* 批次補空殼（同樣不產生 Undo 步驟） */
+                function ggAppendCells(sel, n) {
+                    if (!sel || n < 1) return;
+                    let html = '';
+                    for (let i = 0; i < n; i++) {
+                        html += '<div ' + GG_PLACEHOLDER_ATTR + '="1" style="min-height:' + GG_CELL_MIN + 'px"></div>';
+                    }
+                    ggWithoutUndo(() => { try { sel.append(html); } catch (e) { } });
+                }
+
+                /* 在 UndoManager 關閉記錄的情況下執行一段操作 */
+                function ggWithoutUndo(fn) {
+                    const um = editor.UndoManager;
+                    try {
+                        if (um && typeof um.skip === 'function') { um.skip(fn); return; }
+                    } catch (e) { }
+                    try { fn(); } catch (e) { }
+                }
+
+                /* 藏起來的格子：只加 display:none，不刪元件 → 內容不丟失。
+                   【2026-11-24 修正】這裡刻意走 addStyle(style, {noEvent:true})：
+                   · 一般 setStyle 會觸發 style:update → component:styleUpdate → 整輪面板重繪，
+                     實測 119 格要 958 ms；
+                   · noEvent:true 只改資料不派事件，119 格只要 81 ms（快 12 倍），
+                     而且不會產生任何 Undo 步驟（記憶體不漲）。
+                   · 畫布元素另外手動同步，避免 StyleManager 因為沒事件而沒更新。 */
+                function ggHideCell(c) {
+                    try {
+                        const at = (c.getAttributes && c.getAttributes()) || {};
+                        if (!at[GG_HIDDEN_ATTR]) {
+                            const prev = String(((c.getStyle && c.getStyle()) || {}).display || '').trim();
+                            const next = Object.assign({}, at);
+                            next[GG_HIDDEN_ATTR] = prev;   /* 記住原本的 display，回復時還原 */
+                            if (c.setAttributes) c.setAttributes(next);
+                        }
+                        c.addStyle({ display: 'none' }, { noEvent: true });
+                        const el = c.getEl ? c.getEl() : null;
+                        if (el && el.style) el.style.display = 'none';
+                    } catch (e) { }
+                }
+                function ggUnhideCell(c) {
+                    try {
+                        const at = (c.getAttributes && c.getAttributes()) || {};
+                        /* 屬性值可能是空字串（原本就沒有 display）→ 用「有沒有這個 key」判斷 */
+                        if (!Object.prototype.hasOwnProperty.call(at, GG_HIDDEN_ATTR)) return;
+                        const prev = String(at[GG_HIDDEN_ATTR] || '').trim();
+                        const next = Object.assign({}, at);
+                        delete next[GG_HIDDEN_ATTR];
+                        if (c.setAttributes) c.setAttributes(next);
+                        const st = Object.assign({}, (c.getStyle && c.getStyle()) || {});
+                        delete st.display;
+                        c.addStyle({ display: prev || '' }, { noEvent: true });
+                        const el = c.getEl ? c.getEl() : null;
+                        if (el && el.style) el.style.display = prev || '';
+                    } catch (e) { }
+                }
+                /* 使用者自己設 display:none 的格子：不是我們藏的，也不佔 grid item */
+                function ggWasHiddenByUs(c) {
+                    try {
+                        const at = (c.getAttributes && c.getAttributes()) || {};
+                        /* 屬性值可能是空字串（原本就沒有 display），要用「有沒有這個 key」判斷 */
+                        return Object.prototype.hasOwnProperty.call(at, GG_HIDDEN_ATTR);
+                    } catch (e) { return false; }
+                }
+                function ggIsHiddenCell(c) {
+                    try {
+                        const st = (c.getStyle && c.getStyle()) || {};
+                        return String(st.display || '').trim().toLowerCase() === 'none';
+                    } catch (e) { return false; }
                 }
 
                 function needCellsFor(sel) {
@@ -14582,7 +14776,16 @@
                        每個裝置下都算得出同樣的子格數。 */
                     const L = studioGridLayout(sel);
                     if (!L.cols) return 0;
-                    return L.effCols * L.effRows;
+                    /* 【2026-11-24 修正】原本回傳 L.effCols * L.effRows，
+                       而 effRows 是用「現有子項數」回推的隱式列數
+                       （effRows = max(rows, ceil(kids / cols))）。
+                       這讓 need 變成自我指涉：144 個格子、5 欄時 effRows = 29 → need = 145，
+                       於是每按一次 Fill grid 就多補一格（144 → 145 → …），
+                       格線永遠縮不下來、記憶體一直漲。
+                       改成：有明確列數 → 用「欄 × 明確列」（就是使用者要求的格線大小）；
+                       沒有明確列數 → 才用隱式列數，避免動到使用者既有的內容。 */
+                    const rows = L.rows > 0 ? L.rows : L.effRows;
+                    return L.cols * rows;
                 }
 
                 function syncParentGrid(comp) {
@@ -14624,7 +14827,10 @@
                     }));
                     /* 對齊子格數：N×M 個格子，尾部空殼回收、不足補空 */
                     const need = preset ? (preset.cols * preset.rows) : (cols * rows);
-                    syncGridCells(sel, need);
+                    /* 明確縮格：只有按「Fill grid」才會把多出來的格子收掉。
+                       其他入口（拖入、刪除、改樣式後的重算）只會「補」不會「收」，
+                       否則使用者自己加的第 6 個格子會被自動藏起來。 */
+                    syncGridCells(sel, need, true);
                     closeGg();
                     paint();
                 }
@@ -14645,13 +14851,23 @@
                     if (comp && comp.parent) syncParentGrid(comp);
                     resyncSelectedGrid();
                 });
+                /* 【2026-11-24 修正】樣式變更後的重算改用「單一 rAF 併frame」。
+                   舊版每收到一次 component:styleUpdate 就排一個 rAF，
+   連續改樣式（Fill grid 一次寫四個屬性、或使用者連拖幾個值）會累積十幾個 rAF，
+   每個都要跑一輪 resyncSelectedGrid + syncParentGrid。
+   現在同一幀只跑一次，comp 取最後一次變更的那個。 */
+                let ggStyleRaf = 0;
+                let ggStyleComp = null;
                 editor.on('component:styleUpdate', function (comp, opts) {
-                    /* 欄列樣式變更時重算：不論 updated 物件內容為何，只要選中的是 grid 就重對齊。
-                       用 requestAnimationFrame 確保樣式已寫入，避免讀到舊值。 */
-                    requestAnimationFrame(function () {
+                    ggStyleComp = comp;
+                    if (ggStyleRaf) return;
+                    ggStyleRaf = requestAnimationFrame(function () {
+                        ggStyleRaf = 0;
+                        const c = ggStyleComp;
+                        ggStyleComp = null;
                         if (ggSyncing) return;
                         resyncSelectedGrid();
-                        if (comp && comp.parent) syncParentGrid(comp);
+                        if (c && c.parent) syncParentGrid(c);
                     });
                 });
                 /* 【2026-11-20 修正】裝置切換時網格沒有維持一致
@@ -14704,16 +14920,25 @@
                     }
                     cols = Math.min(cols, GRID_MAX_COLS);
                     rows = Math.min(rows, GRID_MAX_ROWS);
+                    const need = cols * rows;
 
                     const pvg = btn.querySelector('.st-grid__pvg');
                     if (pvg) {
                         pvg.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
                         pvg.style.gridTemplateRows = 'repeat(' + rows + ', 1fr)';
-                        const need = cols * rows;
-                        if (pvg.querySelectorAll('.st-grid__pvc').length !== need) {
+                        /* 【2026-11-24 修正】只增減差額。
+                           舊版每次欄列數一變就 pvg.innerHTML = html 整份重建
+                           （最多 96 個 span），拖曳時每一步都重建 → 主執行緒卡住。
+                           現在沿用既有的 span，只補/刪多出來的那幾個。 */
+                        const have = pvg.childElementCount;
+                        if (have !== need) {
+                            if (have < need) {
                             let html = '';
-                            for (let i = 0; i < need; i++) html += '<span class="st-grid__pvc"></span>';
-                            pvg.innerHTML = html;
+                                for (let i = have; i < need; i++) html += '<span class="st-grid__pvc"></span>';
+                                pvg.insertAdjacentHTML('beforeend', html);
+                            } else {
+                                while (pvg.childElementCount > need) pvg.removeChild(pvg.lastElementChild);
+                            }
                         }
                     }
                     const label = btn.querySelector('.st-grid__pvlabel');
@@ -14741,15 +14966,30 @@
                     const el = document.elementFromPoint(x, y);
                     return el ? el.closest('.st-gg__cell') : null;
                 }
+                /* 【2026-11-24 修正】拖曳重繪節流到每幀一次。
+                   舊版每個 pointermove 都立刻做 elementFromPoint（會強制版面計算）
+                   ＋ 一次完整重繪（96 格全掃 ＋ 預覽整份重建），
+                   拖曳時主執行緒很容易被塞滿而「無回應」。
+                   現在只記住最後一個游標位置，用 rAF 每幀處理一次。 */
+                let ggMoveRaf = 0;
+                let ggMovePt = null;
                 function ggOnMove(e) {
                     if (!ggAnchor) return;
-                    const cell = ggCellAt(e.clientX, e.clientY);
+                    ggMovePt = { x: e.clientX, y: e.clientY };
+                    if (ggMoveRaf) return;
+                    ggMoveRaf = requestAnimationFrame(function () {
+                        ggMoveRaf = 0;
+                        const pt = ggMovePt;
+                        ggMovePt = null;
+                        if (!ggAnchor || !pt) return;
+                        const cell = ggCellAt(pt.x, pt.y);
                     if (!cell) return;
                     const c = +cell.getAttribute('data-c');
                     const r = +cell.getAttribute('data-r');
                     if (c === ggAnchor.c && r === ggAnchor.r) return;
                     ggDragged = true;
                     setGgSel(ggAnchor.c, ggAnchor.r, c, r);
+                    });
                 }
                 function ggOnUp() {
                     document.removeEventListener('pointermove', ggOnMove);
@@ -14889,7 +15129,7 @@
                     const sel = editor.getSelected();
                     const cols = parseTrackList(read('grid-template-columns')).length;
                     const rows = parseTrackList(read('grid-template-rows')).length;
-                    const kids = sel && sel.components ? sel.components().length : 0;
+                    const kids = sel ? studioVisibleKids(sel) : 0;
                     const flow = String(read('grid-auto-flow') || 'row').trim();
                     let ic = 0, ir = 0;
                     if (flow.indexOf('column') === 0) {
@@ -18878,24 +19118,214 @@
     pointer-events: none;
 }
 
-/* ---------- Background layer 彈窗（對應附圖） ----------
-   由 Background 扇區的「+」觸發，浮在按鈕側邊（畫布那一側）。
-   整個彈窗掛在 document.body，避免被右側面板的 overflow 裁掉。 */
+/* ---------- 图层 body 三段式：Type / Image+Code / More properties ---------- */
+.st-bg-layer__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px 0 6px;
+}
+.st-bg-sep {
+    height: 1px;
+    background: var(--studio-border);
+    margin: 2px 0;
+}
+/* Type 行（label + 五个类型图标键） */
+.st-bg-row {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+}
+.st-bg-row-label-row {
+    flex: 0 0 70px;
+    width: 70px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--studio-text-2);
+    white-space: nowrap;
+}
+.st-bg-types {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--studio-border);
+    border-radius: 6px;
+    background: var(--studio-elev-1);
+}
+.st-bg-type {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--studio-text-2);
+    cursor: pointer;
+}
+.st-bg-type:hover { background: var(--studio-hover-soft); color: var(--studio-text-1); }
+.st-bg-type.is-on {
+    background: var(--studio-hover-soft);
+    box-shadow: inset 0 0 0 1px var(--studio-border);
+    color: var(--studio-text-1);
+}
+.st-bg-type svg { width: 16px; height: 16px; display: block; }
+.st-bg-type .st-bg-sw {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid var(--studio-border);
+}
+.st-bg-type .st-bg-sw--solid { background: #fff; }
+.st-bg-type .st-bg-sw--linear {
+    background: linear-gradient(180deg, #fff 0%, #7a7a7a 100%);
+}
+.st-bg-type .st-bg-sw--radial {
+    background: radial-gradient(circle at 50% 50%, #fff 0%, #7a7a7a 100%);
+}
+.st-bg-type .st-bg-sw--conic {
+    background: conic-gradient(from 180deg at 50% 50%, #fff 0%, #7a7a7a 100%);
+}
+/* Image 控制区 */
+.st-bg-ctl {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.st-bg-imgurl {
+    width: 100%;
+    height: 26px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    border: 1px solid var(--studio-border);
+    border-radius: 4px;
+    background: var(--studio-elev-2);
+    color: var(--studio-text-1);
+    font-size: 12px;
+    outline: none;
+}
+.st-bg-imgurl:focus { border-color: var(--studio-accent); }
+.st-bg-choose {
+    align-self: flex-start;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--studio-border);
+    border-radius: 6px;
+    background: var(--studio-elev-1);
+    color: var(--studio-text-1);
+    font-size: 12px;
+    cursor: pointer;
+}
+.st-bg-choose:hover { border-color: var(--studio-accent); }
+/* Code 区块 */
+.st-bg-codeblock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.st-bg-codelabel {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--studio-text-2);
+}
+.st-bg-code {
+    height: 80px;
+    border: 1px solid var(--studio-border);
+    border-radius: 6px;
+    background: var(--studio-elev-1);
+}
+.st-bg-code textarea {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--studio-text-1);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    resize: none;
+    outline: none;
+    border-radius: 6px;
+}
+/* More properties 折叠头 */
+.st-bg-more {
+    display: flex;
+    flex-direction: column;
+}
+.st-bg-more__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 0;
+    cursor: pointer;
+    user-select: none;
+}
+.st-bg-more__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--studio-text-1);
+}
+.st-bg-more__chev {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--studio-text-2);
+    transition: transform .15s ease;
+}
+.st-bg-more.is-open .st-bg-more__chev { transform: rotate(180deg); }
+.st-bg-more__chev svg { width: 14px; height: 14px; display: block; }
+.st-bg-more__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+}
+.st-bg-more.is-collapsed .st-bg-more__body { display: none; }
+
+/* ---------- Background layer 彈窗（側邊浮動卡片） ----------
+   由 Backgrounds 扇區的圖層列觸發，浮在右側屬性面板的左側（畫布那一側）。
+   整個彈窗掛在 document.body，避免被右側面板的 overflow 裁掉。
+   外觀沿用編輯器其他扇區的淺色卡片（Filters / Transitions）與 Backgrounds 扇區
+   本身的控鍵樣式：11~13px 標籤、26~28px 輸入框、6px 圓角、1px #e2e2e6 邊框、
+   主色 #6d5cf6；九宮格與分段按鈕也沿用面板既有的樣式語彙。 */
 .st-bgp {
+    --st-bgp-ctl: 24px;          /* 控制項高度基準：與面板/其他彈窗同一基準（24px） */
     position: fixed;
     z-index: 10001;
-    top: 0;
-    left: 0;
-    width: 300px;
+    top: 56px;
+    right: 320px;
+    left: auto;
+    width: 240px;                /* 與屬性面板同寬（同 .st-tyadv 的 240px 基準） */
     box-sizing: border-box;
     display: none;
     flex-direction: column;
-    max-height: calc(100vh - 24px);
-    background: var(--studio-elev-2, #2a2a2f);
-    border: 1px solid var(--studio-border);
+    max-height: calc(100vh - 64px);
+    /* 淺色卡片：把主題變數翻回淺色（與 .st-flp / .st-trp 同一套做法） */
+    color-scheme: light;
+    --studio-elev-1: #f7f7f8;
+    --studio-elev-2: #ffffff;
+    --studio-bg-1: #ffffff;
+    --studio-bg-2: #f7f7f8;
+    --studio-active: #f7f7f8;
+    --studio-border: #e2e2e6;
+    --studio-text-1: #2f2f35;
+    --studio-text-2: #61616b;
+    --studio-text-3: #8b8b95;
+    --studio-hover-soft: rgba(20, 20, 40, .055);
+    --studio-accent: #6d5cf6;
+    --studio-danger: #e5484d;
+    background: #ffffff;
+    border: 1px solid #e2e2e6;
     border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, .45);
-    color: var(--studio-text-1);
+    box-shadow: 0 18px 44px rgba(18, 18, 32, .28), 0 2px 8px rgba(18, 18, 32, .12);
+    color: #2f2f35;
     overflow: hidden;
 }
 .st-bgp.is-open {
@@ -18906,11 +19336,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 11px 12px;
+    height: 40px;
+    flex: 0 0 auto;
+    padding: 0 8px 0 12px;       /* 同 .st-tyadv__head 的邊界基準 */
     border-bottom: 1px solid var(--studio-border);
+    background: #ffffff;
 }
 .st-bgp__title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 1.2;
     color: var(--studio-text-1);
@@ -18927,41 +19360,98 @@
     background: transparent;
     color: var(--studio-text-2);
     cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
 }
 .st-bgp__close:hover {
     background: var(--studio-hover-soft);
     color: var(--studio-text-1);
 }
 .st-bgp__close svg {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     display: block;
 }
 .st-bgp__body {
     flex: 1 1 auto;
+    min-width: 0px;
     min-height: 0;
     overflow-y: auto;
-    padding: 12px;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    /*gap: var(--spacing-5, 8px);*/
+    /*padding: 8px 10px;*/           /* 彈窗整體邊界 padding：所有內容统一縮進，不再貼邊 */
+    box-sizing: border-box;
 }
-/* 標題欄（左）＋ 控制欄（右） */
+/* 分隔線：Type / Image / More properties 之間（用邊框色，看得見） */
+.st-bgp__divider {
+    height: 1px;
+    flex: 0 0 auto;
+    background: var(--studio-border);
+    margin: 0;
+}
+/* 標題欄（左）＋ 控制欄（右）：同 Backgrounds 扇區的 .st-bg-row */
 .st-bgp__row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-5, 8px);
+    box-sizing: border-box;
     display: grid;
-    grid-template-columns: 78px minmax(0, 1fr);
-    gap: 10px;
+    min-height: 0px;
+    align-items: start;
+}
+.st-bgp-type {
+    gap: var(--spacing-5);
+    justify-content: space-between;
+    flex-shrink: 0;
     align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    box-sizing: border-box;
+    min-width: 0px;
+    padding: var(--panel-padding);
+    display: flex;
+    min-height: 0px;
+}
+
+.st-bgp-img {
+    gap: var(--spacing-3);
+    box-sizing: border-box;
+    min-width: 0px;
+    padding: var(--panel-padding);
+    display: flex;
+    min-height: 0px;
+}
+.st-bgp-rpatc {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-5);
+    align-items: center;
+    box-sizing: border-box;
+    display: grid;
+    min-height: 0px;
 }
 .st-bgp__row--stack {
     align-items: start;
 }
+/* Position 列：標籤獨佔一列，下方才是九宮格＋Left/Top（對齊附圖 bg-layer.png） */
+.st-bgp__row--block {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 4px;
+}
 .st-bgp__label {
-    font-size: 12px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    justify-self: start;
+    padding: 3px 7px;
+    border-radius: 5px;
+    color: var(--studio-text-2);
+    font-size: 10.5px;
     font-weight: 500;
-    color: var(--studio-text-1);
+    line-height: 1.35;
+    letter-spacing: .1px;
     white-space: nowrap;
-    padding-top: 1px;
 }
 .st-bgp__ctl {
     min-width: 0;
@@ -18969,22 +19459,23 @@
     flex-direction: column;
     gap: 6px;
 }
-/* Type：五個圖示鍵 */
+/* Type：五個圖示鍵（同扇區的 .st-bg-types 樣式） */
 .st-bgp__types {
     display: flex;
-    justify-self: start;
-    gap: 2px;
-    padding: 2px;
-    border: 1px solid var(--studio-border);
-    border-radius: 6px;
+    flex-direction: row;
+    align-items: center;
+    height: var(--st-bgp-ctl);
+    padding: 1px;                /* 同面板 .st-ly__btns 的 1px 內距 */
+    border: 1px solid var(--border-default);
+    border-radius: var(--borderRadius-4);
     background: var(--studio-elev-1);
 }
 .st-bgp__type {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: calc(var(--st-bgp-ctl) - 2px);
     padding: 0;
     border: 0;
     border-radius: 4px;
@@ -19008,47 +19499,54 @@
 }
 .st-bgp__sw {
     display: block;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 3px;
     border: 1px solid var(--studio-border);
 }
 .st-bgp__sw--solid {
-    background: linear-gradient(#f2f2f4, #cfcfd6);
+    background: #2f2f35;
 }
 .st-bgp__sw--linear {
-    background: linear-gradient(#f2f2f4, #6f6f78);
+    background: linear-gradient(180deg, #ffffff 0%, #7a7a7a 100%);
 }
 .st-bgp__sw--radial {
-    background: radial-gradient(circle at 50% 50%, #f4f4f6, #74747d);
+    background: radial-gradient(circle at 50% 50%, #ffffff 0%, #7a7a7a 100%);
 }
 .st-bgp__sw--conic {
-    background: conic-gradient(from 45deg, #f2f2f4, #6f6f78, #f2f2f4);
+    background: conic-gradient(from 180deg at 50% 50%, #ffffff 0%, #7a7a7a 100%);
 }
-/* Image / Color / Gradient 控制區 */
+/* Image / Color / Gradient 控制區（同扇區的 .st-bg-imgurl / .st-bg-choose） */
 .st-bgp__input {
     width: 100%;
-    height: 30px;
+    height: var(--st-bgp-ctl);
     padding: 0 8px;
     box-sizing: border-box;
     border: 1px solid var(--studio-border);
-    border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
+    border-radius: 4px;
+    background: var(--studio-elev-2);
     color: var(--studio-text-1);
     font: inherit;
     font-size: 12px;
     outline: none;
+}
+.st-bgp__input::placeholder {
+    color: var(--studio-text-3);
 }
 .st-bgp__input:focus {
     border-color: var(--studio-accent);
 }
 .st-bgp__btn {
     width: 100%;
-    height: 30px;
-    padding: 0 10px;
+    height: var(--st-bgp-ctl);
+    padding: 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
     border: 1px solid var(--studio-border);
     border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
+    background: var(--studio-elev-1);
     color: var(--studio-text-1);
     font: inherit;
     font-size: 12px;
@@ -19061,12 +19559,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 30px;
+    height: 26px;
     padding: 0 8px;
     box-sizing: border-box;
     border: 1px solid var(--studio-border);
-    border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
+    border-radius: 4px;
+    background: var(--studio-elev-2);
 }
 .st-bgp__color:focus-within {
     border-color: var(--studio-accent);
@@ -19076,7 +19574,7 @@
     flex: 0 0 auto;
     width: 16px;
     height: 16px;
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
     border: 1px solid var(--studio-border);
     background: var(--c, transparent);
@@ -19111,12 +19609,12 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    height: 30px;
+    height: 26px;
     padding: 0 6px;
     box-sizing: border-box;
     border: 1px solid var(--studio-border);
-    border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
+    border-radius: 4px;
+    background: var(--studio-elev-2);
     cursor: pointer;
 }
 .st-bgp__stop:hover {
@@ -19145,27 +19643,43 @@
     height: 0;
     opacity: 0;
 }
-/* Code 區 */
-.st-bgp__codeblock {
+/* Code 區（同扇區的 .st-bg-code） */
+/*.st-bgp__codeblock {
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
+}*/
+.st-bgp__codelabel {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: .1px;
+    color: var(--studio-text-2);
+    white-space: nowrap;
 }
 .st-bgp__code {
     position: relative;
 }
 .st-bgp__ed {
-    height: 92px;
+    min-height: 72px;
     border: 1px solid var(--studio-border);
     border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
+    background: var(--studio-elev-1);
     overflow: hidden;
 }
 .st-bgp__ed .cm-editor {
     height: 100%;
+    min-height: 72px;
     border: 0;
     border-radius: 0;
     font-size: 12px;
+    background: transparent;
 }
 .st-bgp__ed .cm-gutters {
     display: none;
@@ -19173,126 +19687,220 @@
 .st-bgp__ed .cm-activeLine {
     background-color: transparent;
 }
+.st-bgp__ed .cm-content {
+    color: #2563eb !important;
+    caret-color: #2563eb;
+}
 .st-bgp__ed textarea {
     width: 100%;
-    height: 100%;
+    min-height: 72px;
     box-sizing: border-box;
     padding: 8px;
     border: 0;
     background: transparent;
-    color: var(--studio-text-1);
+    color: #2563eb;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12px;
     resize: none;
     outline: none;
 }
-/* More properties */
-.st-bgp__sep {
-    height: 1px;
-    background: var(--studio-border);
-    margin: 0 -12px;
-}
+/* More properties 折疊標題（同扇區的 .st-bg-more__head） */
 .st-bgp__section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 2px;            /* body 已有 8px/10px 邊界 padding，不再疊加 */
+    cursor: pointer;
+    user-select: none;
+}
+.st-bgp__section:hover .st-bgp__section-label {
+    color: var(--studio-text-1);
+}
+.st-bgp__section-chev {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--studio-text-2);
+    transition: transform .15s ease;
+}
+.st-bgp__section-chev.is-open {
+    transform: rotate(90deg);
+}
+.st-bgp__section-chev svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+.st-bgp__section-label {
     font-size: 13px;
     font-weight: 600;
     color: var(--studio-text-1);
-    margin-bottom: -4px;
 }
+.st-bpg-more-css {
+    box-sizing: border-box;
+    display: flex;
+    min-height: 0px;
+    min-width: 0px;
+    gap: var(--spacing-5);
+}
+.st-bgp__more {
+    box-sizing: border-box;
+    display: none;               /* 收合狀態：由 [data-toggle-more] 切換 .is-open */
+    flex-direction: column;      /* 原靠 st-direction-column utility 類，彈窗裡保留自有方向 */
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    min-height: 0px;
+    min-width: 0px;
+    gap: var(--spacing-5, 8px);
+}
+.st-bgp__more.is-open {
+    display: flex;
+}
+/* 下拉框：沿用 Transitions 淺色卡片的下拉框外觀 */
 .st-bgp__select {
     width: 100%;
-    height: 30px;
-    padding: 0 22px 0 8px;
+    height: var(--st-bgp-ctl);
+    min-height: var(--st-bgp-ctl);
+    padding: 0 24px 0 9px;
     box-sizing: border-box;
     border: 1px solid var(--studio-border);
     border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
+    background: var(--studio-active);
     color: var(--studio-text-1);
     font: inherit;
-    font-size: 12px;
+    font-size: 11.5px;
     cursor: pointer;
     outline: none;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6-6-6 1.41-1.42z'/%3E%3C/svg%3E");
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='%238b8b95'%3E%3Cpath d='M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6-6-6 1.41-1.42z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 6px center;
+    background-position: right 7px center;
 }
 .st-bgp__select:focus {
     border-color: var(--studio-accent);
 }
-/* Position：3×3 點陣 + Left/Top */
-.st-bgp__posbox {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.st-bgp__select option {
+    background: #ffffff;
+    color: #2f2f35;
+}
+/* Position：標籤在上（.st-bgp__row--block），下方左半為 3×3 點陣、
+   右半為 Left/Top 兩列。對齊附圖 bg-layer.png 的版面。 */
+.st-bgp__posctl {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: 0px;
+    min-width: 0px;
+    gap: var(--spacing-3, 8px);
+    align-items: start;
 }
 .st-bgp__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    width: 68px;
-    padding: 6px;
+    grid-template-rows: repeat(3, 1fr);
+    width: 64px;
+    height: 64px;
+    padding: 4px;
     box-sizing: border-box;
-    border: 1px solid var(--studio-border);
-    border-radius: 6px;
-    background: var(--studio-elev-1, #2a2a2f);
-}
-.st-bgp__dot {
-    width: 12px;
-    height: 12px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: var(--studio-text-3);
-    opacity: .5;
-    cursor: pointer;
-}
-.st-bgp__dot:hover {
-    opacity: .9;
-}
-.st-bgp__dot.is-on {
-    opacity: 1;
-    background: var(--studio-text-1);
-    box-shadow: 0 0 0 3px var(--studio-hover-soft);
-}
-.st-bgp__posnums {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-}
-.st-bgp__row2 {
-    display: grid;
-    grid-template-columns: 34px minmax(0, 1fr);
-    gap: 8px;
-    align-items: center;
-}
-.st-bgp__label2 {
-    font-size: 12px;
-    color: var(--studio-text-1);
-    white-space: nowrap;
-}
-/* Repeat：四個圖示鍵 */
-.st-bgp__reps {
-    display: flex;
-    justify-self: start;
-    gap: 2px;
-    padding: 2px;
     border: 1px solid var(--studio-border);
     border-radius: 6px;
     background: var(--studio-elev-1);
 }
-.st-bgp__rep {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 26px;
+.st-bgp__dot {
     padding: 0;
     border: 0;
-    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.st-bgp__dot::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--studio-text-3);
+    opacity: .55;
+    transition: width .12s ease, height .12s ease, background-color .12s ease;
+}
+.st-bgp__dot:hover::after {
+    opacity: 1;
+    background: var(--studio-text-1);
+}
+.st-bgp__dot.is-on::after {
+    width: 7px;
+    height: 7px;
+    opacity: 1;
+    background: var(--studio-accent);
+}
+.st-bgp__posnums {
+    box-sizing: border-box;
+    display: grid;
+    min-height: 0px;
+    min-width: 0px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-5, 8px);
+}
+.st-bgp__poslr {
+    grid-template-columns: max-content 1fr;
+    column-gap: var(--spacing-5);
+    align-items: center;
+    box-sizing: border-box;
+    display: grid;
+    min-height: 0px;
+}
+.st-bgp__row2 {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+}
+.st-bgp-css {
+    box-sizing: border-box;
+    min-width: 0px;
+}
+.st-bgp__label2 {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: .1px;
+    color: var(--studio-text-2);
+    white-space: nowrap;
+}
+/* Repeat：四個圖示鍵（同 .st-bg-types 的分段外觀） */
+.st-bgp__reps {
+    display: flex;
+    flex-direction: row;
+    /*height: var(--st-bgp-ctl);*/
+    padding: 1px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--borderRadius-4);
+    background: var(--studio-elev-1);
+}
+.st-bgp__rep {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    min-width: var(--size-controlHeight);
+    height: calc(var(--st-bgp-ctl) - 4px);
+    padding: 0;
+    border: 0;
+    border-radius: var(--borderRadius-3);
     background: transparent;
     color: var(--studio-text-2);
     cursor: pointer;
+    flex-grow: 1;
 }
 .st-bgp__rep:hover {
     background: var(--studio-hover-soft);
@@ -19311,26 +19919,30 @@
 /* Attachment：分段按鈕 */
 .st-bgp__seg {
     display: flex;
-    gap: 2px;
-    padding: 2px;
+    flex-direction: row;
+    /*height: var(--st-bgp-ctl);*/
+    padding: 1px;
     border: 1px solid var(--studio-border);
     border-radius: 6px;
     background: var(--studio-elev-1);
 }
 .st-bgp__segbtn {
-    flex: 1 1 0;
-    height: 24px;
-    padding: 0 8px;
+    height: calc(var(--st-bgp-ctl) - 4px);
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--borderRadius-3);
+    padding: 0;
+    border: 0;
     background: transparent;
     color: var(--studio-text-2);
     font: inherit;
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    flex-grow: 1;
 }
 .st-bgp__segbtn:hover {
+    background: var(--studio-hover-soft);
     color: var(--studio-text-1);
 }
 .st-bgp__segbtn.is-on {
@@ -19583,112 +20195,15 @@
                 const colorMenu = root.querySelector('[data-bg="color-menu"]');
                 const colorField = root.querySelector('[data-bg="color-field"]');
 
-                /* 图层行HTML模板 */
+                /* 图层行HTML模板：仅保留头部（图标+名称+删除按钮），点击头部打开弹窗编辑 */
                 function layerHTML(i) {
                     return [
                         '<div class="st-bg-layer" data-idx="' + i + '">',
-                        '  <div class="st-bg-layer__head">',
+                        '  <div class="st-bg-layer__head" data-act="open" title="點擊編輯此背景圖層">',
                         '    <span class="st-bg-layer__icon" data-layer-icon>' + ICO.img + '</span>',
                         '    <span class="st-bg-layer__name" data-layer-name>Background ' + (i + 1) + '</span>',
                         '    <div class="st-bg-layer__actions">',
                         '      <button type="button" class="st-bg-layer__act" data-act="del" title="刪除圖層">' + ICO.trash + '</button>',
-                        '    </div>',
-                        '  </div>',
-                        '  <div class="st-bg-layer__body" data-layer-body>',
-                        '    <div class="st-bg-field">',
-                        '      <span class="st-bg-field-label">Image URL</span>',
-                        '      <input type="text" class="st-bg-input" data-f="url" placeholder="輸入圖片URL或選擇資源">',
-                        '    </div>',
-                        '    <div class="st-bg-grid2">',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Position X</span>',
-                        '        <div class="st-bg-input-wrap">',
-                        '          <select class="st-bg-select" data-f="x-sel">',
-                        POS_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '            <option value="custom">Custom</option>',
-                        '          </select>',
-                        '        </div>',
-                        '      </div>',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Position Y</span>',
-                        '        <div class="st-bg-input-wrap">',
-                        '          <select class="st-bg-select" data-f="y-sel">',
-                        POS_OPTS.slice(2).concat(POS_OPTS.slice(0, 2)).map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '            <option value="custom">Custom</option>',
-                        '          </select>',
-                        '        </div>',
-                        '      </div>',
-                        '      <div class="st-bg-field" data-field-xval hidden>',
-                        '        <span class="st-bg-field-label">X offset</span>',
-                        '        <div class="st-bg-input-wrap">',
-                        '          <input type="text" inputmode="decimal" class="st-bg-input" data-f="x-val" value="0">',
-                        '          <span class="st-bg-unit" data-u="x">%</span>',
-                        '        </div>',
-                        '      </div>',
-                        '      <div class="st-bg-field" data-field-yval hidden>',
-                        '        <span class="st-bg-field-label">Y offset</span>',
-                        '        <div class="st-bg-input-wrap">',
-                        '          <input type="text" inputmode="decimal" class="st-bg-input" data-f="y-val" value="0">',
-                        '          <span class="st-bg-unit" data-u="y">%</span>',
-                        '        </div>',
-                        '      </div>',
-                        '    </div>',
-                        '    <div class="st-bg-grid2">',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Size</span>',
-                        '        <select class="st-bg-select" data-f="size-sel">',
-                        SIZE_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '          <option value="custom">Custom</option>',
-                        '        </select>',
-                        '      </div>',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Repeat</span>',
-                        '        <select class="st-bg-select" data-f="repeat">',
-                        REPEAT_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '        </select>',
-                        '      </div>',
-                        '      <div class="st-bg-field" data-field-wval hidden>',
-                        '        <span class="st-bg-field-label">Width</span>',
-                        '        <div class="st-bg-input-wrap">',
-                        '          <input type="text" inputmode="decimal" class="st-bg-input" data-f="w-val" value="auto">',
-                        '          <span class="st-bg-unit" data-u="w">px</span>',
-                        '        </div>',
-                        '      </div>',
-                        '      <div class="st-bg-field" data-field-hval hidden>',
-                        '        <span class="st-bg-field-label">Height</span>',
-                        '        <div class="st-bg-input-wrap">',
-                        '          <input type="text" inputmode="decimal" class="st-bg-input" data-f="h-val" value="auto">',
-                        '          <span class="st-bg-unit" data-u="h">px</span>',
-                        '        </div>',
-                        '      </div>',
-                        '    </div>',
-                        '    <div class="st-bg-grid2">',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Attachment</span>',
-                        '        <select class="st-bg-select" data-f="attachment">',
-                        ATTACH_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '        </select>',
-                        '      </div>',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Blend mode</span>',
-                        '        <select class="st-bg-select" data-f="blend">',
-                        BLEND_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '        </select>',
-                        '      </div>',
-                        '    </div>',
-                        '    <div class="st-bg-grid2">',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Origin</span>',
-                        '        <select class="st-bg-select" data-f="origin">',
-                        BOX_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '        </select>',
-                        '      </div>',
-                        '      <div class="st-bg-field">',
-                        '        <span class="st-bg-field-label">Clip</span>',
-                        '        <select class="st-bg-select" data-f="clip">',
-                        BOX_OPTS.map(o => '<option value="' + o.v + '">' + o.l + '</option>').join(''),
-                        '        </select>',
-                        '      </div>',
                         '    </div>',
                         '  </div>',
                         '</div>',
@@ -19701,8 +20216,7 @@
                 let expanded = new Set();
 
                 function addLayer() {
-                    /* 「+」只在清單最下方新增一列（＝ background-image 最末層，疊在最底），
-                       不再自動開啟彈窗；改由使用者點該圖層列時才顯示 Background layer 彈窗。 */
+                    /* 「+」新增空图层后直接弹出编辑弹窗，符合原始Grapes Studio行为 */
                     layers.push({
                         kind: 'image', type: 'image', url: '', value: '', color: '', stops: null,
                         x: '0%', y: '0%', xSel: 'left', ySel: 'top',
@@ -19713,14 +20227,8 @@
                     });
                     writeAll();
                     render();
-                    /* 短暫高亮剛新增的那一列，提示可以點它開彈窗編輯 */
-                    const last = layersEl.querySelector('.st-bg-layer[data-idx="' + (layers.length - 1) + '"]');
-                    if (last) {
-                        last.classList.add('is-new');
-                        setTimeout(() => last.classList.remove('is-new'), 1200);
-                        /* 清單較長時把剛新增的列捲進可視範圍，否則使用者看不到「已在下方新增」 */
-                        bgRowEnsureVisible(last);
-                    }
+                    /* 直接打开刚新增图层的编辑弹窗 */
+                    openBgPop(layers.length - 1);
                 }
                 function removeLayer(i) {
                     layers.splice(i, 1);
@@ -19857,9 +20365,6 @@
                         const el = wrap.firstElementChild;
                         if (!el) return;
                         layersEl.appendChild(el);
-                        /* 展开状态 */
-                        const body = el.querySelector('[data-layer-body]');
-                        if (body) body.hidden = !expanded.has(i);
                         /* 名称 */
                         let name = 'Background ' + (i + 1);
                         const kind = layerKind(l);
@@ -19868,31 +20373,24 @@
                         else if (kind === 'linear' || kind === 'radial' || kind === 'conic' || kind === 'gradient') name = 'Gradient';
                         const nameEl = el.querySelector('[data-layer-name]');
                         if (nameEl) nameEl.textContent = name;
-                        /* 填充表单值 */
-                        const setVal = (sel, v) => { const f = el.querySelector(sel); if (f) f.value = v; };
-                        setVal('[data-f="url"]', l.url || '');
-                        setVal('[data-f="x-sel"]', l.xSel || 'left');
-                        setVal('[data-f="y-sel"]', l.ySel || 'top');
-                        setVal('[data-f="x-val"]', numOf(l.x));
-                        setVal('[data-f="y-val"]', numOf(l.y));
-                        const ux = el.querySelector('[data-u="x"]'); if (ux) ux.textContent = (unitOf(l.x) || '%').toUpperCase();
-                        const uy = el.querySelector('[data-u="y"]'); if (uy) uy.textContent = (unitOf(l.y) || '%').toUpperCase();
-                        /* x/y custom 显示 */
-                        const fx = el.querySelector('[data-field-xval]'); if (fx) fx.hidden = l.xSel !== 'custom';
-                        const fy = el.querySelector('[data-field-yval]'); if (fy) fy.hidden = l.ySel !== 'custom';
-                        setVal('[data-f="size-sel"]', l.sizeSel || 'auto');
-                        setVal('[data-f="repeat"]', l.repeat || 'repeat');
-                        setVal('[data-f="w-val"]', l.w === 'auto' ? 'auto' : numOf(l.w));
-                        setVal('[data-f="h-val"]', l.h === 'auto' ? 'auto' : numOf(l.h));
-                        const uw = el.querySelector('[data-u="w"]'); if (uw) uw.textContent = l.w === 'auto' ? '' : (unitOf(l.w) || 'px').toUpperCase();
-                        const uh = el.querySelector('[data-u="h"]'); if (uh) uh.textContent = l.h === 'auto' ? '' : (unitOf(l.h) || 'px').toUpperCase();
-                        const fw = el.querySelector('[data-field-wval]'); if (fw) fw.hidden = l.sizeSel !== 'custom';
-                        const fh = el.querySelector('[data-field-hval]'); if (fh) fh.hidden = l.sizeSel !== 'custom';
-                        setVal('[data-f="attachment"]', l.attachment || 'scroll');
-                        setVal('[data-f="blend"]', l.blend || 'normal');
-                        setVal('[data-f="origin"]', l.origin || 'padding-box');
-                        setVal('[data-f="clip"]', l.clip || 'border-box');
-                    });
+                        /* 图标背景显示当前图层预览缩略图 */
+                        const iconEl = el.querySelector('[data-layer-icon]');
+                        if (iconEl) {
+                            const singleVal = fmtImgOne(l);
+                            iconEl.style.background = singleVal;
+                            iconEl.style.backgroundSize = 'cover';
+                            iconEl.style.backgroundPosition = 'center';
+                            iconEl.style.borderRadius = '3px';
+                            iconEl.style.width = '16px';
+                            iconEl.style.height = '16px';
+                            iconEl.style.display = 'inline-flex';
+                            iconEl.style.alignItems = 'center';
+                            iconEl.style.justifyContent = 'center';
+                            iconEl.style.overflow = 'hidden';
+                            if (singleVal === 'none') iconEl.innerHTML = ICO.img;
+                            else iconEl.innerHTML = '';
+                            }
+                        });
                     paintSwatch();
                 }
 
@@ -19980,11 +20478,11 @@
                 bgpop.innerHTML = [
                     '<div class="st-bgp__head">',
                     '  <span class="st-bgp__title">Background layer</span>',
-                    '  <button type="button" class="st-bgp__close" data-act="close" title="關閉">' + ICO.close + '</button>',
+                    '  <button type="button" class="st-bgp__close" data-act="close" title="關閉">×</button>',
                     '</div>',
-                    '<div class="st-bgp__body">',
-                    '  <div class="st-bgp__row">',
-                    '    <span class="st-bgp__label">Type</span>',
+                    '<div class="st-bgp__body st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch">',
+                    '  <div class="st-bgp-type">',
+                    '    <div class="st-bgp__label">Type</div>',
                     '    <div class="st-bgp__types" data-types>',
                     '      <button type="button" class="st-bgp__type" data-type="image" title="Image">' + BG_TYPE_SVG + '</button>',
                     '      <button type="button" class="st-bgp__type" data-type="solid" title="Solid color"><i class="st-bgp__sw st-bgp__sw--solid"></i></button>',
@@ -19993,43 +20491,51 @@
                     '      <button type="button" class="st-bgp__type" data-type="conic" title="Conic gradient"><i class="st-bgp__sw st-bgp__sw--conic"></i></button>',
                     '    </div>',
                     '  </div>',
+                    '  <div class="st-bgp__divider"></div>',
+                    '  <div class="st-bgp-img st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch">',
                     '  <div class="st-bgp__row st-bgp__row--stack">',
-                    '    <span class="st-bgp__label" data-ctl-label>Image</span>',
-                    '    <div class="st-bgp__ctl" data-ctl></div>',
+                    '    <div class="st-bgp__label" data-ctl-label>Image</div>',
+                    '    <div class="st-bgp-css st-sel-grid-colspan"><div class="st-bgp__ctl" data-ctl></div></div>',
                     '  </div>',
-                    '  <div class="st-bgp__codeblock">',
-                    '    <div class="st-bgp__label">Code</div>',
+                    '    <div class="st-bgp__codelabel">Code</div>',
                     '    <div class="st-bgp__code" data-code><div class="st-bgp__ed" data-ed></div></div>',
                     '  </div>',
-                    '  <div class="st-bgp__sep"></div>',
-                    '  <div class="st-bgp__section">More properties</div>',
-                    '  <div class="st-bgp__row"><span class="st-bgp__label">Blend mode</span><select class="st-bgp__select" data-f="blend"></select></div>',
-                    '  <div class="st-bgp__row"><span class="st-bgp__label">Size</span><select class="st-bgp__select" data-f="size"></select></div>',
-                    '  <div class="st-bgp__row st-bgp__row--pos">',
-                    '    <div class="st-bgp__posbox">',
+                    '  <div class="st-bgp__divider"></div>',
+                    '  <div class="st-bgp__section" data-toggle-more role="button" tabindex="0" aria-expanded="false">',
+                    '    <span class="st-bgp__section-chev"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg></span>',
+                    '    <span class="st-bgp__section-label">More properties</span>',
+                    '  </div>',
+                    '  <div class="st-bgp-more-css st-ly-panel-paddingBlock st-justify-flex-start st-direction-column st-align-stretch st-flex-nowrap">',
+                    '  <div class="st-bgp__more st-ly-panel-paddingInline" data-more>',
+                    '    <div class="st-gtc-col"><div class="st-bgp__label">Blend mode</div><select class="st-bgp__select" data-f="blend"></select></div>',
+                    '    <div class="st-gtc-col"><div class="st-bgp__label">Size</div><select class="st-bgp__select" data-f="size"></select></div>',
+                    '    <div class="st-bgp__row st-bgp__row--block">',
                     '      <span class="st-bgp__label">Position</span>',
-                    '      <div class="st-bgp__grid" data-grid>',
+                    '      <div class="st-bgp__posctl">',
+                    '        <div class="st-bgp__grid" data-grid>',
                     BG_POS.map((pp, i) => '<button type="button" class="st-bgp__dot" data-dot="' + i + '" title="' + pp.x + ' ' + pp.y + '"></button>').join(''),
+                    '        </div>',
+                    '        <div class="st-bgp__posnums">',
+                    '          <div class="st-bgp__row2"><span class="st-bgp__label2">Left</span><input type="text" inputmode="decimal" class="st-bgp__input" data-f="left"></div>',
+                    '          <div class="st-bgp__row2"><span class="st-bgp__label2">Top</span><input type="text" inputmode="decimal" class="st-bgp__input" data-f="top"></div>',
+                    '        </div>',
                     '      </div>',
                     '    </div>',
-                    '    <div class="st-bgp__posnums">',
-                    '      <div class="st-bgp__row2"><span class="st-bgp__label2">Left</span><input type="text" inputmode="decimal" class="st-bgp__input" data-f="left"></div>',
-                    '      <div class="st-bgp__row2"><span class="st-bgp__label2">Top</span><input type="text" inputmode="decimal" class="st-bgp__input" data-f="top"></div>',
+                    '    <div class="st-bgp-rpatc">',
+                    '    <div class="st-bgp__label">Repeat</div><div class="st-bgp__reps" data-reps>',
+                    '      ' + Object.keys(BG_REPEAT_SVG).map(k => '<button type="button" class="st-bgp__rep" data-rep="' + k + '" title="' + k + '">' + BG_REPEAT_SVG[k] + '</button>').join('') + '',
                     '    </div>',
-                    '  </div>',
-                    '  <div class="st-bgp__row"><span class="st-bgp__label">Repeat</span>',
-                    '    <div class="st-bgp__reps" data-reps>',
-                    Object.keys(BG_REPEAT_SVG).map(k => '<button type="button" class="st-bgp__rep" data-rep="' + k + '" title="' + k + '">' + BG_REPEAT_SVG[k] + '</button>').join(''),
-                    '    </div>',
-                    '  </div>',
-                    '  <div class="st-bgp__row"><span class="st-bgp__label">Attachment</span>',
-                    '    <div class="st-bgp__seg" data-seg>',
+                    '    <div class="st-bgp__label">Attachment</div><div class="st-bgp__seg" data-seg>',
                     '      <button type="button" class="st-bgp__segbtn" data-att="scroll">Scroll</button>',
                     '      <button type="button" class="st-bgp__segbtn" data-att="fixed">Fixed</button>',
                     '    </div>',
+                    '    </div>',
+                    '    <div class="st-bgp-rpatc">',
+                    '    <div class="st-bgp__label">Clip</div><select class="st-bgp__select" data-f="clip"></select>',
+                    '    <div class="st-bgp__label">Origin</div><select class="st-bgp__select" data-f="origin"></select>',
+                    '    </div>',
                     '  </div>',
-                    '  <div class="st-bgp__row"><span class="st-bgp__label">Clip</span><select class="st-bgp__select" data-f="clip"></select></div>',
-                    '  <div class="st-bgp__row"><span class="st-bgp__label">Origin</span><select class="st-bgp__select" data-f="origin"></select></div>',
+                    '</div>',
                     '</div>',
                 ].join('');
                 document.body.appendChild(bgpop);
@@ -20302,33 +20808,43 @@
                    先把列往上捲到能容納最小高度的位置，再以「列到視窗底部」
                    的可用空間當彈窗高度上限（超出部分由內部捲動）。 */
                 const BG_POP_MIN_H = 360;
-                function placeBgPop(anchor) {
-                    if (!anchor) return;
-                    /* 先量自然高度（暫時解除高度上限） */
-                    bgpop.style.maxHeight = 'none';
-                    const w = bgpop.offsetWidth || 300;
-                    const natH = bgpop.offsetHeight || BG_POP_MIN_H;
-                    const availAt = () => window.innerHeight - 8 - anchor.getBoundingClientRect().top;
-                    /* 下方空間不足 → 沿可捲動鏈把錨點列往上帶 */
-                    if (availAt() < BG_POP_MIN_H) {
-                        const chain = bgPopScrollChain(anchor);
-                        for (let i = 0; i < chain.length; i++) {
-                            const need = BG_POP_MIN_H - availAt();
-                            if (need <= 0) break;
-                            chain[i].scrollTop += need;
+                /* 右側屬性面板的左緣：只認「真的在畫面右側、寬度合理」的那個容器。
+                   原本的選取器會抓到整個 gjs-pn-views-container（left = 0），
+                   算出的 right 變成視窗寬度 + 8 → 彈窗整個跑到畫面外看不見。 */
+                function bgPanelLeft() {
+                    const cands = ['#right-panel-body', '.gjs-pn-views-container', '.gjs-right-panel'];
+                    for (const sel of cands) {
+                        const el = document.querySelector(sel);
+                        if (!el) continue;
+                        const r = el.getBoundingClientRect();
+                        if (r.width > 40 && r.left > window.innerWidth * 0.4 && r.left < window.innerWidth - 40) {
+                            return r.left;
                         }
                     }
-                    const r = anchor.getBoundingClientRect();
-                    const avail = window.innerHeight - 8 - r.top;
-                    const h = Math.min(natH, Math.max(BG_POP_MIN_H, avail));
-                    bgpop.style.maxHeight = Math.round(h) + 'px';
-                    let left = r.left - w - 8;
-                    if (left < 8) left = r.right + 8;
-                    if (left + w > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w - 8);
-                    let top = r.top;
-                    if (top + h > window.innerHeight - 8) top = Math.max(8, window.innerHeight - h - 8);
-                    bgpop.style.left = Math.round(left) + 'px';
+                    return window.innerWidth - 240;
+                }
+                function placeBgPop(anchor) {
+                    const w = bgpop.offsetWidth || 320;
+                    /* 水平：固定貼在右側屬性面板的左緣外側（畫布那一側） */
+                    let rightPos = window.innerWidth - bgPanelLeft() + 8;
+                    /* 右側放不下（視窗太窄）就退回靠右緣 */
+                    if (rightPos + w > window.innerWidth - 8) rightPos = window.innerWidth - w - 8;
+                    if (rightPos < 8) rightPos = 8;
+                    bgpop.style.right = Math.round(rightPos) + 'px';
+                    bgpop.style.left = 'auto';
+                    /* 垂直：對齊被編輯的圖層列；超出視窗就夾回來 */
+                    const maxH = Math.max(240, window.innerHeight - 24);
+                    let top = 56;
+                    const anchorEl = anchor || bgPopAnchorEl();
+                    if (anchorEl && typeof anchorEl.getBoundingClientRect === 'function') {
+                        const r = anchorEl.getBoundingClientRect();
+                        if (r.height) top = r.top - 4;
+                    }
+                    const h = bgpop.offsetHeight || 0;
+                    if (top + h > maxH) top = Math.max(8, maxH - h);
+                    if (top < 8) top = 8;
                     bgpop.style.top = Math.round(top) + 'px';
+                    bgpop.style.maxHeight = Math.round(maxH) + 'px';
                 }
                 /* 彈窗錨點：優先對齊目前編輯中的圖層列，其次才是扇區的「+」 */
                 function bgPopAnchorEl() {
@@ -20344,6 +20860,13 @@
                     bgPopIdx = idx;
                     bgPopOpen = true;
                     bgpop.classList.add('is-open');
+                    /* 依附圖 bg-layer.png：每次打開預設展開 More properties */
+                    const more = bgpop.querySelector('[data-more]');
+                    const chev = bgpop.querySelector('.st-bgp__section-chev');
+                    const msec = bgpop.querySelector('[data-toggle-more]');
+                    if (more) more.classList.add('is-open');
+                    if (chev) chev.classList.add('is-open');
+                    if (msec) msec.setAttribute('aria-expanded', 'true');
                     renderBgCtl();
                     paintBgFields();
                     bgSetCode(fmtImgOne(layers[idx]));
@@ -20358,6 +20881,18 @@
                 /* 彈窗事件 */
                 bgpop.addEventListener('click', e => {
                     if (e.target.closest('[data-act="close"]')) { closeBgPop(); return; }
+                    /* More properties 摺疊切換 */
+                    const toggle = e.target.closest('[data-toggle-more]');
+                    if (toggle) {
+                        const more = bgpop.querySelector('[data-more]');
+                        const chev = toggle.querySelector('.st-bgp__section-chev');
+                        const isOpen = more.classList.toggle('is-open');
+                        chev.classList.toggle('is-open', isOpen);
+                        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                        /* 展開後彈窗長高，重新定位一次夾回視窗內 */
+                        placeBgPop();
+                        return;
+                    }
                     if (e.target.closest('[data-act="choose"]')) { chooseBgImage(); return; }
                     const typeBtn = e.target.closest('[data-type]');
                     if (typeBtn) { setBgType(typeBtn.getAttribute('data-type')); return; }
@@ -20494,7 +21029,12 @@
                 });
 
                 /* 图层事件（事件委托） */
+                /* 展开/折叠状态保存在 expanded：图层行 body 的显示 */
+                let moreOpen = new Set();   /* 各图层 More properties 展开状态 */
+
                 layersEl.addEventListener('click', e => {
+                    const addBtn = e.target.closest('[data-act="add"]');
+                    if (addBtn) { addLayer(); return; }
                     const layerEl = e.target.closest('.st-bg-layer');
                     if (!layerEl) return;
                     const idx = parseInt(layerEl.getAttribute('data-idx'), 10);
@@ -20505,48 +21045,17 @@
                         if (act === 'del') removeLayer(idx);
                         return;
                     }
-                    /* 點圖層列標題區（名稱／圖示／空白處）→ 顯示 Background layer 彈窗編輯該圖層 */
-                    const headEl = e.target.closest('.st-bg-layer__head');
-                    if (headEl) { e.stopPropagation(); openBgPop(idx, headEl); return; }
-                });
-                layersEl.addEventListener('change', e => {
-                    const layerEl = e.target.closest('.st-bg-layer');
-                    if (!layerEl) return;
-                    const idx = parseInt(layerEl.getAttribute('data-idx'), 10);
-                    const l = layers[idx]; if (!l) return;
-                    const f = e.target.getAttribute('data-f');
-                    const v = e.target.value;
-                    if (f === 'url') {
-                        l.url = v.trim(); l.type = v.trim() ? 'image' : 'none';
-                        if (v.trim() && l.sizeSel === 'auto' && l.repeat === 'repeat') {
-                            l.repeat = 'no-repeat';
-                        }
-                    } else if (f === 'x-sel') { l.xSel = v; }
-                    else if (f === 'y-sel') { l.ySel = v; }
-                    else if (f === 'size-sel') { l.sizeSel = v; }
-                    else if (f === 'repeat') { l.repeat = v; }
-                    else if (f === 'attachment') { l.attachment = v; }
-                    else if (f === 'blend') { l.blend = v; }
-                    else if (f === 'origin') { l.origin = v; }
-                    else if (f === 'clip') { l.clip = v; }
-                    writeAll(); render();
-                });
-                layersEl.addEventListener('input', e => {
-                    const layerEl = e.target.closest('.st-bg-layer');
-                    if (!layerEl) return;
-                    const idx = parseInt(layerEl.getAttribute('data-idx'), 10);
-                    const l = layers[idx]; if (!l) return;
-                    const f = e.target.getAttribute('data-f');
-                    const v = e.target.value;
-                    if (f === 'x-val') { l.x = v + (unitOf(l.x) || '%'); }
-                    else if (f === 'y-val') { l.y = v + (unitOf(l.y) || '%'); }
-                    else if (f === 'w-val') {
-                        if (v === 'auto') l.w = 'auto'; else l.w = v + (unitOf(l.w) || 'px');
-                    } else if (f === 'h-val') {
-                        if (v === 'auto') l.h = 'auto'; else l.h = v + (unitOf(l.h) || 'px');
+                    /* 点击图层头部任意位置（非删除按钮）→ 打开编辑弹窗 */
+                    const headEl = e.target.closest('[data-act="open"]');
+                    if (headEl) {
+                        e.stopPropagation();
+                        /* 先把該列捲進面板可視範圍，彈窗才有辦法對齊它 */
+                        bgRowEnsureVisible(headEl);
+                        openBgPop(idx);
+                        return;
                     }
-                    writeAll(); render();
                 });
+
 
                 /* 全局事件监听 */
                 function paint() {
@@ -23433,9 +23942,11 @@
                 root.innerHTML = [
                     '<div class="c-dbZYJE st-justify-flex-start st-flex-nowrap st-align-center st-direction-row">',
                     '<div class="st-tr__head">',
-                    '  <div class="st-ly__head" data-act="toggle">',
-                    '  </div>',
+                    '  <button class="st-ly__head" data-act="toggle">',
+                    '  </button>',
+                    '  <div class="">',
                     '  <button type="button" class="st-ly__head-title" data-act="title" aria-label="Transitions">Transitions</button>',
+                    '  </div>',
                     '  <button type="button" class="st-tr__chev" data-act="toggle" aria-label="收合/展開 Transitions">',
                     ICO.chev,
                     '  </button>',
