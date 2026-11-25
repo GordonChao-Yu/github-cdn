@@ -13356,11 +13356,117 @@
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/grid-column-start',
                     /* v = { 'grid-area': …, 'grid-column': …, … } */
-                    isSet: v => Object.keys(v).some(pp => {
+                    isSet: v => {
+                        // 检查是否是未定义的grid area
+                        const sel = editor.getSelected();
+                        const area = String(v['grid-area'] || '').trim();
+                        const areaSet = !!area && !/^auto(\s*\/\s*auto)*$/i.test(area);
+                        if (areaSet && sel) {
+                            try {
+                                const parent = sel.parent();
+                                if (parent) {
+                                    const raw = String(studioEffProp(parent, 'grid-template-areas') || '').trim();
+                                    const names = [];
+                                    if (raw && raw !== 'none') {
+                                        raw.split(/["']/).forEach(chunk => {
+                                            chunk.trim().split(/\s+/).forEach(t => {
+                                                if (!t || t === '.') return;
+                                                if (names.indexOf(t) === -1) names.push(t);
+                                            });
+                                        });
+                                    }
+                                    // 未定义的area视为未设置
+                                    if (names.indexOf(area) === -1) return false;
+                                }
+                            } catch (e) { /* 读取失败时按有值处理 */ }
+                        }
+                        return Object.keys(v).some(pp => {
                         const sv = String(v[pp] || '').trim();
                         return !!sv && sv !== 'auto';
-                    }),
+                        });
+                    },
                     reset: () => studioClearProps(STUDIO_GRID_POS_PROPS),
+                    view: function() {
+                        const sel = editor.getSelected();
+                        if (!sel) return { code: this.code, desc: this.desc, note: STUDIO_BLOCK_FOOT };
+                        // 检测当前模式（复用Grid child扇区内的判断逻辑）
+                        const area = String(studioEffProp(sel, 'grid-area') || '').trim();
+                        const manProps = ['grid-column-start', 'grid-column-end', 'grid-row-start', 'grid-row-end'];
+                        let manLv = -1;
+                        manProps.forEach(p => {
+                            if (!String(studioEffProp(sel, p) || '').trim()) return;
+                            const lv = studioPropLevel(sel, p);
+                            if (manLv < 0 || lv < manLv) manLv = lv;
+                        });
+                        const areaSet = !!area && !/^auto(\s*\/\s*auto)*$/i.test(area);
+                        const areaLv = areaSet ? studioPropLevel(sel, 'grid-area') : -1;
+                        // 检查是否是未定义的grid area
+                        let isUndefinedArea = false;
+                        let areaName = '';
+                        if (areaSet && areaLv >= 0 && (manLv < 0 || areaLv <= manLv)) {
+                            areaName = area;
+                            // 读取父元素的grid-template-areas
+                            try {
+                                const parent = sel.parent();
+                                if (parent) {
+                                    const raw = String(studioEffProp(parent, 'grid-template-areas') || '').trim();
+                                    const names = [];
+                                    if (raw && raw !== 'none') {
+                                        raw.split(/["']/).forEach(chunk => {
+                                            chunk.trim().split(/\s+/).forEach(t => {
+                                                if (!t || t === '.') return;
+                                                if (names.indexOf(t) === -1) names.push(t);
+                                            });
+                                        });
+                                    }
+                                    isUndefinedArea = names.indexOf(areaName) === -1;
+                                }
+                            } catch (e) { isUndefinedArea = false; }
+                            if (isUndefinedArea) {
+                                // 未定义area：维持默认值显示，无Reset
+                                return {
+                                    code: 'grid-column-start:auto;<br>grid-column-end: auto;<br>grid-row-start: auto;<br>grid-row-end: auto;',
+                                    desc: 'How the grid item is positioned within the grid',
+                                    note: STUDIO_BLOCK_FOOT
+                                };
+                            }
+                        }
+                        if (areaSet && areaLv >= 0 && (manLv < 0 || areaLv <= manLv)) {
+                            // Area模式：显示 grid-area: <name>;
+                            return {
+                                code: 'grid-area: ' + areaName + ';',
+                                desc: 'The grid item is placed in the named grid area "' + areaName + '".',
+                                note: ''
+                            };
+                        }
+                        if (manLv >= 0) {
+                            // Manual模式：显示四个属性当前值
+                            const cs = String(studioEffProp(sel, 'grid-column-start') || 'auto').trim();
+                            const ce = String(studioEffProp(sel, 'grid-column-end') || 'auto').trim();
+                            const rs = String(studioEffProp(sel, 'grid-row-start') || 'auto').trim();
+                            const re = String(studioEffProp(sel, 'grid-row-end') || 'auto').trim();
+                            const isDefault = (cs === 'auto' || cs === '1') && (ce === 'auto' || ce === '2') &&
+                                (rs === 'auto' || rs === '1') && (re === 'auto' || re === '2');
+                            return {
+                                code: 'grid-column-start: ' + cs + ';<br>grid-column-end: ' + ce +
+                                    ';<br>grid-row-start: ' + rs + ';<br>grid-row-end: ' + re + ';',
+                                desc: 'The grid item is positioned manually by its grid line numbers.',
+                                note: isDefault ? STUDIO_BLOCK_FOOT : ''
+                            };
+                        }
+                        // Auto模式：显示当前跨栏跨列值，默认是1
+                        const colRaw = String(studioEffProp(sel, 'grid-column') || '').trim().toLowerCase();
+                        const rowRaw = String(studioEffProp(sel, 'grid-row') || '').trim().toLowerCase();
+                        const colM = /^span\s+(\d+)/.exec(colRaw);
+                        const rowM = /^span\s+(\d+)/.exec(rowRaw);
+                        const colSpan = colM ? parseInt(colM[1], 10) : 1;
+                        const rowSpan = rowM ? parseInt(rowM[1], 10) : 1;
+                        return {
+                            code: 'grid-column: span ' + colSpan + ';<br>grid-row: span ' + rowSpan + ';',
+                            desc: 'The grid item spans ' + colSpan + ' column(s) and ' + rowSpan + ' row(s), placed automatically into the next available cell.',
+                            note: (colSpan === 1 && rowSpan === 1) ? STUDIO_BLOCK_FOOT : ''
+                        };
+                    },
                 },
                 align: {
                     title: 'Align',
@@ -13371,6 +13477,17 @@
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/align-self',
                     isSet: v => !!v && v !== 'auto',
                     reset: () => studioClearProps(['align-self']),
+                    view: function() {
+                        const v = String(studioReadProp('align-self') || 'auto').trim().toLowerCase();
+                        const norm = (s) => s.replace(/^flex-/, '');
+                        const values = STUDIO_CTRLS['align-self'].values;
+                        const tok = v === '' ? 'auto' : (values[v] ? v : (values[norm(v)] ? norm(v) : v));
+                        const entry = values[tok] || {};
+                        const isDefault = tok === 'auto';
+                        const code = 'align-self: ' + tok + ';';
+                        const desc = typeof entry === 'string' ? entry : (entry.desc || 'Aligns an item along the cross/block axis within its container.');
+                        return { code: code, desc: desc, note: isDefault ? STUDIO_BLOCK_FOOT : '' };
+                    },
                 },
                 justify: {
                     title: 'Justify',
@@ -13381,6 +13498,15 @@
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/justify-self',
                     isSet: v => !!v && v !== 'auto',
                     reset: () => studioClearProps(['justify-self']),
+                    view: function() {
+                        const v = String(studioReadProp('justify-self') || 'auto').trim().toLowerCase();
+                        const tok = v === '' ? 'auto' : v;
+                        const entry = STUDIO_CTRLS['justify-self'].values[tok] || {};
+                        const isDefault = tok === 'auto';
+                        const code = 'justify-self: ' + tok + ';';
+                        const desc = typeof entry === 'string' ? entry : (entry.desc || 'Aligns an item along the inline axis within its container.');
+                        return { code: code, desc: desc, note: isDefault ? STUDIO_BLOCK_FOOT : '' };
+                    },
                 },
                 order: {
                     title: 'Order',
@@ -13391,6 +13517,15 @@
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/order',
                     isSet: v => !!v && v !== '0',
                     reset: () => studioClearProps(['order']),
+                    view: function() {
+                        const v = String(studioReadProp('order') || '0').trim();
+                        const tok = v === '' ? '0' : v;
+                        const entry = STUDIO_CTRLS.order.values[tok] || {};
+                        const isDefault = tok === '0';
+                        const code = 'order: ' + tok + ';';
+                        const desc = typeof entry === 'string' ? entry : (entry.desc || 'Controls the order in which an element appears within its flex or grid container.');
+                        return { code: code, desc: desc, note: isDefault ? STUDIO_BLOCK_FOOT : '' };
+                    },
                 },
                 sizing: {
                     title: 'Sizing',
@@ -13402,6 +13537,25 @@
                     /* v = { grow: 數字, shrink: 數字, basis: 字串 } */
                     isSet: v => v.grow !== 0 || v.shrink !== 1 || v.basis !== 'auto',
                     reset: () => studioClearProps(['flex-grow', 'flex-shrink', 'flex-basis']),
+                    view: function() {
+                        const g = parseFloat(String(studioReadProp('flex-grow') || '0').trim());
+                        const sh = parseFloat(String(studioReadProp('flex-shrink') || '1').trim());
+                        const b = String(studioReadProp('flex-basis') || 'auto').trim().toLowerCase();
+                        const grow = isNaN(g) ? 0 : g;
+                        const shrink = isNaN(sh) ? 1 : sh;
+                        const basis = b || 'auto';
+                        let tok = 'shrink';
+                        if (grow === 0 && shrink === 0) tok = 'fixed';
+                        else if (grow === 1 && shrink === 0) tok = 'grow';
+                        else if (grow === 0 && shrink === 1) tok = 'shrink';
+                        const isDefault = tok === 'shrink' && basis === 'auto';
+                        const entry = STUDIO_CTRLS['flex-sizing'].values[tok] || {};
+                        const code = isDefault ? 'flex-grow: 0; flex-shrink: 1; flex-basis: auto;' :
+                            'flex-grow: ' + grow + ';<br>flex-shrink: ' + shrink + ';<br>flex-basis: ' + basis + ';';
+                        const desc = (isDefault || tok !== 'custom') ? (entry.desc || 'Specifies the ability of a flex item to grow, shrink, or set its initial size within a flex container.')
+                            : 'Custom grow/shrink/basis values control how the item expands, shrinks, and defines its initial size.';
+                        return { code: code, desc: desc, note: isDefault ? STUDIO_BLOCK_FOOT : '' };
+                    },
                 },
             };
             /* 讀某個區塊目前的值並判斷是否「已設定」。
@@ -13409,6 +13563,7 @@
             function studioBlockIsSet(key) {
                 const d = STUDIO_BLOCKS[key];
                 if (!d) return false;
+                const sel = editor.getSelected();
                 if (key === 'sizing') {
                     const g = parseFloat(String(studioReadProp('flex-grow') || '').trim());
                     const sh = parseFloat(String(studioReadProp('flex-shrink') || '').trim());
@@ -13418,6 +13573,11 @@
                         shrink: isNaN(sh) ? 1 : sh,
                         basis: b || 'auto',
                     });
+                }
+                if (key === 'position') {
+                    const o = {};
+                    d.props.forEach(pp => { o[pp] = String(studioReadProp(pp) || '').trim(); });
+                    return d.isSet(o, sel);
                 }
                 if (d.prop) return d.isSet(String(studioReadProp(d.prop) || '').trim());
                 const o = {};
@@ -13493,9 +13653,9 @@
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/grid-column-start',
                     values: {
-                        'auto': { code: 'grid-column: auto; grid-row: auto;', desc: 'The grid item is placed automatically into the next available cell.' },
-                        'area': { code: 'grid-area: auto;', desc: 'The grid item is placed in the named grid area.' },
-                        'manual': { code: 'grid-column-start: auto;<br>grid-column-end: auto;<br>grid-row-start: auto;<br>grid-row-end: auto;', desc: 'The grid item is positioned manually by its grid line numbers.' },
+                        'auto': { code: 'grid-column: span 1;<br>grid-row: span 1;', desc: 'The grid item spans 1 column and 1 row, placed automatically into the next available cell.' },
+                        'area': { code: 'grid-area: <area-name>;', desc: 'The grid item is placed in a named grid area defined on the parent container.' },
+                        'manual': { code: 'grid-column-start: 1;<br>grid-column-end: 2;<br>grid-row-start: 1;<br>grid-row-end: 2;', desc: 'The grid item is positioned manually by its grid line numbers.' },
                     },
                     reset: () => studioClearProps(STUDIO_GRID_POS_PROPS),
                 },
@@ -13515,10 +13675,10 @@
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',
                     values: {
-                        'visible': { code: 'overflow-x: visible;<br>overflow-y: visible;', desc: 'Controls how content overflows its container when it is too large.' },
-                        'clip': { code: 'overflow-x: clip;<br>overflow-y: clip;', desc: 'Content that exceeds the container’s size is clipped without scrollbars. It can not be scrolled with JavaScript or via a scroll-timeline animation.' },
-                        'hidden': { code: 'overflow-x: hidden;<br>overflow-y: hidden;', desc: 'Content that exceeds the container’s size is hidden without scrollbars. It can be scrolled with JavaScript or via a scroll-timeline animation.' },
-                        'auto': { code: 'overflow-x: auto;<br>overflow-y: auto;', desc: 'Scrollbars are added to the container only when necessary, based on the content size.' },
+                        'visible': 'Controls how content overflows its container when it is too large.',
+                        'clip': 'Content that exceeds the container’s size is clipped without scrollbars. It can not be scrolled with JavaScript or via a scroll-timeline animation.',
+                        'hidden': 'Content that exceeds the container’s size is hidden without scrollbars. It can be scrolled with JavaScript or via a scroll-timeline animation.',
+                        'auto': 'Scrollbars are added to the container only when necessary, based on the content size.',
                     },
                     reset: () => studioClearProps(['overflow', 'overflow-x', 'overflow-y']),
                 },
@@ -13651,11 +13811,32 @@
             function studioBindBlockPop(btn, key) {
                 const desc = STUDIO_BLOCKS[key];
                 if (!desc) return;
+                const getCode = () => {
+                    if (desc.view && typeof desc.view === 'function') {
+                        const v = desc.view();
+                        return v.code || desc.code;
+                    }
+                    return desc.code;
+                };
+                const getDesc = () => {
+                    if (desc.view && typeof desc.view === 'function') {
+                        const v = desc.view();
+                        return v.desc || desc.desc;
+                    }
+                    return desc.desc;
+                };
+                const getFoot = () => {
+                    if (desc.view && typeof desc.view === 'function') {
+                        const v = desc.view();
+                        return v.foot || (v.note ? '<small>' + v.note + '</small>' : (desc.foot || ''));
+                    }
+                    return desc.foot || '';
+                };
                 studioBindPop(btn,
                     () => desc.title,
-                    () => '<code>' + desc.code + '</code>' +
-                        '<p>' + desc.desc + '</p>' +
-                        (desc.foot ? '<small>' + desc.foot + '</small>' : ''),
+                    () => '<code>' + getCode() + '</code>' +
+                        '<p>' + getDesc() + '</p>' +
+                        getFoot(),
                     desc.mdn,
                     () => (studioBlockIsSet(key) ? { kind: 'blk', key: key } : null));
             }
@@ -13950,7 +14131,7 @@
                 'max-width':         { title: 'Max Width',     code: 'max-width: none;',          desc: 'Sets the maximum width of an element.',                          mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-width',     init: 'none',  defaults: ['none'] },
                 'max-height':        { title: 'Max Height',    code: 'max-height: none;',         desc: 'Sets the maximum height of an element.',                         mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-height',    init: 'none',  defaults: ['none'] },
                 'aspect-ratio':      { title: 'Aspect ratio',  code: 'aspect-ratio: auto;',       desc: `Controls the aspect ratio of an element's box.`,                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/aspect-ratio',  init: 'auto',  defaults: ['auto'] },
-                'overflow':          { title: 'Overflow',      code: 'overflow-x: visible;<br>overflow-y: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: ['visible'], read: studioOverflowAppliedValue, values: (STUDIO_CTRLS['overflow'] && STUDIO_CTRLS['overflow'].values) || null },
+                'overflow':          { title: 'Overflow',      code: 'overflow-x: visible;<br>overflow-y: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: ['visible'] },
                 'object-fit':        { title: 'Object fit',    code: 'object-fit: fill;',         desc: 'Specifies how the content of an element should fit.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/object-fit',    init: 'fill',  defaults: ['fill', ''] },
                 'object-position':   { title: 'Object position', code: 'object-position: 50% 50%;', desc: 'Where the replaced content is aligned inside its box.',              mdn: 'https://developer.mozilla.org/docs/Web/CSS/object-position', init: '50% 50%', defaults: ['50% 50%', ''] },
                 'margin':            { title: 'Margin',        code: 'margin: 0;',                desc: 'Space outside the border. Each side can be set separately.',          mdn: 'https://developer.mozilla.org/docs/Web/CSS/margin',        init: '0',     defaults: ['0'], multi: ['margin-top','margin-right','margin-bottom','margin-left'] },
@@ -17270,7 +17451,16 @@
                         ).join('');
                             $$('.st-gc__area', areaBox).forEach(b => {
                                 b.setAttribute('data-ctrl', 'grid-area');
-                                studioBindCtrlPop(b, 'grid-area', b.getAttribute('data-area'));
+                                const areaName = b.getAttribute('data-area');
+                                studioBindPop(b,
+                                    () => areaName,
+                                    () => '<code>grid-area: ' + areaName + ';</code>' +
+                                        '<p>Place the grid item into the named area "' + areaName + '".</p>',
+                                    'https://developer.mozilla.org/docs/Web/CSS/grid-area',
+                                    () => {
+                                        const cur = String(read('grid-area') || '').trim();
+                                        return cur === areaName ? { kind: 'ctrl', key: 'grid-position' } : null;
+                                    });
                             });
                         }
                         $$('.st-gc__area', areaBox).forEach(b =>
@@ -17315,7 +17505,7 @@
 
                     const posVals = {};
                     GRID_POS_PROPS.forEach(pp => { posVals[pp] = String(read(pp) || '').trim(); });
-                    const gridOn = STUDIO_BLOCKS.position.isSet(posVals);
+                    const gridOn = STUDIO_BLOCKS.position.isSet(posVals, sel);
                     /* 三組控鍵的值讀一次，按鈕高亮與區塊高亮共用 */
                     const btnsRaw = {};
                     studioPaintBlock(root, 'position', gridOn);
