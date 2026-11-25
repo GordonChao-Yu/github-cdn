@@ -13508,6 +13508,20 @@
                     values: {},
                     reset: () => studioClearProps(STUDIO_GRID_POS_PROPS),
                 },
+                'overflow': {
+                    prop: 'overflow',
+                    initial: 'visible',
+                    desc: 'Controls what happens to content that is too big to fit into an area.',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',
+                    values: {
+                        'visible': 'Controls how content overflows its container when it is too large.',
+                        'clip': 'Content that exceeds the container’s size is clipped without scrollbars. It can not be scrolled with JavaScript or via a scroll-timeline animation.',
+                        'hidden': 'Content that exceeds the container’s size is hidden without scrollbars. It can be scrolled with JavaScript or via a scroll-timeline animation.',
+                        'auto': 'Scrollbars are added to the container only when necessary, based on the content size.',
+                    },
+                    reset: () => studioClearProps(['overflow', 'overflow-x', 'overflow-y']),
+                },
             };
 
             /* Popover 觸發鍵 → 重置目標的對照表（Reset value 按鈕掛在 document.body 上，
@@ -13878,6 +13892,53 @@
                 studioSectorReg.push({ btn: btn, key: key });
                 studioSyncSectorStates();
             }
+            /* Overflow 目前「實際生效」的值（口徑與面板四個控制鍵一致）：
+               簡寫 overflow 優先，其次看 overflow-x / overflow-y 長屬性是否同值。
+               供標籤晶片的 Popover 依目前值同步顯示對應的 CSS 規則與說明。 */
+            function studioOverflowAppliedValue() {
+                const sel = editor.getSelected();
+                if (!sel) return '';
+                const sh = String(studioEffProp(sel, 'overflow') || '').trim();
+                if (sh) return sh.toLowerCase();
+                const x = String(studioEffProp(sel, 'overflow-x') || '').trim();
+                const y = String(studioEffProp(sel, 'overflow-y') || '').trim();
+                if (x && y && x.toLowerCase() === y.toLowerCase()) return x.toLowerCase();
+                return '';
+            }
+
+            /* 標籤晶片 Popover 的內容解析：
+               屬性帶 values 對照表時，依「目前套用值」同步顯示對應的 CSS 規則與說明
+               （例：Overflow 切成 hidden 後顯示 overflow: hidden; 及 hidden 的說明），
+               未設定或值為預設時顯示初始規則並保留 Default 註記。 */
+            function studioPropDocView(key) {
+                const d = STUDIO_PROP_DOC[key];
+                if (!d) return { code: '', desc: '', note: 'Default' };
+                const vals = d.values;
+                if (!vals) return { code: d.code, desc: d.desc, note: 'Default' };
+                let raw = '';
+                try {
+                    raw = d.read ? String(d.read() || '') : '';
+                    if (!raw) {
+                        const sel = editor.getSelected();
+                        if (sel) {
+                            const names = d.props || d.multi || [key];
+                            for (let i = 0; i < names.length; i++) {
+                                const v = String(studioEffProp(sel, names[i]) || '').trim();
+                                if (v) { raw = v; break; }
+                            }
+                        }
+                    }
+                } catch (e) { raw = ''; }
+                const low = String(raw).trim().toLowerCase();
+                const tok = low ? low.split(/\s+/)[0] : String(d.init || '').toLowerCase();
+                const entry = vals[tok];
+                if (!entry) return { code: d.code, desc: d.desc, note: 'Default' };
+                const code = entry.code ? entry.code : (key + ': ' + tok + ';');
+                const desc = entry.desc ? entry.desc : String(entry);
+                const isDefault = !low || (d.defaults || [d.init]).some(function (v) { return String(v).toLowerCase() === tok; });
+                return { code: code, desc: desc, note: isDefault ? 'Default' : '' };
+            }
+
             /* ============================================================
              * 屬性級 Popover（無「+」扇區展開後的子控制項標籤晶片）
              * ============================================================ */
@@ -13889,7 +13950,7 @@
                 'max-width':         { title: 'Max Width',     code: 'max-width: none;',          desc: 'Sets the maximum width of an element.',                          mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-width',     init: 'none',  defaults: ['none'] },
                 'max-height':        { title: 'Max Height',    code: 'max-height: none;',         desc: 'Sets the maximum height of an element.',                         mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-height',    init: 'none',  defaults: ['none'] },
                 'aspect-ratio':      { title: 'Aspect ratio',  code: 'aspect-ratio: auto;',       desc: `Controls the aspect ratio of an element's box.`,                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/aspect-ratio',  init: 'auto',  defaults: ['auto'] },
-                'overflow':          { title: 'Overflow',      code: 'overflow: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: ['visible'] },
+                'overflow':          { title: 'Overflow',      code: 'overflow-x: visible;<br>overflow-y: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: ['visible'] },
                 'object-fit':        { title: 'Object fit',    code: 'object-fit: fill;',         desc: 'Specifies how the content of an element should fit.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/object-fit',    init: 'fill',  defaults: ['fill', ''] },
                 'object-position':   { title: 'Object position', code: 'object-position: 50% 50%;', desc: 'Where the replaced content is aligned inside its box.',              mdn: 'https://developer.mozilla.org/docs/Web/CSS/object-position', init: '50% 50%', defaults: ['50% 50%', ''] },
                 'margin':            { title: 'Margin',        code: 'margin: 0;',                desc: 'Space outside the border. Each side can be set separately.',          mdn: 'https://developer.mozilla.org/docs/Web/CSS/margin',        init: '0',     defaults: ['0'], multi: ['margin-top','margin-right','margin-bottom','margin-left'] },
@@ -13969,9 +14030,10 @@
                 studioBindPop(btn,
                     function() { return (d.title || key) + mdnLink; },
                     function() {
-                        return '<code>' + d.code + '</code>' +
-                               '<p>' + d.desc + '</p>' +
-                               '<small>Default</small>';
+                        const view = studioPropDocView(key);
+                        return '<code>' + view.code + '</code>' +
+                               '<p>' + view.desc + '</p>' +
+                               (view.note ? '<small>' + view.note + '</small>' : '');
                     },
                     d.mdn,
                     function() { return studioPropIsSet(key) ? { kind: 'prop', key: key } : null; }
@@ -17478,8 +17540,8 @@
                     chev: '<svg class="st-ly__chev" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>',
                     minus: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H5v-2h14v2z"/></svg>',
                     ovVisible: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
-                    ovHidden: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M4.167 1.5v9.333A1.333 1.333 0 0 0 5.5 12.167h9.333m-2.666 2.666V5.5a1.333 1.333 0 0 0-1.334-1.333H1.5"></path></svg>',
-                    ovScroll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m10 12-.481-2.167M1.333 5.333a7.097 7.097 0 0 0 13.334 0M13.333 10l-1.15-1.367M2.667 10l1.15-1.367M6 12l.481-2.167"></path></svg>',
+                    ovClip: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M4.167 1.5v9.333A1.333 1.333 0 0 0 5.5 12.167h9.333m-2.666 2.666V5.5a1.333 1.333 0 0 0-1.334-1.333H1.5"></path></svg>',
+                    ovHidden: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m10 12-.481-2.167M1.333 5.333a7.097 7.097 0 0 0 13.334 0M13.333 10l-1.15-1.367M2.667 10l1.15-1.367M6 12l.481-2.167"></path></svg>',
                     ovAuto: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m5.502 10.5 2.5-5 2.5 5M6.126 9.25h3.75M2 14V2M14.003 14V2"></path></svg>',
                 };
 
@@ -17515,10 +17577,10 @@
                     '       <div class="st-ly__label">Overflow</div>',
                     '    </div>',
                     '    <div role="group" dir="ltr" tabindex="0" class="st-sz__row st-ly__btns" data-prop="overflow" style="outline: none;">',
-                    '      <button type="button" class="st-ly__btn" data-val="visible" title="Visible">' + ICO.ovVisible + '</button>',
-                    '      <button type="button" class="st-ly__btn" data-val="hidden" title="Hidden">' + ICO.ovHidden + '</button>',
-                    '      <button type="button" class="st-ly__btn" data-val="scroll" title="Scroll">' + ICO.ovScroll + '</button>',
-                    '      <button type="button" class="st-ly__btn" data-val="auto" title="Auto">' + ICO.ovAuto + '</button>',
+                    '      <button type="button" class="st-ly__btn" data-val="visible" data-ctrl="overflow" title="Visible">' + ICO.ovVisible + '</button>',
+                    '      <button type="button" class="st-ly__btn" data-val="clip" data-ctrl="overflow" title="Clip">' + ICO.ovClip + '</button>',
+                    '      <button type="button" class="st-ly__btn" data-val="hidden" data-ctrl="overflow" title="Hidden">' + ICO.ovHidden + '</button>',
+                    '      <button type="button" class="st-ly__btn" data-val="auto" data-ctrl="overflow" title="Auto">' + ICO.ovAuto + '</button>',
                     '    </div>',
                     '    <div class="st-sz__row">',
                     '      <div class="c-dbZYJE st-align-center st-justify-start st-flex-nowrap st-direction-row" style="width: fit-content;max-width: 100%;">',
@@ -17847,6 +17909,14 @@
                         writePosAxes();
                         paint();
                     });
+                });
+
+                /* 控制鍵 Popover：Overflow 四個按鈕 hover 顯示 CSS 規則說明 */
+                $$('.st-ly__btns[data-prop="overflow"] .st-ly__btn', root).forEach(btn => {
+                    const val = btn.getAttribute('data-val');
+                    if (!val) return;
+                    btn.setAttribute('data-ctrl', 'overflow');
+                    studioBindCtrlPop(btn, 'overflow', val);
                 });
 
                 editor.on('component:selected', paint);
