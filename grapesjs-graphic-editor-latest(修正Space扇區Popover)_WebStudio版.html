@@ -10185,10 +10185,23 @@
             background: #ffffff;
             box-shadow: 0 12px 30px rgba(18, 18, 32, .18), 0 2px 6px rgba(18, 18, 32, .10);
             color-scheme: light;
+            animation-duration: 200ms;
+            animation-timing-function: var(--easing-easeOut, cubic-bezier(0.16, 1, 0.3, 1));
+        }
+        @keyframes spPop-fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.0);
+            }
         }
 
         .st-sp-pop.is-open {
             display: flex;
+            animation-name: 'spPop-fadeIn';
         }
 
         .st-sp-pop__label {
@@ -13786,6 +13799,7 @@
                     }
                     return html;
                 };
+                const getMdnUrl = typeof mdnUrl === 'function' ? mdnUrl : () => mdnUrl;
                 const inst = new materialstyle.Popover(btn, {
                     trigger: 'manual',
                     placement: 'top',
@@ -13800,7 +13814,7 @@
                        關閉動畫讓 show / hide 同步完成，避免淡出期間重建節點造成的競態。 */
                     animation: false,
                     offset: [0, 8],
-                    template: studioPopTemplate(mdnUrl),
+                    template: studioPopTemplate(getMdnUrl()),
                     title: getTitle,
                     content: content,
                     popperConfig: (defaultConfig) => ({
@@ -13830,8 +13844,19 @@
                     if (inst.tip) {
                         const head = inst.tip.querySelector('.popover-header');
                         const body = inst.tip.querySelector('.popover-body');
+                        const mdnLink = inst.tip.querySelector('.st-pop-mdn');
                         if (head) head.innerHTML = next['.popover-header'];
                         if (body) body.innerHTML = next['.popover-body'];
+                        if (mdnLink) {
+                            const url = getMdnUrl();
+                            if (url) {
+                                mdnLink.setAttribute('href', url);
+                                mdnLink.style.display = '';
+                            } else {
+                                mdnLink.removeAttribute('href');
+                                mdnLink.style.display = 'none';
+                            }
+                        }
                         return;
                     }
                     inst.setContent(next);
@@ -18460,6 +18485,7 @@
                 spPop.className = 'st-sp-pop';
                 spPop.setAttribute('role', 'dialog');
                 spPop.setAttribute('aria-label', 'Spacing value');
+                spPop.style.transformOrigin = '50% 42px';
                 spPop.innerHTML = [
                     '<button type="button" class="st-sp-pop__label st-prop-label" data-sp-label aria-label="Spacing 說明">',
                     '  <span class="st-sp-pop__label-text" data-sp-label-text></span>',
@@ -18617,14 +18643,10 @@
                         foot: isSet ? '' : STUDIO_BLOCK_FOOT
                     };
                 }
-                function spPopContent(prop, inlineMdn) {
+                function spPopContent(prop) {
                     const v = spSideView(prop);
-                    const link = (inlineMdn && v.mdn)
-                        ? '<a class="st-sp-pop__mdn" target="_blank" rel="noopener" title="MDN 文件" href="' + v.mdn + '">' +
-                          STUDIO_POP_MDN_SVG + 'MDN</a>'
-                        : '';
                     return '<code>' + v.code + '</code><p>' + v.desc + '</p>' +
-                        (v.foot ? '<small>' + v.foot + '</small>' : '') + link;
+                        (v.foot ? '<small>' + v.foot + '</small>' : '');
                 }
                 /* 把某一側還原成預設值：
                    先清掉該邊界的宣告讓它回到瀏覽器預設值，
@@ -18648,22 +18670,13 @@
                 });
 
                 function bindSidePops() {
-                    $$('.st-sp__val').forEach(g => {
-                        const prop = g.getAttribute('data-prop');
-                        if (!prop || !STUDIO_SP_SIDE_DOC[prop]) return;
-                        studioBindPop(g,
-                            () => spSideView(prop).title,
-                            () => spPopContent(prop, false),
-                            STUDIO_SP_SIDE_DOC[prop].mdn,
-                            () => (spSideIsSet(prop) ? { kind: 'sp', key: prop } : null));
-                    });
                     /* 浮層編輯器的「標籤晶片」：主要說明框，跟著當前編輯的那一側走。
                        值偏離預設值才附「Reset value」，回到預設值就自動消失。
-                       （MDN 連結放在內文，故模板不帶 mdn 參數） */
+                       MDN 連結由 studioBindPop 模板放在標題最右側，與其他扇區對齊。 */
                     studioBindPop(spPopLabel,
                         () => (spPopProp ? spSideView(spPopProp).title : 'Spacing'),
-                        () => (spPopProp ? spPopContent(spPopProp, true) : '<p>Space value</p>'),
-                        null,
+                        () => (spPopProp ? spPopContent(spPopProp) : '<p>Space value</p>'),
+                        () => (spPopProp ? STUDIO_SP_SIDE_DOC[spPopProp].mdn : null),
                         () => (spPopProp && spSideIsSet(spPopProp) ? { kind: 'sp', key: spPopProp } : null));
                 }
 
