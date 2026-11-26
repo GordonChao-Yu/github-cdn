@@ -9961,8 +9961,7 @@
         /* 上半 Width／Height～Aspect ratio 四列之間的間距：欄距與列距取自
            --spacing-5（8px，定義在 style.css）。這裡保留權杖並補上後備值，
            並限定在 Size 扇區（根類名 .st-sz）內的上半，避免動到兩處——
-           下半的父網格欄距必須維持 8px，才有共用的第二欄起點（1484.5px），
-           Position 扇區的 offsets 面板同樣用 .st-sz__grid，也不能順帶被改到。 */
+           下半的父網格欄距必須維持 8px，才有共用的第二欄起點（1484.5px）。 */
         .st-sz .st-sz__grid:not(.st-sz__grid--rows) {
             column-gap: var(--spacing-5, 8px);
             row-gap: var(--spacing-5, 8px);
@@ -10014,6 +10013,169 @@
 
         .st-sz__control input::placeholder {
             color: var(--studio-text-3);
+        }
+
+        /* ---------- Position offsets：box skeleton（對齊 pos.html） ----------
+           外框與內框用 SVG 畫骨架線，四個方位各放一個輸入框，
+           中央顯示目前 position 值；取代原本的 .st-sz__grid 四欄表單。 */
+        .st-ps__skel {
+            position: relative;
+            grid-column: 1 / -1;   /* 橫跨 Position／Z Index 兩欄，使用整個面板寬度 */
+            width: 100%;
+            aspect-ratio: 560 / 340;
+            min-height: 126px;
+            margin-top: 2px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            background: var(--studio-bg-2, #f7f7f8);
+            overflow: hidden;
+        }
+
+        .st-ps__skel[hidden] {
+            display: none;
+        }
+
+        /* position 為 static／initial／inherit／unset 時，
+           Z Index 那一列要整個收起。這兩個元素自己帶 display:flex，
+           會蓋掉 UA 的 [hidden]{display:none}，所以要顯式覆蓋。 */
+        .st-ps [data-zindex][hidden] {
+            display: none !important;
+        }
+
+        .st-ps__skel-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .st-ps__outer {
+            fill: none;
+            stroke: var(--studio-border, #c9c9d3);
+            stroke-width: 1.5;
+        }
+
+        .st-ps__inner {
+            fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 6%, transparent);
+            stroke: var(--studio-accent, #6d5cf6);
+            stroke-width: 1.5;
+        }
+
+        .st-ps__diag {
+            fill: none;
+            stroke: var(--studio-border, #c9c9d3);
+            stroke-width: 1;
+            stroke-dasharray: 6 4;
+            opacity: .7;
+        }
+
+        .st-ps__dot {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--studio-text-3, #8b8b95);
+        }
+
+        .st-ps__dot--tl { top: 2px; left: 2px; }
+        .st-ps__dot--tr { top: 2px; right: 2px; }
+        .st-ps__dot--bl { bottom: 2px; left: 2px; }
+        .st-ps__dot--br { bottom: 2px; right: 2px; }
+
+        .st-ps__edge {
+            position: absolute;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .st-ps__edge--top { top: 8px; left: 50%; transform: translateX(-50%); }
+        .st-ps__edge--bottom { bottom: 8px; left: 50%; transform: translateX(-50%); flex-direction: column-reverse; }
+        .st-ps__edge--left { left: 8px; top: 50%; transform: translateY(-50%); align-items: flex-start; }
+        .st-ps__edge--right { right: 8px; top: 50%; transform: translateY(-50%); align-items: flex-end; }
+
+        .st-ps__edge-label {
+            color: var(--studio-text-3, #8b8b95);
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            line-height: 1;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        .st-ps__edge-value {
+            width: 58px;
+            height: 22px;
+            padding: 0 6px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--studio-border, #d8d8dc);
+            border-radius: 5px;
+            background: color-mix(in srgb, var(--studio-bg-1, #ffffff) 88%, transparent);
+            color: var(--studio-text-1, #2f2f35);
+            font-family: inherit;
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+            outline: none;
+            cursor: pointer;
+            transition: border-color .15s ease, box-shadow .15s ease, color .15s ease;
+        }
+
+        .st-ps__edge:hover .st-ps__edge-value {
+            border-color: var(--studio-text-3, #8b8b95);
+        }
+
+        .st-ps__edge-value:focus-visible {
+            border-color: var(--studio-accent, #6d5cf6);
+            box-shadow: 0 0 0 2px rgba(109, 92, 246, .14);
+        }
+
+        /* 值偏離預設值（auto）→ 以主色標示，回到預設值就恢復一般字色 */
+        .st-ps__edge-value.is-set {
+            color: var(--studio-accent, #6d5cf6);
+            font-weight: 600;
+        }
+
+        .st-ps__center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            width: 28.6%;
+            min-width: 56px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .st-ps__center-title {
+            color: var(--studio-text-3, #8b8b95);
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        .st-ps__center-preview {
+            max-width: 100%;
+            overflow: hidden;
+            color: var(--studio-text-2, #61616b);
+            font-size: 9px;
+            line-height: 1.3;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* ---------- ⑤ 圖示按鈕群：一組一框的 segmented control ---------- */
@@ -10309,6 +10471,13 @@
         }
         .st-sp-pop__mdn:hover { text-decoration: underline; }
         .st-sp-pop__mdn svg { width: 13px; height: 13px; }
+
+        /* 浮層編輯框（.st-sp-pop，z-index:10002）上的 hover 說明框：
+           Popover 必須疊在標籤晶片前面（前後深度＝Popover 在前、標籤晶片在後），
+           否則說明框下緣與箭頭會被浮層白框蓋住。 */
+        .popover.st-popover {
+            z-index: 10050;
+        }
 
         /* ---------- ⑦ Typography ---------- */
         .st-ty__trio {
@@ -13835,6 +14004,22 @@
                         ],
                     }),
                 });
+                /* MDN 連結：樣板是在建立時寫死的，而網址可能隨觸發鍵而變
+                   （Space 扇區的四界各指向自己的 MDN 頁），故每次顯示都要重寫。 */
+                const refreshMdnLink = () => {
+                    const tip = inst.tip;
+                    if (!tip) return;
+                    const mdnLink = tip.querySelector('.st-pop-mdn');
+                    if (!mdnLink) return;
+                    const url = getMdnUrl();
+                    if (url) {
+                        mdnLink.setAttribute('href', url);
+                        mdnLink.style.display = '';
+                    } else {
+                        mdnLink.removeAttribute('href');
+                        mdnLink.style.display = 'none';
+                    }
+                };
                 /* 每次顯示前先刷新內容：彈層節點第二次之後會被重用，直接改寫既有節點。 */
                 const refreshPopContent = () => {
                     const next = {
@@ -13844,19 +14029,9 @@
                     if (inst.tip) {
                         const head = inst.tip.querySelector('.popover-header');
                         const body = inst.tip.querySelector('.popover-body');
-                        const mdnLink = inst.tip.querySelector('.st-pop-mdn');
                         if (head) head.innerHTML = next['.popover-header'];
                         if (body) body.innerHTML = next['.popover-body'];
-                        if (mdnLink) {
-                            const url = getMdnUrl();
-                            if (url) {
-                                mdnLink.setAttribute('href', url);
-                                mdnLink.style.display = '';
-                            } else {
-                                mdnLink.removeAttribute('href');
-                                mdnLink.style.display = 'none';
-                            }
-                        }
+                        refreshMdnLink();
                         return;
                     }
                     inst.setContent(next);
@@ -13870,6 +14045,9 @@
                     refreshPopContent();
                     if (inst._isShown && inst._isShown()) return;
                     try { inst.show(); } catch (_) { }
+                    /* 第一次顯示：彈層節點剛建立，樣板上的 MDN 連結還停在建立時的值，
+                       這裡補寫一次（觸發鍵的網址可能是隨側別變的動態值）。 */
+                    refreshMdnLink();
                     bindTipHover();
                 };
                 const doPopHide = () => {
@@ -14533,10 +14711,11 @@
                     const d = STUDIO_SECTOR_DOC[key];
                     if (d) studioClearProps(d.props);
                     studioSyncSectorStates();
-                } else if (kind === 'sp') {
-                    /* Space 扇區的單一邊界（kind=sp、key=屬性名）：只還原該邊界。
-                       用自訂事件通知 Space 扇區處理，避免兩邊共用變數造成的 scope 依賴。 */
-                    if (key) document.dispatchEvent(new CustomEvent('studio:space-reset', { detail: { prop: key } }));
+                } else if (kind === 'edge') {
+                    /* 邊界浮層編輯器（Space 四界／Position offsets）的單一邊界：
+                       只還原該邊界。用自訂事件通知對應的編輯器處理，
+                       避免兩邊共用變數造成的 scope 依賴。 */
+                    if (key) document.dispatchEvent(new CustomEvent('studio:edge-reset', { detail: { prop: key } }));
                 }
                 /* 還原後 Reset value 按鈕消失，一併把彈層收掉 */
                 const trig = STUDIO_POP_TARGETS[rid];
@@ -14548,7 +14727,7 @@
                避免扇區自己的 click 處理器又把值寫回去。 */
             document.addEventListener('click', e => {
                 if (!e.altKey) return;
-                const t = e.target.closest('[data-blk], [data-ctrl], .st-ly__head-title, .st-sp__val');
+                const t = e.target.closest('[data-blk], [data-ctrl], .st-ly__head-title, [data-edge-anchor]');
                 if (!t) return;
                 e.preventDefault();
                 e.stopPropagation();
@@ -14558,10 +14737,11 @@
                     if (d && d.reset) d.reset();
                     return;
                 }
-                /* Space 扇區的四界數值晶片：Alt + 點擊＝只還原該邊界 */
-                const spProp = t.getAttribute('data-prop');
-                if (spProp && t.classList.contains('st-sp__val')) {
-                    document.dispatchEvent(new CustomEvent('studio:space-reset', { detail: { prop: spProp } }));
+                /* 邊界浮層編輯器的晶片（Space 四界／Position offsets）：
+                   Alt + 點擊＝只還原該邊界 */
+                const edgeProp = t.getAttribute('data-prop');
+                if (edgeProp && t.hasAttribute('data-edge-anchor')) {
+                    document.dispatchEvent(new CustomEvent('studio:edge-reset', { detail: { prop: edgeProp } }));
                     return;
                 }
                 const cfgKey = t.getAttribute('data-ctrl');
@@ -18250,6 +18430,265 @@
                 paint();
             })();
 
+            /* ============================================================
+             * 共用「邊界浮層編輯器」
+             *   Space 扇區的四界（MARGIN／PADDING）與 Position 扇區的 offsets
+             *   共用同一份實作，外觀與互動自然一致：
+             *     · 點某一側 → 浮層編輯框開啟（標籤晶片 + 輸入框）
+             *     · 標籤晶片掛 Popover 說明框（標題／CSS 規則／說明／MDN）
+             *     · 值偏離預設值 → 晶片高亮、說明框附「Reset value」
+             *     · 值回到預設值 → 高亮熄滅、Reset value 消失
+             *
+             *   cfg:
+             *     docs      { prop: { title, code, desc, mdn } } 說明框內容
+             *     presets   { prop: '0px' }                      各邊界的預設值
+             *     unit      'PX' | (value) => string             輸入框右側單位
+             *     read(prop) / write(prop, value)               取值／寫值
+             *     normalize(raw)                               輸入字串正規化
+             *     onState(prop, isSet)                         高亮狀態變動（圖上晶片）
+             *     onReset(prop)                                Reset value 的還原行為
+             *     onCommit(prop, value)                        寫入完成後的額外處理
+             *     placeholder                                  輸入框提示文字（預設 '0'）
+             * ============================================================ */
+            function studioCreateEdgeEditor(cfg) {
+                const docs = cfg.docs || {};
+                const presets = cfg.presets || {};
+                const readFn = cfg.read || function () { return ''; };
+                const writeFn = cfg.write || function () { };
+                const normalizeFn = cfg.normalize || function (raw) {
+                    const v = String(raw == null ? '' : raw).trim();
+                    if (!v) return '';
+                    if (/^-?\d+(\.\d+)?$/.test(v)) return v + 'px';
+                    return v;
+                };
+                const unitFn = typeof cfg.unit === 'function' ? cfg.unit
+                    : function () { return cfg.unit || 'PX'; };
+                const onState = cfg.onState || function () { };
+                const onReset = cfg.onReset || function () { };
+                const onCommit = cfg.onCommit || function () { };
+
+                /* ---- 浮層編輯框 ---- */
+                const pop = document.createElement('div');
+                pop.className = 'st-sp-pop';
+                pop.setAttribute('role', 'dialog');
+                pop.setAttribute('aria-label', cfg.ariaLabel || 'Spacing value');
+                pop.style.transformOrigin = '50% 42px';
+                pop.innerHTML = [
+                    '<button type="button" class="st-sp-pop__label st-prop-label st-sp-pop__label-text" data-sp-label data-sp-label-text aria-label="說明">',
+                    '  <span class="st-prop-label__dot"></span>',
+                    '</button>',
+                    '<span class="st-sp-pop__field">',
+                    '  <input type="text" inputmode="decimal" class="st-sp-pop__input" data-sp-input placeholder="' + (cfg.placeholder || '0') + '" spellcheck="false" autocomplete="off">',
+                    '  <span class="st-sp-pop__unit">PX</span>',
+                    '</span>',
+                ].join('');
+                document.body.appendChild(pop);
+                const label = pop.querySelector('[data-sp-label]');
+                const unitEl = pop.querySelector('.st-sp-pop__unit');
+                const input = pop.querySelector('[data-sp-input]');
+                let curProp = '', curAnchor = null, selRef = null;
+
+                function titleOf(prop) {
+                    const d = docs[prop] || {};
+                    if (d.title) return d.title;
+                    return String(prop).split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+                }
+                function presetOf(prop) { return presets[prop] || 'auto'; }
+                function displayVal(v) {
+                    if (!v) return '';
+                    return String(v).replace(/px$/i, '');
+                }
+                /* 目前生效值：浮層開著、且正在編輯這一側時，以輸入框裡尚未寫回的
+                   數字為準，讓標籤晶片的高亮與說明框即時反映使用者正在輸入的值。 */
+                function curVal(prop) {
+                    if (curProp === prop && pop.classList.contains('is-open')) {
+                        const typed = displayVal(normalizeFn(input.value));
+                        if (typed !== '') return typed;
+                    }
+                    return displayVal(readFn(prop));
+                }
+                /* 是否偏離預設值：偏離才算已設定。 */
+                function isSet(prop) {
+                    const preset = displayVal(presetOf(prop));
+                    const cur = curVal(prop);
+                    return !!cur && cur !== preset;
+                }
+                /* 顯示值：生效值；沒有值就顯示預設值。 */
+                function display(prop) {
+                    return displayVal(readFn(prop)) || displayVal(presetOf(prop));
+                }
+                /* 同步某一側的高亮狀態（圖上晶片 + 浮層標籤晶片）。 */
+                function sync(prop) {
+                    if (!prop) return;
+                    const set = isSet(prop);
+                    onState(prop, set);
+                    if (curProp === prop) label.classList.toggle('is-set', set);
+                }
+                /* 說明框的內容（標題／CSS 規則／說明／Default 註記）。 */
+                function view(prop) {
+                    const d = docs[prop] || {};
+                    const cur = curVal(prop);
+                    const set = isSet(prop);
+                    let code = d.code || (prop + ': ' + displayVal(presetOf(prop)) + ';');
+                    if (set && cur) {
+                        const unit = /\d$/.test(cur) ? 'px' : '';
+                        code = prop + ': ' + cur + unit + ';';
+                    }
+                    return {
+                        title: titleOf(prop),
+                        code: code,
+                        desc: d.desc || '',
+                        mdn: d.mdn || '',
+                        foot: set ? '' : STUDIO_BLOCK_FOOT
+                    };
+                }
+                function content(prop) {
+                    const v = view(prop);
+                    return '<code>' + v.code + '</code><p>' + v.desc + '</p>' +
+                        (v.foot ? '<small>' + v.foot + '</small>' : '');
+                }
+                /* 換標籤文字時要保留狀態圓點（.st-prop-label__dot）——
+                   直接用 textContent 會把圓點一併清掉，晶片就少了「已設定」的指示。 */
+                function setLabelText(text) {
+                    const dot = label.querySelector('.st-prop-label__dot');
+                    label.textContent = text;
+                    if (dot) label.appendChild(dot);
+                }
+                /* 定位：置於觸發鍵中央，並夾進視窗可見範圍。 */
+                function place(anchor) {
+                    if (!anchor) return;
+                    pop.classList.add('is-open');
+                    pop.style.visibility = 'hidden';
+                    /* ★ 量尺寸前先把浮層釘到左上角，再用 offsetWidth 量。
+                       兩個原因都會讓量到的寬度偏小、導致定位超出視窗被裁掉：
+                         ① position:fixed 的元素還沒給 left/top 時，可用寬度被視窗
+                            邊界壓縮，量到的是被壓過的寬度；
+                         ② 入場動畫 spPop-fadeIn 帶 scale(0.8)，
+                            getBoundingClientRect 量到的是縮放後的尺寸。
+                       offsetWidth 是排版尺寸，不受 transform 影響，量到的才是真實寬度。 */
+                    pop.style.left = '0px';
+                    pop.style.top = '0px';
+                    const r = anchor.getBoundingClientRect();
+                    const pw = pop.offsetWidth;
+                    const ph = pop.offsetHeight;
+                    const gap = 8;
+                    let left = r.left + (r.width - pw) / 2;
+                    let top = r.top + (r.height - ph) / 2;
+                    /* 夾進視窗可見範圍：靠右側的邊界若不夾就會被視窗裁掉 */
+                    left = Math.max(gap, Math.min(left, window.innerWidth - pw - gap));
+                    top = Math.max(gap, Math.min(top, window.innerHeight - ph - gap));
+                    pop.style.left = left + 'px';
+                    pop.style.top = top + 'px';
+                    pop.style.visibility = '';
+                    /* 保險：字型載入後寬度可能再變，確認一次沒有超出視窗 */
+                    const pw2 = pop.offsetWidth;
+                    if (pw2 > pw) {
+                        pop.style.left = Math.max(gap, Math.min(left, window.innerWidth - pw2 - gap)) + 'px';
+                    }
+                    const ph2 = pop.offsetHeight;
+                    if (ph2 > ph) {
+                        pop.style.top = Math.max(gap, Math.min(top, window.innerHeight - ph2 - gap)) + 'px';
+                    }
+                }
+                function open(anchor) {
+                    if (!anchor) return;
+                    if (curAnchor) curAnchor.classList.remove('is-active');
+                    curProp = anchor.getAttribute('data-prop');
+                    curAnchor = anchor;
+                    anchor.classList.add('is-active');
+                    setLabelText(titleOf(curProp));
+                    input.value = display(curProp);
+                    unitEl.textContent = unitFn(input.value);
+                    sync(curProp);
+                    place(anchor);
+                    requestAnimationFrame(() => { input.focus(); input.select(); });
+                }
+                function close() {
+                    pop.classList.remove('is-open');
+                    if (curAnchor) curAnchor.classList.remove('is-active');
+                    if (typeof label._msPopHide === 'function') label._msPopHide();
+                    label.classList.remove('is-set');
+                    curProp = '';
+                    curAnchor = null;
+                }
+                function commit() {
+                    if (!curProp) return;
+                    const v = normalizeFn(input.value);
+                    writeFn(curProp, v);
+                    onCommit(curProp, v);
+                }
+                /* 選取對象換了（含點畫布）就收起浮層，避免編輯到別的元件 */
+                function checkSelection(sel) {
+                    if (sel !== selRef) { close(); selRef = sel; }
+                }
+                function reposition() {
+                    if (curAnchor && pop.classList.contains('is-open')) place(curAnchor);
+                }
+
+                /* ---- 說明框（Popover）：與其他扇區同一套骨架 ---- */
+                studioBindPop(label,
+                    () => (curProp ? view(curProp).title : (cfg.placeholderTitle || 'Spacing')),
+                    () => (curProp ? content(curProp) : '<p>' + (cfg.placeholderText || 'Space value') + '</p>'),
+                    () => (curProp && docs[curProp] ? docs[curProp].mdn : null),
+                    () => (curProp && isSet(curProp) ? { kind: 'edge', key: curProp } : null));
+
+                /* ---- 互動 ---- */
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') { e.preventDefault(); commit(); close(); }
+                    else if (e.key === 'Escape') { e.preventDefault(); close(); }   /* 取消，不寫回 */
+                });
+                /* 邊打邊看：輸入值偏離預設值就讓標籤晶片亮起來，回到預設值則熄滅。
+                   單位也跟著換（Position 的 auto／PX 會隨輸入值切換）。 */
+                input.addEventListener('input', () => {
+                    if (!curProp) return;
+                    unitEl.textContent = unitFn(input.value);
+                    sync(curProp);
+                });
+                input.addEventListener('blur', () => { if (curProp) commit(); });
+                /* 點浮層外部 → 先提交目前輸入值再關閉。
+                   點到說明框（Popover，例如 Reset value）時不要關閉浮層，
+                   使用者才能直接看到還原後晶片高亮熄滅的樣子。 */
+                document.addEventListener('mousedown', e => {
+                    if (!pop.classList.contains('is-open')) return;
+                    if (pop.contains(e.target)) return;
+                    if (e.target.closest && e.target.closest('.popover')) return;
+                    commit();
+                    close();
+                }, true);
+                window.addEventListener('resize', reposition);
+                document.addEventListener('scroll', reposition, true);
+
+                /* Reset value（Popover 底部按鈕／Alt + 點擊晶片）：
+                   由共用的事件派送，各編輯器只處理自己管的屬性。 */
+                document.addEventListener('studio:edge-reset', e => {
+                    const prop = e.detail && e.detail.prop;
+                    if (!prop || !(prop in presets)) return;
+                    onReset(prop);
+                    /* 正在編輯這一側 → 輸入框跟著回到預設值，
+                       晶片高亮才會立刻熄滅、說明框裡的 Reset value 也會跟著消失。 */
+                    if (curProp === prop) {
+                        input.value = display(prop);
+                        unitEl.textContent = unitFn(input.value);
+                        sync(prop);
+                    }
+                });
+
+                return {
+                    el: pop,
+                    open: open,
+                    close: close,
+                    commit: commit,
+                    sync: sync,
+                    display: display,
+                    isSet: isSet,
+                    view: view,
+                    checkSelection: checkSelection,
+                    reposition: reposition,
+                    currentProp: function () { return curProp; },
+                    isOpen: function () { return pop.classList.contains('is-open'); }
+                };
+            }
+
             /* -------------- Space 扇區 --------------- */
             (function mountStudioSpacing() {
                 const host = smEl || rightBody;
@@ -18340,7 +18779,7 @@
                     '  <button type="button" class="st-ly__head st-align-center st-justify-flex-start st-flex-nowrap st-direction-row" aria-label="收合/展開 Spacing">',
                     ICO_CHEV,
                     '  </button>',
-                    '  <button type="button" class="st-ly__head-title">Space</button>',
+                    '<button type="button" class="st-ly__head-title">Space</button>',
                     '</div>',
                     '<div class="st-ly__body st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch st-ly-panel-paddingBlock">',
                     '   <div class="c-dbZYJE st-pos-paddingInline st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch">',
@@ -18354,22 +18793,22 @@
                     '        <line x1="400" y1="260" x2="340" y2="220" stroke="#dcb67a" stroke-width="1"/>',
                     '        <line x1="0" y1="260" x2="60" y2="220" stroke="#dcb67a" stroke-width="1"/>',
                     '        <text x="10" y="20" font-size="16" fill="#8c734b" font-weight="bold">MARGIN</text>',
-                    '        <g class="st-sp__val" data-prop="margin-top" role="button" tabindex="0" aria-label="Margin Top" transform="translate(200, 20)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="margin-top" role="button" tabindex="0" aria-label="Margin Top" transform="translate(200, 20)">',
                     '          <polygon class="st-sp__trap" points="-200,-20 200,-20 140,20 -140,20"/>',
                     '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
                     '        </g>',
-                    '        <g class="st-sp__val" data-prop="margin-right" role="button" tabindex="0" aria-label="Margin Right" transform="translate(370, 130)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="margin-right" role="button" tabindex="0" aria-label="Margin Right" transform="translate(370, 130)">',
                     '          <polygon class="st-sp__trap" points="30,-130 30,130 -30,90 -30,-90"/>',
                     '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
                     '        </g>',
-                    '        <g class="st-sp__val" data-prop="margin-bottom" role="button" tabindex="0" aria-label="Margin Bottom" transform="translate(200, 240)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="margin-bottom" role="button" tabindex="0" aria-label="Margin Bottom" transform="translate(200, 240)">',
                     '          <polygon class="st-sp__trap" points="200,20 -200,20 -140,-20 140,-20"/>',
                     '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
                     '        </g>',
-                    '        <g class="st-sp__val" data-prop="margin-left" role="button" tabindex="0" aria-label="Margin Left" transform="translate(30, 130)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="margin-left" role="button" tabindex="0" aria-label="Margin Left" transform="translate(30, 130)">',
                     '          <polygon class="st-sp__trap" points="-30,130 -30,-130 30,-90 30,90"/>', 
                     '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
@@ -18388,22 +18827,22 @@
                     '        <line x1="310" y1="190" x2="270" y2="160" stroke="#9bbf7a" stroke-width="1"/>',
                     '        <line x1="90" y1="190" x2="130" y2="160" stroke="#9bbf7a" stroke-width="1"/>',
                     '        <text x="100" y="90" font-size="16" fill="#5a7a3a" font-weight="bold">PADDING</text>',
-                    '        <g class="st-sp__val" data-prop="padding-top" role="button" tabindex="0" aria-label="Padding Top" transform="translate(200, 85)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="padding-top" role="button" tabindex="0" aria-label="Padding Top" transform="translate(200, 85)">',
                     '          <polygon class="st-sp__trap" points="-110,-15 110,-15 70,15 -70,15"/>', 
                     '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
                     '        </g>',
-                    '        <g class="st-sp__val" data-prop="padding-right" role="button" tabindex="0" aria-label="Padding Right" transform="translate(290, 130)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="padding-right" role="button" tabindex="0" aria-label="Padding Right" transform="translate(290, 130)">',
                     '          <polygon class="st-sp__trap" points="20,-60 20,60 -20,30 -20,-30"/>', 
                         '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
                     '        </g>',
-                    '        <g class="st-sp__val" data-prop="padding-bottom" role="button" tabindex="0" aria-label="Padding Bottom" transform="translate(200, 175)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="padding-bottom" role="button" tabindex="0" aria-label="Padding Bottom" transform="translate(200, 175)">',
                     '          <polygon class="st-sp__trap" points="110,15 -110,15 -70,-15 70,-15"/>',
                         '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
                     '        </g>',
-                    '        <g class="st-sp__val" data-prop="padding-left" role="button" tabindex="0" aria-label="Padding Left" transform="translate(110, 130)">',
+                    '        <g class="st-sp__val" data-edge-anchor data-prop="padding-left" role="button" tabindex="0" aria-label="Padding Left" transform="translate(110, 130)">',
                     '          <polygon class="st-sp__trap" points="-20,60 -20,-60 20,-30 20,30"/>', 
                     '          <rect class="st-sp__hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
                     '          <text class="st-sp__num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">0</text>',
@@ -18480,100 +18919,35 @@
 
                 /* 浮層編輯器：圖上只顯示數值，點擊某一側才開啟。
                    標籤晶片（.st-sp-pop__label）掛 Popover 說明框：
-                   值偏離預設值時晶片高亮，說明框下方附「Reset value」按鈕。 */
-                const spPop = document.createElement('div');
-                spPop.className = 'st-sp-pop';
-                spPop.setAttribute('role', 'dialog');
-                spPop.setAttribute('aria-label', 'Spacing value');
-                spPop.style.transformOrigin = '50% 42px';
-                spPop.innerHTML = [
-                    '<button type="button" class="st-sp-pop__label st-prop-label" data-sp-label aria-label="Spacing 說明">',
-                    '  <span class="st-sp-pop__label-text" data-sp-label-text></span>',
-                    '  <span class="st-prop-label__dot"></span>',
-                    '</button>',
-                    '<span class="st-sp-pop__field">',
-                    '  <input type="text" inputmode="decimal" class="st-sp-pop__input" data-sp-input placeholder="0" spellcheck="false" autocomplete="off">',
-                    '  <span class="st-sp-pop__unit">PX</span>',
-                    '</span>',
-                ].join('');
-                document.body.appendChild(spPop);
-                const spPopLabel = spPop.querySelector('[data-sp-label]');
-                const spPopLabelText = spPop.querySelector('[data-sp-label-text]');
-                const spPopInput = spPop.querySelector('[data-sp-input]');
-                let spPopProp = '', spPopAnchor = null, spSelRef = null;
-
-                /* 該邊界「目前生效的值」：浮層編輯器開著、且正在編輯這一側時，
-                   以輸入框裡尚未寫回的數字為準，讓標籤晶片的高亮與說明框
-                   （含 Reset value）即時反映使用者正在輸入的值。 */
-                function spCurVal(prop) {
-                    if (spPopProp === prop && spPop.classList.contains('is-open')) {
-                        const typed = displayVal(normalize(spPopInput.value));
-                        if (typed !== '') return typed;
+                   值偏離預設值時晶片高亮，說明框下方附「Reset value」按鈕。
+                   與 Position 扇區的 offsets 共用同一套實作（studioCreateEdgeEditor）。 */
+                const spEditor = studioCreateEdgeEditor({
+                    docs: STUDIO_SP_SIDE_DOC,
+                    presets: PRESET,
+                    unit: 'PX',
+                    read: read,
+                    write: write,
+                    normalize: normalize,
+                    ariaLabel: 'Spacing value',
+                    placeholderTitle: 'Spacing',
+                    placeholderText: 'Space value',
+                    /* 圖上晶片的高亮 */
+                    onState: (prop, set) => {
+                        const g = root.querySelector('.st-sp__val[data-prop="' + prop + '"]');
+                        if (g) g.classList.toggle('is-set', set);
+                    },
+                    /* Reset value：先清掉宣告讓它回到瀏覽器預設值，
+                       若仍不是預設值（例如值來自 class 規則）就顯式寫回預設值，
+                       確保「值 == 預設值」與晶片高亮、Reset value 的判定一致。 */
+                    onReset: (prop) => {
+                        const preset = PRESET[prop] || '0px';
+                        write(prop, '');
+                        if (displayVal(read(prop)) !== displayVal(preset)) {
+                            write(prop, preset);
+                        }
+                        paint();
                     }
-                    return displayVal(read(prop));
-                }
-                /* 該邊界「是否偏離預設值」：偏離才算已設定。
-                   標籤晶片的高亮、Popover 的 Reset value 按鈕都以此為準：
-                   值回到預設值（0px）時，高亮就熄滅、Reset value 也跟著消失。 */
-                function spSideIsSet(prop) {
-                    const preset = displayVal(PRESET[prop] || '0px') || '0';
-                    const cur = spCurVal(prop);
-                    return !!cur && cur !== preset;
-                }
-                /* 同步某一側的狀態：圖上晶片與浮層標籤晶片的高亮 */
-                function syncSideStates(prop) {
-                    if (!prop) return;
-                    const set = spSideIsSet(prop);
-                    const g = root.querySelector('.st-sp__val[data-prop="' + prop + '"]');
-                    if (g) g.classList.toggle('is-set', set);
-                    if (spPopProp === prop) spPopLabel.classList.toggle('is-set', set);
-                }
-
-                function spLabelOf(prop) {
-                    return String(prop).split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-                }
-                function placeSpPop(anchor) {
-                    if (!anchor) return;
-                    spPop.classList.add('is-open');
-                    spPop.style.visibility = 'hidden';
-                    const r = anchor.getBoundingClientRect();
-                    const p = spPop.getBoundingClientRect();
-                    const gap = 8;
-                    let top = r.top - p.height - gap;
-                    if (top < 8) top = r.bottom + gap;
-                    let left = r.left + (r.width - p.width) / 2;
-                    left = Math.max(8, Math.min(left, window.innerWidth - p.width - 8));
-                    top = Math.max(8, Math.min(top, window.innerHeight - p.height - 8));
-                    spPop.style.top = top + 'px';
-                    spPop.style.left = left + 'px';
-                    spPop.style.visibility = '';
-                }
-                function openSpPop(btn) {
-                    if (spPopAnchor) spPopAnchor.classList.remove('is-active');
-                    spPopProp = btn.getAttribute('data-prop');
-                    spPopAnchor = btn;
-                    btn.classList.add('is-active');
-                    spPopLabelText.textContent = spLabelOf(spPopProp);
-                    spPopInput.value = displayVal(read(spPopProp)) || displayVal(PRESET[spPopProp] || '0px');
-                    /* 標籤晶片：值偏離預設值就高亮 */
-                    syncSideStates(spPopProp);
-                    placeSpPop(btn);
-                    requestAnimationFrame(() => { spPopInput.focus(); spPopInput.select(); });
-                }
-                function closeSpPop() {
-                    spPop.classList.remove('is-open');
-                    if (spPopAnchor) spPopAnchor.classList.remove('is-active');
-                    /* 浮層收起時，標籤上的說明框也要跟著收掉 */
-                    if (typeof spPopLabel._msPopHide === 'function') spPopLabel._msPopHide();
-                    spPopLabel.classList.remove('is-set');
-                    spPopProp = '';
-                    spPopAnchor = null;
-                }
-                function commitSpPop() {
-                    if (!spPopProp) return;
-                    write(spPopProp, normalize(spPopInput.value));
-                    paint();
-                }
+                });
 
                 /* 內容盒（content box）尺寸：padding box 扣掉 padding 就是 content box。
                    圖上的 140 × 60 是示意值，這裡改成選中元素當下的真實尺寸。 */
@@ -18594,17 +18968,16 @@
                 function paint() {
                     const sel = editor.getSelected();
                     /* 選取對象換了（含點畫布）就收起浮層，避免編輯到別的元件 */
-                    if (sel !== spSelRef) { closeSpPop(); spSelRef = sel; }
+                    spEditor.checkSelection(sel);
                     root.classList.toggle('is-disabled', !sel);
                     $$('.st-sp__val').forEach(g => {
                         const num = g.querySelector('.st-sp__num');
                         if (!num) return;
                         const prop = g.getAttribute('data-prop');
                         /* 取不到有效值時顯示該邊界的預設值（0px） */
-                        const v = displayVal(read(prop)) || displayVal(PRESET[prop] || '0px') || '0';
-                        num.textContent = v;
+                        num.textContent = spEditor.display(prop);
                         /* 值偏離預設值 → 該側晶片高亮（回到預設值就熄滅） */
-                        g.classList.toggle('is-set', spSideIsSet(prop));
+                        spEditor.sync(prop);
                     });
                     /* 內容盒尺寸：跟著選中元素走 */
                     const size = readContentSize();
@@ -18612,79 +18985,14 @@
                     const hSpan = root.querySelector('.val-height');
                     if (wSpan) wSpan.textContent = size ? String(size.w) : '0';
                     if (hSpan) hSpan.textContent = size ? String(size.h) : '0';
-                    /* 浮層編輯器的標籤晶片：跟著當前這一側的高亮狀態走 */
-                    if (spPopProp) syncSideStates(spPopProp);
-                    if (!sel) closeSpPop();
-                }
-
-                /* ============================================================
-                 * 四界的 Popover 說明框
-                 *   · 浮層編輯器的「標籤晶片」（.st-sp-pop__label）是主要說明框：
-                 *     值偏離預設值時晶片高亮，說明框下方附「Reset value」按鈕；
-                 *     值回到預設值 → 高亮熄滅、Reset value 一併消失。
-                 *   · 圖上每一側的數值晶片（.st-sp__val）hover 時也說明該側規則。
-                 *   · 骨架沿用 studioBindPop（與 Layout／Transitions 扇區同一套）。
-                 * ============================================================ */
-                function spSideView(prop) {
-                    const d = STUDIO_SP_SIDE_DOC[prop] || {};
-                    const cur = spCurVal(prop);
-                    const preset = displayVal(PRESET[prop] || '0px') || '0';
-                    const isSet = spSideIsSet(prop);
-                    let code = d.code || (prop + ': ' + preset + 'px;');
-                    if (isSet && cur) {
-                        const unit = /\d$/.test(cur) ? 'px' : '';
-                        code = prop + ': ' + cur + unit + ';';
-                    }
-                    return {
-                        title: d.title || spLabelOf(prop),
-                        code: code,
-                        desc: d.desc || '',
-                        mdn: d.mdn || '',
-                        foot: isSet ? '' : STUDIO_BLOCK_FOOT
-                    };
-                }
-                function spPopContent(prop) {
-                    const v = spSideView(prop);
-                    return '<code>' + v.code + '</code><p>' + v.desc + '</p>' +
-                        (v.foot ? '<small>' + v.foot + '</small>' : '');
-                }
-                /* 把某一側還原成預設值：
-                   先清掉該邊界的宣告讓它回到瀏覽器預設值，
-                   若仍不是預設值（例如值來自 class 規則）就顯式寫回預設值，
-                   確保「值 == 預設值」與晶片高亮、Reset value 的判定一致。
-                   由 Popover 的「Reset value」或 Alt + 點擊晶片觸發。 */
-                document.addEventListener('studio:space-reset', e => {
-                    const prop = e.detail && e.detail.prop;
-                    if (!prop || !PRESET[prop]) return;
-                    const preset = PRESET[prop];
-                    write(prop, '');
-                    if (displayVal(read(prop)) !== displayVal(preset)) {
-                        write(prop, preset);
-                    }
-                    /* 浮層編輯器正在編輯這一側 → 輸入框也要跟著回到預設值，
-                       晶片高亮才會立刻熄滅、說明框裡的 Reset value 也會跟著消失。 */
-                    if (spPopProp === prop) {
-                        spPopInput.value = displayVal(read(prop)) || displayVal(preset);
-                    }
-                    paint();
-                });
-
-                function bindSidePops() {
-                    /* 浮層編輯器的「標籤晶片」：主要說明框，跟著當前編輯的那一側走。
-                       值偏離預設值才附「Reset value」，回到預設值就自動消失。
-                       MDN 連結由 studioBindPop 模板放在標題最右側，與其他扇區對齊。 */
-                    studioBindPop(spPopLabel,
-                        () => (spPopProp ? spSideView(spPopProp).title : 'Spacing'),
-                        () => (spPopProp ? spPopContent(spPopProp) : '<p>Space value</p>'),
-                        () => (spPopProp ? STUDIO_SP_SIDE_DOC[spPopProp].mdn : null),
-                        () => (spPopProp && spSideIsSet(spPopProp) ? { kind: 'sp', key: spPopProp } : null));
+                    if (!sel) spEditor.close();
                 }
 
                 root.addEventListener('click', e => {
                     const val = e.target.closest && e.target.closest('.st-sp__val');
-                    if (val) { openSpPop(val); return; }
+                    if (val) { spEditor.open(val); return; }
                     if (e.target.closest('[data-act="toggle"]')) {
-                        closeSpPop();
+                        spEditor.close();
                         root.classList.toggle('is-collapsed');
                     }
                 });
@@ -18694,34 +19002,8 @@
                     const val = e.target.closest && e.target.closest('.st-sp__val');
                     if (!val) return;
                     e.preventDefault();
-                    openSpPop(val);
+                    spEditor.open(val);
                 });
-
-                spPopInput.addEventListener('keydown', e => {
-                    if (e.key === 'Enter') { e.preventDefault(); commitSpPop(); closeSpPop(); }
-                    else if (e.key === 'Escape') { e.preventDefault(); closeSpPop(); }   /* 取消，不寫回 */
-                });
-                /* 邊打邊看：輸入值偏離預設值就讓標籤晶片亮起來，回到預設值則熄滅 */
-                spPopInput.addEventListener('input', () => {
-                    if (!spPopProp) return;
-                    syncSideStates(spPopProp);
-                });
-                spPopInput.addEventListener('blur', () => { if (spPopProp) commitSpPop(); });
-                /* 點浮層外部 → 先提交目前輸入值再關閉。
-                   點到說明框（Popover，例如 Reset value）時不要關閉浮層，
-                   使用者才能直接看到還原後晶片高亮熄滅的樣子。 */
-                document.addEventListener('mousedown', e => {
-                    if (!spPop.classList.contains('is-open')) return;
-                    if (spPop.contains(e.target)) return;
-                    if (e.target.closest && e.target.closest('.popover')) return;
-                    commitSpPop();
-                    closeSpPop();
-                }, true);
-                function spReposition() {
-                    if (spPopAnchor && spPop.classList.contains('is-open')) placeSpPop(spPopAnchor);
-                }
-                window.addEventListener('resize', spReposition);
-                document.addEventListener('scroll', spReposition, true);
 
                 editor.on('component:selected', paint);
                 editor.on('component:deselected', paint);
@@ -18743,15 +19025,9 @@
                 editor.on('css:mount css:rules:add css:rules:remove css:rules:update', schedulePaint);
                 editor.on('canvas:spot canvas:spot:add canvas:spot:update', schedulePaint);
 
-                /* 扇區標題晶片的 Popover（Space 扇區管理的四界規則說明） */
-                try {
-                    const titleBtn = root.querySelector('.st-ly__head-title');
-                    if (titleBtn) studioBindSectorPop(titleBtn, 'spacing');
-                } catch (e) { console.error('sbss', e); }
-                /* 每個四界晶片＋浮層編輯器的說明框 */
-                try {
-                    bindSidePops();
-                } catch (e) { console.error('sbsp', e); }
+                /* Space 扇區標題列不再顯示標題晶片，因此也不綁定扇區 Popover
+                   （hover 標題列時不會再彈出說明框）。
+                   浮層編輯器的標籤晶片說明框已由 studioCreateEdgeEditor 內部綁定。 */
                 paint();
             })();
 
@@ -18764,6 +19040,46 @@
                     chev: '<svg class="st-ly__chev" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>',
                     minus: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H5v-2h14v2z"/></svg>',
                 };
+
+                /* ============================================================
+                 * Position 扇區的四界（offsets）
+                 *   · 預設值一律 auto（CSS initial value）。
+                 *   · 互動與外觀比照 Space 扇區的 MARGIN／PADDING：
+                 *     點某一側 → 浮層編輯框開啟（標籤晶片 + 輸入框），
+                 *     標籤晶片掛同款 Popover 說明框，值偏離 auto 就高亮、
+                 *     說明框附 Reset value，回到 auto 則熄滅。
+                 *   · 說明框內容（Popover 用）
+                 * ============================================================ */
+                const STUDIO_POS_SIDE_DOC = {
+                    'top': {
+                        title: 'Top',
+                        code: 'top: auto;',
+                        desc: 'Distance between the top of the containing block and the top of the element. Only applies to positioned elements.',
+                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/top'
+                    },
+                    'right': {
+                        title: 'Right',
+                        code: 'right: auto;',
+                        desc: 'Distance between the right of the containing block and the right of the element. Only applies to positioned elements.',
+                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/right'
+                    },
+                    'bottom': {
+                        title: 'Bottom',
+                        code: 'bottom: auto;',
+                        desc: 'Distance between the bottom of the containing block and the bottom of the element. Only applies to positioned elements.',
+                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/bottom'
+                    },
+                    'left': {
+                        title: 'Left',
+                        code: 'left: auto;',
+                        desc: 'Distance between the left of the containing block and the left of the element. Only applies to positioned elements.',
+                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/left'
+                    },
+                };
+                /* 四界的預設值：auto */
+                const POS_PRESETS = { top: 'auto', right: 'auto', bottom: 'auto', left: 'auto' };
+                /* position 為這些值時元素不參與定位，Z Index 與 offsets 介面都不顯示 */
+                const POS_STATIC_LIKE = ['static', 'initial', 'inherit', 'unset'];
 
                 const root = document.createElement('div');
                 root.className = 'st-ly st-ps gjs-sm-sector';
@@ -18786,19 +19102,38 @@
                     '      <u-option value="absolute">absolute</u-option>',
                     '      <u-option value="fixed">fixed</u-option>',
                     '      <u-option value="sticky">sticky</u-option>',
+                    '      <u-option value="initial">initial</u-option>',
+                    '      <u-option value="inherit">inherit</u-option>',
+                    '      <u-option value="unset">unset</u-option>',
                     '    </u-combobox>',
-                    '  <div class="st-ly__row">',
+                    '  <div class="st-ly__row" data-zindex>',
                     '    <div class="st-ly__label">Z Index</div>',
                     '  </div>',
-                    '  <div class="st-sz__control st-ps__zindex">',
+                    '  <div class="st-sz__control st-ps__zindex" data-zindex>',
                     '    <input data-prop="z-index" placeholder="auto">',
                     '    <button type="button" class="st-ly__iconbtn" data-clear="z-index" title="清除">' + ICO.minus + '</button>',
                     '  </div>',
-                    '  <div class="st-sz__grid" data-offsets hidden>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Top</span><span class="st-sz__control"><input data-prop="top" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="top" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Right</span><span class="st-sz__control"><input data-prop="right" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="right" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Bottom</span><span class="st-sz__control"><input data-prop="bottom" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="bottom" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Left</span><span class="st-sz__control"><input data-prop="left" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="left" title="清除">' + ICO.minus + '</button></span></label>',
+                    '  <div class="st-ps__skel" data-offsets hidden>',
+                    '    <svg class="st-ps__skel-svg" viewBox="0 0 560 340" preserveAspectRatio="none" aria-hidden="true">',
+                    '      <rect class="st-ps__outer" x="1" y="1" width="558" height="338" rx="2"/>',
+                    '      <rect class="st-ps__inner" x="200" y="138" width="160" height="64" rx="2"/>',
+                    '      <line class="st-ps__diag" x1="1" y1="1" x2="200" y2="138"/>',
+                    '      <line class="st-ps__diag" x1="559" y1="1" x2="360" y2="138"/>',
+                    '      <line class="st-ps__diag" x1="1" y1="339" x2="200" y2="202"/>',
+                    '      <line class="st-ps__diag" x1="559" y1="339" x2="360" y2="202"/>',
+                    '    </svg>',
+                    '    <span class="st-ps__dot st-ps__dot--tl"></span>',
+                    '    <span class="st-ps__dot st-ps__dot--tr"></span>',
+                    '    <span class="st-ps__dot st-ps__dot--bl"></span>',
+                    '    <span class="st-ps__dot st-ps__dot--br"></span>',
+                    '    <div class="st-ps__edge st-ps__edge--top" data-edge-anchor data-prop="top" role="button" tabindex="0" aria-label="Top 偏移"><span class="st-ps__edge-label">Top</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__edge st-ps__edge--bottom" data-edge-anchor data-prop="bottom" role="button" tabindex="0" aria-label="Bottom 偏移"><span class="st-ps__edge-label">Bottom</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__edge st-ps__edge--left" data-edge-anchor data-prop="left" role="button" tabindex="0" aria-label="Left 偏移"><span class="st-ps__edge-label">Left</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__edge st-ps__edge--right" data-edge-anchor data-prop="right" role="button" tabindex="0" aria-label="Right 偏移"><span class="st-ps__edge-label">Right</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__center">',
+                    '      <span class="st-ps__center-title">Element</span>',
+                    '      <span class="st-ps__center-preview" data-pos-preview>position: absolute</span>',
+                    '    </div>',
                     '  </div>',
                     '</div>',
                     '</div>',
@@ -18811,17 +19146,31 @@
                 const $$ = (sel, el = root) => Array.prototype.slice.call(el.querySelectorAll(sel));
                 const posSel = $('u-combobox[data-prop="position"]');
                 const offsets = $('[data-offsets]');
-                const PROPS = ['position', 'z-index', 'top', 'right', 'bottom', 'left'];
 
                 function camel(p) {
                     return p.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
                 }
+                /* 宣告值（inline 優先，再沿媒體鏈回退到樣式規則）：position／z-index 用。
+                   走 studioEffProp 才能讀到 class 規則宣告的 position，
+                   否則元素明明是 relative，介面卻會誤判成 static 而隱藏。 */
                 function read(prop) {
                     const sel = editor.getSelected();
                     if (!sel) return '';
-                    const st = sel.getStyle() || {};
-                    const v = st[prop] != null ? st[prop] : st[camel(prop)];
-                    return v == null ? '' : String(v);
+                    const v = studioEffProp(sel, prop);
+                    return v == null ? '' : String(v).trim();
+                }
+                /* offsets 四界的取值。
+                   ★ 不能直接讀 getComputedStyle：Position 偏移的初始值是 auto，
+                   而瀏覽器對已定位元素會把 auto 解析成「用值」——
+                   例如 position:relative 的 left:auto 會算成 0px、
+                   top:10% 會算成 px 數字。這樣未設定的那幾邊會顯示 0 而非 auto，
+                   百分比也會被寫回成 px。
+                   這裡改讀宣告值（inline → 樣式規則），沒有宣告就是 auto，
+                   與「預設值皆為 auto」一致。 */
+                function readEff(prop) {
+                    const sel = editor.getSelected();
+                    if (!sel) return '';
+                    return read(prop) || 'auto';
                 }
                 function write(prop, value) {
                     const sel = editor.getSelected();
@@ -18841,20 +19190,85 @@
                     if (/^-?\d+(\.\d+)?$/.test(v)) return v + 'px';
                     return v;
                 }
+                function displayVal(v) {
+                    if (!v) return '';
+                    return String(v).replace(/px$/i, '');
+                }
+
+                /* offsets 四界的浮層編輯器：與 Space 扇區共用同一套實作 */
+                const psEditor = studioCreateEdgeEditor({
+                    docs: STUDIO_POS_SIDE_DOC,
+                    presets: POS_PRESETS,
+                    /* 值是 auto 時單位顯示 AUTO；純數字（來自 px）顯示 PX；
+                       50%／2em 這類單位已寫在數值裡，就不再重複標示。 */
+                    unit: v => {
+                        const s = String(v == null ? '' : v).trim();
+                        if (!s || /^auto$/i.test(s)) return 'AUTO';
+                        if (/^-?[\d.]+$/.test(s)) return 'PX';
+                        return '';
+                    },
+                    read: readEff,
+                    write: write,
+                    normalize: normalize,
+                    ariaLabel: 'Offset value',
+                    placeholderTitle: 'Offset',
+                    placeholderText: 'Offset value',
+                    placeholder: 'auto',
+                    /* 骨架上四個數值的高亮 */
+                    onState: (prop, set) => {
+                        const el = root.querySelector('.st-ps__edge[data-prop="' + prop + '"] .st-ps__edge-value');
+                        if (el) el.classList.toggle('is-set', set);
+                    },
+                    /* Reset value：清掉宣告讓它回到 auto；
+                       若仍不是 auto（例如值來自 class 規則）就顯式寫回 auto。 */
+                    onReset: (prop) => {
+                        write(prop, '');
+                        if (displayVal(readEff(prop)) !== 'auto') {
+                            write(prop, 'auto');
+                        }
+                        paint();
+                    },
+                    /* 寫入完成後立即刷新四界的數值與高亮 */
+                    onCommit: () => { paint(); }
+                });
 
                 function paint() {
                     const sel = editor.getSelected();
+                    psEditor.checkSelection(sel);
                     root.classList.toggle('is-disabled', !sel);
-                    const pos = read('position') || 'static';
-                    posSel.value = pos;
-                    offsets.hidden = pos === 'static';
-                    $$('input[data-prop]').forEach(inp => {
-                        inp.value = read(inp.getAttribute('data-prop'));
+                    /* position 的宣告值：沒有宣告就是瀏覽器預設的 static */
+                    const pos = (read('position') || 'static').toLowerCase();
+                    /* 只在選項真的存在時才回寫，避免 combobox 被設成無效值 */
+                    const opts = posSel.options;
+                    if (opts && [].some.call(opts, o => o.value === pos)) posSel.value = pos;
+                    /* position 為 static／initial／inherit／unset 時，
+                       元素不參與定位 → Z Index 與 offsets 介面都不顯示。 */
+                    const staticLike = POS_STATIC_LIKE.indexOf(pos) !== -1;
+                    offsets.hidden = staticLike;
+                    $$('[data-zindex]').forEach(el => { el.hidden = staticLike; });
+                    /* 介面收起時，浮層的錨點已不可見 → 一併關掉浮層 */
+                    if (staticLike) psEditor.close();
+                    const pv = $('[data-pos-preview]');
+                    if (pv) pv.textContent = 'position: ' + pos;
+                    /* z-index 輸入框 */
+                    const zi = $('input[data-prop="z-index"]');
+                    if (zi) zi.value = read('z-index');
+                    /* offsets 四界的值 + 高亮 */
+                    $$('.st-ps__edge[data-prop]').forEach(el => {
+                        const prop = el.getAttribute('data-prop');
+                        const v = el.querySelector('[data-ps-val]');
+                        if (v) v.textContent = psEditor.display(prop);
+                        psEditor.sync(prop);
                     });
+                    if (!sel) psEditor.close();
                 }
 
                 root.addEventListener('click', e => {
+                    /* 點四界 → 開啟浮層編輯框（與 Space 扇區同一套元件） */
+                    const edge = e.target.closest && e.target.closest('.st-ps__edge[data-prop]');
+                    if (edge) { psEditor.open(edge); return; }
                     if (e.target.closest('[data-act="toggle"]')) {
+                        psEditor.close();
                         root.classList.toggle('is-collapsed');
                         return;
                     }
@@ -18864,8 +19278,19 @@
                         paint();
                     }
                 });
+                /* div 不是原生按鈕，補上 Enter／Space 開啟浮層 */
+                root.addEventListener('keydown', e => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return;
+                    const edge = e.target.closest && e.target.closest('.st-ps__edge[data-prop]');
+                    if (!edge) return;
+                    e.preventDefault();
+                    psEditor.open(edge);
+                });
                 posSel.addEventListener('change', () => {
-                    write('position', posSel.value === 'static' ? '' : posSel.value);
+                    /* static 是初始值，寫成空字串讓它回到預設；
+                       initial／inherit／unset 是 CSS 全域關鍵字，須原樣寫入。 */
+                    const v = String(posSel.value || '').trim().toLowerCase();
+                    write('position', (!v || v === 'static') ? '' : v);
                     paint();
                 });
                 $$('input[data-prop]').forEach(inp => {
@@ -18883,6 +19308,20 @@
                 editor.on('style:target', paint);
                 editor.on('device:select', paint);
                 editor.on('styleable:change', paint);
+                /* ★ position／z-index／offsets 也可能被「面板之外」的動作改掉：
+                   改 class（component:update）、增刪改樣式規則（css:rules:*）、
+                   畫布上的 spot 變動… 這些都不會觸發 component:styleUpdate，
+                   若不重繪，position 與四界數值就會停在舊值。
+                   這幾個事件觸發頻繁，用 rAF 合併成一次重繪。 */
+                let psPaintRaf = 0;
+                function schedulePaint() {
+                    if (psPaintRaf) return;
+                    psPaintRaf = requestAnimationFrame(() => { psPaintRaf = 0; paint(); });
+                }
+                editor.on('component:update', schedulePaint);
+                editor.on('css:mount css:rules:add css:rules:remove css:rules:update', schedulePaint);
+                editor.on('canvas:spot canvas:spot:add canvas:spot:update', schedulePaint);
+
                 paint();
             })();
 
