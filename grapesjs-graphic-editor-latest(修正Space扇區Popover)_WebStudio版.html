@@ -10015,15 +10015,14 @@
             color: var(--studio-text-3);
         }
 
-        /* ---------- Position offsets：box skeleton（對齊 pos.html） ----------
-           外框與內框用 SVG 畫骨架線，四個方位各放一個輸入框，
-           中央顯示目前 position 值；取代原本的 .st-sz__grid 四欄表單。 */
+        /* ---------- Position offsets：box skeleton（對齊 board.html） ----------
+           四片梯形 flap 環繞中央元素盒；四個方位各放一個偏移值，
+           點擊方位值以浮層編輯。深色主題不套用，一律使用面板淺色變數。 */
         .st-ps__skel {
             position: relative;
             grid-column: 1 / -1;   /* 橫跨 Position／Z Index 兩欄，使用整個面板寬度 */
             width: 100%;
-            aspect-ratio: 560 / 340;
-            min-height: 126px;
+            aspect-ratio: 1 / 1;
             margin-top: 2px;
             box-sizing: border-box;
             border-radius: 8px;
@@ -10047,70 +10046,81 @@
             inset: 0;
             width: 100%;
             height: 100%;
+        }
+
+        /* 四片梯形 flap：不使用 board.html 的深色底，改用面板淺色＋淡主色。
+           hover／點擊由梯形本身接收，數值只負責顯示。 */
+        .st-ps__flap {
+            fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 4%, var(--studio-bg-1, #ffffff));
+            stroke: var(--studio-border, #d8d8dc);
+            stroke-width: 1.2;
+            stroke-linejoin: round;
+            pointer-events: auto;
+            cursor: pointer;
+            outline: none;
+            transition: fill .15s ease, stroke .15s ease, stroke-width .15s ease;
+        }
+
+        .st-ps__flap:hover,
+        .st-ps__flap:focus-visible {
+            fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 10%, var(--studio-bg-1, #ffffff));
+            stroke: var(--studio-accent, #6d5cf6);
+        }
+
+        /* 該側已有宣告值 */
+        .st-ps__flap.is-set {
+            fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 7%, var(--studio-bg-1, #ffffff));
+            stroke: color-mix(in srgb, var(--studio-accent, #6d5cf6) 55%, var(--studio-border, #d8d8dc));
+        }
+
+        /* 浮層正在編輯的那一側 */
+        .st-ps__flap.is-active {
+            fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 14%, var(--studio-bg-1, #ffffff));
+            stroke: var(--studio-accent, #6d5cf6);
+            stroke-width: 1.8;
+        }
+
+        .st-ps__board {
+            fill: var(--studio-bg-1, #ffffff);
+            stroke: var(--studio-border, #d8d8dc);
+            stroke-width: 1.2;
             pointer-events: none;
         }
 
-        .st-ps__outer {
+        .st-ps__dashed {
             fill: none;
-            stroke: var(--studio-border, #c9c9d3);
-            stroke-width: 1.5;
-        }
-
-        .st-ps__inner {
-            fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 6%, transparent);
-            stroke: var(--studio-accent, #6d5cf6);
-            stroke-width: 1.5;
-        }
-
-        .st-ps__diag {
-            fill: none;
-            stroke: var(--studio-border, #c9c9d3);
-            stroke-width: 1;
+            stroke: var(--studio-text-3, #b9b9c2);
+            stroke-width: 1.2;
             stroke-dasharray: 6 4;
-            opacity: .7;
+            opacity: .8;
+            pointer-events: none;
         }
 
-        .st-ps__dot {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--studio-text-3, #8b8b95);
+        .st-ps__element {
+            fill: url(#st-ps-elem-grad);
+            stroke: none;
+            filter: drop-shadow(0 2px 6px rgba(109, 92, 246, .18));
+            pointer-events: none;
         }
-
-        .st-ps__dot--tl { top: 2px; left: 2px; }
-        .st-ps__dot--tr { top: 2px; right: 2px; }
-        .st-ps__dot--bl { bottom: 2px; left: 2px; }
-        .st-ps__dot--br { bottom: 2px; right: 2px; }
 
         .st-ps__edge {
             position: absolute;
             z-index: 2;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 3px;
+            justify-content: center;
+            pointer-events: none;   /* 只顯示 value，點擊交給下方的梯形 */
         }
 
-        .st-ps__edge--top { top: 8px; left: 50%; transform: translateX(-50%); }
-        .st-ps__edge--bottom { bottom: 8px; left: 50%; transform: translateX(-50%); flex-direction: column-reverse; }
-        .st-ps__edge--left { left: 8px; top: 50%; transform: translateY(-50%); align-items: flex-start; }
-        .st-ps__edge--right { right: 8px; top: 50%; transform: translateY(-50%); align-items: flex-end; }
-
-        .st-ps__edge-label {
-            color: var(--studio-text-3, #8b8b95);
-            font-size: 8.5px;
-            font-weight: 700;
-            letter-spacing: .8px;
-            line-height: 1;
-            text-transform: uppercase;
-            pointer-events: none;
-        }
+        .st-ps__edge--top { top: 20%; left: 50%; transform: translate(-50%, -50%); }
+        .st-ps__edge--bottom { top: 80%; left: 50%; transform: translate(-50%, -50%); }
+        .st-ps__edge--left { top: 50%; left: 20%; transform: translate(-50%, -50%); }
+        .st-ps__edge--right { top: 50%; left: 80%; transform: translate(-50%, -50%); }
 
         .st-ps__edge-value {
-            width: 58px;
-            height: 22px;
-            padding: 0 6px;
+            width: 48px;
+            height: 18px;
+            padding: 0 5px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
@@ -10120,62 +10130,16 @@
             background: color-mix(in srgb, var(--studio-bg-1, #ffffff) 88%, transparent);
             color: var(--studio-text-1, #2f2f35);
             font-family: inherit;
-            font-size: 11px;
+            font-size: 10.5px;
             font-variant-numeric: tabular-nums;
             text-align: center;
-            outline: none;
-            cursor: pointer;
-            transition: border-color .15s ease, box-shadow .15s ease, color .15s ease;
-        }
-
-        .st-ps__edge:hover .st-ps__edge-value {
-            border-color: var(--studio-text-3, #8b8b95);
-        }
-
-        .st-ps__edge-value:focus-visible {
-            border-color: var(--studio-accent, #6d5cf6);
-            box-shadow: 0 0 0 2px rgba(109, 92, 246, .14);
+            transition: color .15s ease, font-weight .15s ease;
         }
 
         /* 值偏離預設值（auto）→ 以主色標示，回到預設值就恢復一般字色 */
         .st-ps__edge-value.is-set {
             color: var(--studio-accent, #6d5cf6);
             font-weight: 600;
-        }
-
-        .st-ps__center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            width: 28.6%;
-            min-width: 56px;
-            text-align: center;
-            pointer-events: none;
-        }
-
-        .st-ps__center-title {
-            color: var(--studio-text-3, #8b8b95);
-            font-size: 8px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            line-height: 1;
-            text-transform: uppercase;
-        }
-
-        .st-ps__center-preview {
-            max-width: 100%;
-            overflow: hidden;
-            color: var(--studio-text-2, #61616b);
-            font-size: 9px;
-            line-height: 1.3;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         /* ---------- ⑤ 圖示按鈕群：一組一框的 segmented control ---------- */
@@ -10453,6 +10417,34 @@
             font-size: 10px;
             font-weight: 600;
             letter-spacing: .3px;
+        }
+        /* 單位鈕（可點擊切換單位，參考 Border 扇區的單位鈕） */
+        button.st-sp-pop__unit {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 0;
+            background: transparent;
+            padding: 2px 4px;
+            margin: -2px -4px -2px 0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .3px;
+            line-height: 1;
+            color: #8b8b95;
+        }
+        button.st-sp-pop__unit.is-clickable {
+            cursor: pointer;
+            transition: color .12s, background .12s;
+        }
+        button.st-sp-pop__unit.is-clickable:hover {
+            color: var(--studio-accent, #6d5cf6);
+            background: rgba(127, 127, 140, .12);
+        }
+        button.st-sp-pop__unit.is-clickable:focus-visible {
+            outline: 2px solid var(--studio-accent, #6d5cf6);
+            outline-offset: 1px;
         }
 
         /* 沒有 href 的 MDN 圖示不要顯示（浮層編輯器的說明框改在內文放連結） */
@@ -13932,10 +13924,10 @@
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',
                     values: {
-                        'visible': 'Controls how content overflows its container when it is too large.',
-                        'clip': 'Content that exceeds the container’s size is clipped without scrollbars. It can not be scrolled with JavaScript or via a scroll-timeline animation.',
-                        'hidden': 'Content that exceeds the container’s size is hidden without scrollbars. It can be scrolled with JavaScript or via a scroll-timeline animation.',
-                        'auto': 'Scrollbars are added to the container only when necessary, based on the content size.',
+                        'visible': { code: 'overflow-x: visible;<br>overflow-y: visible;', desc: 'Controls how content overflows its container when it is too large.' },
+                        'clip': { code: 'overflow-x: clip;<br>overflow-y: clip;', desc: 'Content that exceeds the container’s size is clipped without scrollbars. It can not be scrolled with JavaScript or via a scroll-timeline animation.' },
+                        'hidden': { code: 'overflow-x: hidden;<br>overflow-y: hidden;', desc: 'Content that exceeds the container’s size is hidden without scrollbars. It can be scrolled with JavaScript or via a scroll-timeline animation.' },
+                        'auto': { code: 'overflow-x: auto;<br>overflow-y: auto;', desc: 'Scrollbars are added to the container only when necessary, based on the content size.' },
                     },
                     reset: () => studioClearProps(['overflow', 'overflow-x', 'overflow-y']),
                 },
@@ -14415,7 +14407,17 @@
                 'max-width':         { title: 'Max Width',     code: 'max-width: none;',          desc: 'Sets the maximum width of an element.',                          mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-width',     init: 'none',  defaults: ['none'] },
                 'max-height':        { title: 'Max Height',    code: 'max-height: none;',         desc: 'Sets the maximum height of an element.',                         mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-height',    init: 'none',  defaults: ['none'] },
                 'aspect-ratio':      { title: 'Aspect ratio',  code: 'aspect-ratio: auto;',       desc: `Controls the aspect ratio of an element's box.`,                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/aspect-ratio',  init: 'auto',  defaults: ['auto'] },
-                'overflow':          { title: 'Overflow',      code: 'overflow-x: visible;<br>overflow-y: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: ['visible'] },
+                'overflow':          { title: 'Overflow',      code: 'overflow-x: visible;<br>overflow-y: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: ['visible', ''],
+                    read: function() {
+                        return studioOverflowAppliedValue() || 'visible';
+                    },
+                    values: {
+                        'visible': { code: 'overflow-x: visible;<br>overflow-y: visible;', desc: 'Content is fully visible and extends beyond the container if it exceeds its size.' },
+                        'clip':    { code: 'overflow-x: clip;<br>overflow-y: clip;',       desc: 'Content that exceeds the container’s size is clipped without scrollbars. It can not be scrolled with JavaScript or via a scroll-timeline animation.' },
+                        'hidden':  { code: 'overflow-x: hidden;<br>overflow-y: hidden;',   desc: 'Content that exceeds the container’s size is hidden without scrollbars. It can be scrolled with JavaScript or via a scroll-timeline animation.' },
+                        'auto':    { code: 'overflow-x: auto;<br>overflow-y: auto;',       desc: 'Scrollbars are added to the container only when necessary, based on the content size.' },
+                    },
+                },
                 'object-fit':        { title: 'Object fit',    code: 'object-fit: fill;',         desc: 'Specifies how the content of an element should fit.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/object-fit',    init: 'fill',  defaults: ['fill', ''] },
                 'object-position':   { title: 'Object position', code: 'object-position: 50% 50%;', desc: 'Where the replaced content is aligned inside its box.',              mdn: 'https://developer.mozilla.org/docs/Web/CSS/object-position', init: '50% 50%', defaults: ['50% 50%', ''] },
                 'margin':            { title: 'Margin',        code: 'margin: 0;',                desc: 'Space outside the border. Each side can be set separately.',          mdn: 'https://developer.mozilla.org/docs/Web/CSS/margin',        init: '0',     defaults: ['0'], multi: ['margin-top','margin-right','margin-bottom','margin-left'] },
@@ -18467,6 +18469,38 @@
                 const onReset = cfg.onReset || function () { };
                 const onCommit = cfg.onCommit || function () { };
 
+                /* ---- 單位切換（可選）----
+                   傳入 cfg.units（如 ['px','em','rem','%']）時，單位鈕可點擊循環切換，
+                   並把目前輸入的數值按新單位一起寫回（參考 Border 扇區的 cycleUnit）。
+                   沒傳時維持原本「單位隨值自動顯示」的行為（如 Position 的 offsets）。 */
+                const unitsList = Array.isArray(cfg.units) && cfg.units.length ? cfg.units.slice() : null;
+                let curUnit = unitsList ? String(unitsList[0] || 'px').toLowerCase() : '';
+                const LEN_RE = /^(-?(?:\d+\.?\d*|\.\d+))\s*([a-z%]*)$/i;
+                function splitLenLocal(v) {
+                    const m = LEN_RE.exec(String(v == null ? '' : v).trim());
+                    if (!m) return null;
+                    return { num: parseFloat(m[1]), unit: (m[2] || '').toLowerCase() };
+                }
+                function fmtNumLocal(n) { return String(Math.round(n * 1000) / 1000); }
+                function unitTextFor(value) {
+                    if (unitsList) return (curUnit || '').toUpperCase();
+                    return unitFn(value);
+                }
+                /* 由「宣告原值」解析應顯示的單位；解析不到或不在清單內就用第一個單位 */
+                function unitOfRaw(raw) {
+                    const s = splitLenLocal(raw);
+                    if (s && s.unit && unitsList && unitsList.indexOf(s.unit) !== -1) return s.unit;
+                    return String((unitsList && unitsList[0]) || 'px').toLowerCase();
+                }
+                function declaredOf(prop) {
+                    if (typeof cfg.readRaw === 'function') {
+                        const v = cfg.readRaw(prop);
+                        return v == null ? '' : String(v).trim();
+                    }
+                    const v = readFn(prop);
+                    return v == null ? '' : String(v).trim();
+                }
+
                 /* ---- 浮層編輯框 ---- */
                 const pop = document.createElement('div');
                 pop.className = 'st-sp-pop';
@@ -18479,7 +18513,7 @@
                     '</button>',
                     '<span class="st-sp-pop__field">',
                     '  <input type="text" inputmode="decimal" class="st-sp-pop__input" data-sp-input placeholder="' + (cfg.placeholder || '0') + '" spellcheck="false" autocomplete="off">',
-                    '  <span class="st-sp-pop__unit">PX</span>',
+                    '  <button type="button" class="st-sp-pop__unit" data-sp-unit>PX</button>',
                     '</span>',
                 ].join('');
                 document.body.appendChild(pop);
@@ -18531,7 +18565,9 @@
                     const set = isSet(prop);
                     let code = d.code || (prop + ': ' + displayVal(presetOf(prop)) + ';');
                     if (set && cur) {
-                        const unit = /\d$/.test(cur) ? 'px' : '';
+                        let unit;
+                        if (unitsList && /^-?[\d.]+$/.test(cur)) unit = curUnit;
+                        else unit = /\d$/.test(cur) ? 'px' : '';
                         code = prop + ': ' + cur + unit + ';';
                     }
                     return {
@@ -18597,8 +18633,16 @@
                     curAnchor = anchor;
                     anchor.classList.add('is-active');
                     setLabelText(titleOf(curProp));
-                    input.value = display(curProp);
-                    unitEl.textContent = unitFn(input.value);
+                    if (unitsList) {
+                        /* 取宣告原值（含單位）決定初始單位；輸入框只放數字 */
+                        const raw = declaredOf(curProp);
+                        const s = splitLenLocal(raw);
+                        curUnit = unitOfRaw(raw);
+                        input.value = s ? fmtNumLocal(s.num) : (displayVal(raw) || displayVal(presetOf(curProp)));
+                    } else {
+                        input.value = display(curProp);
+                    }
+                    unitEl.textContent = unitTextFor(input.value);
                     sync(curProp);
                     place(anchor);
                     requestAnimationFrame(() => { input.focus(); input.select(); });
@@ -18613,9 +18657,42 @@
                 }
                 function commit() {
                     if (!curProp) return;
-                    const v = normalizeFn(input.value);
+                    let v = normalizeFn(input.value);
+                    if (unitsList) {
+                        const s = splitLenLocal(input.value);
+                        if (s) {
+                            /* 手打帶單位（如 50%）→ 同步單位鈕；否則用目前單位 */
+                            if (s.unit && unitsList.indexOf(s.unit) !== -1) curUnit = s.unit;
+                            input.value = fmtNumLocal(s.num);
+                            v = fmtNumLocal(s.num) + curUnit;
+                        }
+                    }
                     writeFn(curProp, v);
                     onCommit(curProp, v);
+                }
+                /* 點單位鈕：切到下一個單位，並把目前數值的單位一起換掉
+                   （參考 Border 扇區的 cycleUnit：先換單位，數值不變一起寫回）。 */
+                function cycleEdgeUnit() {
+                    if (!unitsList || !curProp) return;
+                    const i = unitsList.indexOf(curUnit);
+                    curUnit = unitsList[(i + 1) % unitsList.length];
+                    unitEl.textContent = unitTextFor(input.value);
+                    const s = splitLenLocal(input.value);
+                    if (s) {
+                        input.value = fmtNumLocal(s.num);
+                        const v = fmtNumLocal(s.num) + curUnit;
+                        writeFn(curProp, v);
+                        onCommit(curProp, v);
+                    }
+                    sync(curProp);
+                }
+                if (unitsList) {
+                    unitEl.classList.add('is-clickable');
+                    unitEl.setAttribute('title', '切換單位');
+                    unitEl.setAttribute('aria-label', '切換單位');
+                    /* 按下滑鼠時不讓輸入框失焦（否則會先用舊單位 commit 一次） */
+                    unitEl.addEventListener('mousedown', e => e.preventDefault());
+                    unitEl.addEventListener('click', e => { e.preventDefault(); cycleEdgeUnit(); });
                 }
                 /* 選取對象換了（含點畫布）就收起浮層，避免編輯到別的元件 */
                 function checkSelection(sel) {
@@ -18641,7 +18718,11 @@
                    單位也跟著換（Position 的 auto／PX 會隨輸入值切換）。 */
                 input.addEventListener('input', () => {
                     if (!curProp) return;
-                    unitEl.textContent = unitFn(input.value);
+                    if (unitsList) {
+                        const s = splitLenLocal(input.value);
+                        if (s && s.unit && unitsList.indexOf(s.unit) !== -1) curUnit = s.unit;
+                    }
+                    unitEl.textContent = unitTextFor(input.value);
                     sync(curProp);
                 });
                 input.addEventListener('blur', () => { if (curProp) commit(); });
@@ -18667,8 +18748,15 @@
                     /* 正在編輯這一側 → 輸入框跟著回到預設值，
                        晶片高亮才會立刻熄滅、說明框裡的 Reset value 也會跟著消失。 */
                     if (curProp === prop) {
-                        input.value = display(prop);
-                        unitEl.textContent = unitFn(input.value);
+                        if (unitsList) {
+                            const raw = declaredOf(prop);
+                            const s = splitLenLocal(raw);
+                            curUnit = unitOfRaw(raw);
+                            input.value = s ? fmtNumLocal(s.num) : (displayVal(raw) || displayVal(presetOf(prop)));
+                        } else {
+                            input.value = display(prop);
+                        }
+                        unitEl.textContent = unitTextFor(input.value);
                         sync(prop);
                     }
                 });
@@ -18925,6 +19013,15 @@
                     docs: STUDIO_SP_SIDE_DOC,
                     presets: PRESET,
                     unit: 'PX',
+                    /* 單位鈕可循環切換；參考 Border 扇區的 cycleUnit 行為 */
+                    units: ['px', 'em', 'rem', '%'],
+                    /* 讀「宣告原值」（含單位）以決定初始單位：
+                       read() 取的是畫布計算值（一律 px），拿不到 %／em 這類原始單位。 */
+                    readRaw: prop => {
+                        const sel = editor.getSelected();
+                        if (!sel) return '';
+                        return String(studioEffProp(sel, prop) || '').trim();
+                    },
                     read: read,
                     write: write,
                     normalize: normalize,
@@ -19114,26 +19211,26 @@
                     '    <button type="button" class="st-ly__iconbtn" data-clear="z-index" title="清除">' + ICO.minus + '</button>',
                     '  </div>',
                     '  <div class="st-ps__skel" data-offsets hidden>',
-                    '    <svg class="st-ps__skel-svg" viewBox="0 0 560 340" preserveAspectRatio="none" aria-hidden="true">',
-                    '      <rect class="st-ps__outer" x="1" y="1" width="558" height="338" rx="2"/>',
-                    '      <rect class="st-ps__inner" x="200" y="138" width="160" height="64" rx="2"/>',
-                    '      <line class="st-ps__diag" x1="1" y1="1" x2="200" y2="138"/>',
-                    '      <line class="st-ps__diag" x1="559" y1="1" x2="360" y2="138"/>',
-                    '      <line class="st-ps__diag" x1="1" y1="339" x2="200" y2="202"/>',
-                    '      <line class="st-ps__diag" x1="559" y1="339" x2="360" y2="202"/>',
+                    '    <svg class="st-ps__skel-svg" viewBox="0 0 500 500" preserveAspectRatio="none">',
+                    '      <defs>',
+                    '        <linearGradient id="st-ps-elem-grad" x1="0" y1="0" x2="1" y2="1">',
+                    '          <stop offset="0%" stop-color="#c9b6ff"/>',
+                    '          <stop offset="50%" stop-color="#a78bfa"/>',
+                    '          <stop offset="100%" stop-color="#7c5cff"/>',
+                    '        </linearGradient>',
+                    '      </defs>',
+                    '      <polygon class="st-ps__flap" data-side="top" data-edge-anchor data-prop="top" role="button" tabindex="0" aria-label="Top 偏移" points="130,130 370,130 340,70 160,70"/>',
+                    '      <polygon class="st-ps__flap" data-side="bottom" data-edge-anchor data-prop="bottom" role="button" tabindex="0" aria-label="Bottom 偏移" points="130,370 370,370 340,430 160,430"/>',
+                    '      <polygon class="st-ps__flap" data-side="left" data-edge-anchor data-prop="left" role="button" tabindex="0" aria-label="Left 偏移" points="130,130 130,370 70,340 70,160"/>',
+                    '      <polygon class="st-ps__flap" data-side="right" data-edge-anchor data-prop="right" role="button" tabindex="0" aria-label="Right 偏移" points="370,130 370,370 430,340 430,160"/>',
+                    '      <rect class="st-ps__board" x="130" y="130" width="240" height="240"/>',
+                    '      <rect class="st-ps__dashed" x="148" y="148" width="204" height="204" rx="16"/>',
+                    '      <rect class="st-ps__element" x="175" y="175" width="150" height="150" rx="14"/>',
                     '    </svg>',
-                    '    <span class="st-ps__dot st-ps__dot--tl"></span>',
-                    '    <span class="st-ps__dot st-ps__dot--tr"></span>',
-                    '    <span class="st-ps__dot st-ps__dot--bl"></span>',
-                    '    <span class="st-ps__dot st-ps__dot--br"></span>',
-                    '    <div class="st-ps__edge st-ps__edge--top" data-edge-anchor data-prop="top" role="button" tabindex="0" aria-label="Top 偏移"><span class="st-ps__edge-label">Top</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
-                    '    <div class="st-ps__edge st-ps__edge--bottom" data-edge-anchor data-prop="bottom" role="button" tabindex="0" aria-label="Bottom 偏移"><span class="st-ps__edge-label">Bottom</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
-                    '    <div class="st-ps__edge st-ps__edge--left" data-edge-anchor data-prop="left" role="button" tabindex="0" aria-label="Left 偏移"><span class="st-ps__edge-label">Left</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
-                    '    <div class="st-ps__edge st-ps__edge--right" data-edge-anchor data-prop="right" role="button" tabindex="0" aria-label="Right 偏移"><span class="st-ps__edge-label">Right</span><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
-                    '    <div class="st-ps__center">',
-                    '      <span class="st-ps__center-title">Element</span>',
-                    '      <span class="st-ps__center-preview" data-pos-preview>position: absolute</span>',
-                    '    </div>',
+                    '    <div class="st-ps__edge st-ps__edge--top" data-prop="top"><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__edge st-ps__edge--bottom" data-prop="bottom"><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__edge st-ps__edge--left" data-prop="left"><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
+                    '    <div class="st-ps__edge st-ps__edge--right" data-prop="right"><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
                     '  </div>',
                     '</div>',
                     '</div>',
@@ -19214,10 +19311,12 @@
                     placeholderTitle: 'Offset',
                     placeholderText: 'Offset value',
                     placeholder: 'auto',
-                    /* 骨架上四個數值的高亮 */
+                    /* 骨架上四個數值與梯形的高亮 */
                     onState: (prop, set) => {
                         const el = root.querySelector('.st-ps__edge[data-prop="' + prop + '"] .st-ps__edge-value');
                         if (el) el.classList.toggle('is-set', set);
+                        const flap = root.querySelector('.st-ps__flap[data-edge-anchor][data-prop="' + prop + '"]');
+                        if (flap) flap.classList.toggle('is-set', set);
                     },
                     /* Reset value：清掉宣告讓它回到 auto；
                        若仍不是 auto（例如值來自 class 規則）就顯式寫回 auto。 */
@@ -19248,8 +19347,6 @@
                     $$('[data-zindex]').forEach(el => { el.hidden = staticLike; });
                     /* 介面收起時，浮層的錨點已不可見 → 一併關掉浮層 */
                     if (staticLike) psEditor.close();
-                    const pv = $('[data-pos-preview]');
-                    if (pv) pv.textContent = 'position: ' + pos;
                     /* z-index 輸入框 */
                     const zi = $('input[data-prop="z-index"]');
                     if (zi) zi.value = read('z-index');
@@ -19264,9 +19361,9 @@
                 }
 
                 root.addEventListener('click', e => {
-                    /* 點四界 → 開啟浮層編輯框（與 Space 扇區同一套元件） */
-                    const edge = e.target.closest && e.target.closest('.st-ps__edge[data-prop]');
-                    if (edge) { psEditor.open(edge); return; }
+                    /* 點梯形 → 開啟浮層編輯框（與 Space 扇區同一套元件） */
+                    const flap = e.target.closest && e.target.closest('.st-ps__flap[data-edge-anchor][data-prop]');
+                    if (flap) { psEditor.open(flap); return; }
                     if (e.target.closest('[data-act="toggle"]')) {
                         psEditor.close();
                         root.classList.toggle('is-collapsed');
@@ -19278,13 +19375,13 @@
                         paint();
                     }
                 });
-                /* div 不是原生按鈕，補上 Enter／Space 開啟浮層 */
+                /* SVG polygon 不是原生按鈕，補上 Enter／Space 開啟浮層 */
                 root.addEventListener('keydown', e => {
                     if (e.key !== 'Enter' && e.key !== ' ') return;
-                    const edge = e.target.closest && e.target.closest('.st-ps__edge[data-prop]');
-                    if (!edge) return;
+                    const flap = e.target.closest && e.target.closest('.st-ps__flap[data-edge-anchor][data-prop]');
+                    if (!flap) return;
                     e.preventDefault();
-                    psEditor.open(edge);
+                    psEditor.open(flap);
                 });
                 posSel.addEventListener('change', () => {
                     /* static 是初始值，寫成空字串讓它回到預設；
