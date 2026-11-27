@@ -10278,6 +10278,34 @@
             background: var(--studio-hover-strong, rgba(134, 134, 158, .34));
             color: var(--studio-text-1, #e4e4e7);
         }
+        .st-ly__btn.is-default:hover {
+            background: var(--studio-hover-strong, rgba(134, 134, 158, .48));
+        }
+
+        /* ============================================================
+         * 分頁（分段按鍵）的雙態高亮
+         *   · 灰色 .is-default ＝未設置／已移除該 CSS 規則
+         *     （Reset value 視同移除該規則 → 聚焦回首個分頁）
+         *   · 紫色 .is-on      ＝已套用該 CSS 規則（實心紫底 + 白字）
+         * 只套用在採用此口徑的扇區：Flex child／Grid child／
+         * Size（Overflow）／Typography；其他扇區維持原樣。 */
+        .st-ly--flexchild .st-ly__btns .st-ly__btn.is-on,
+        .st-ly--gridchild .st-ly__btns .st-ly__btn.is-on,
+        .st-ly--gridchild .st-gc__tabs .st-gc__tab.is-on,
+        .st-sz__row[data-prop="overflow"] .st-ly__btn.is-on,
+        .st-ty .st-ly__btns .st-ly__btn.is-on {
+            background: var(--studio-accent, #6d5cf6);
+            color: #fff;
+        }
+        /* 紫色分頁 hover 時維持紫底（避免被通用的 hover 灰底蓋掉） */
+        .st-ly--flexchild .st-ly__btns .st-ly__btn.is-on:hover,
+        .st-ly--gridchild .st-ly__btns .st-ly__btn.is-on:hover,
+        .st-ly--gridchild .st-gc__tabs .st-gc__tab.is-on:hover,
+        .st-sz__row[data-prop="overflow"] .st-ly__btn.is-on:hover,
+        .st-ty .st-ly__btns .st-ly__btn.is-on:hover {
+            background: var(--studio-accent, #6d5cf6);
+            color: #fff;
+        }
 
         /* 值繼承自全域根元素（未在選取元素上宣告）時，欄位以次要文字色顯示 */
         .st-sz__control input.is-inherited {
@@ -13742,7 +13770,7 @@
                         }
                         return Object.keys(v).some(pp => {
                             const sv = String(v[pp] || '').trim();
-                            return !!sv && sv !== 'auto';
+                            return !!sv;
                         });
                     },
                     reset: () => { studioClearProps(STUDIO_GRID_POS_PROPS); gcResetHooks(); },
@@ -13818,7 +13846,8 @@
                     desc: 'Aligns an item along the cross/block axis within its container.',
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/align-self',
-                    isSet: v => !!v && v !== 'auto',
+                    /* 已宣告就算套用（auto 也算一條規則）→ 標籤晶片紫色高亮 */
+                    isSet: v => !!v,
                     reset: () => studioClearProps(['align-self']),
                     view: function() {
                         const v = String(studioReadProp('align-self') || 'auto').trim().toLowerCase();
@@ -13839,7 +13868,8 @@
                     desc: 'Aligns an item along the inline axis within its container.',
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/justify-self',
-                    isSet: v => !!v && v !== 'auto',
+                    /* 已宣告就算套用（auto 也算一條規則）→ 標籤晶片紫色高亮 */
+                    isSet: v => !!v,
                     reset: () => studioClearProps(['justify-self']),
                     view: function() {
                         const v = String(studioReadProp('justify-self') || 'auto').trim().toLowerCase();
@@ -13858,7 +13888,8 @@
                     desc: 'Controls the order in which an element appears within its flex or grid container.',
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/order',
-                    isSet: v => !!v && v !== '0',
+                    /* 已宣告就算套用（order: 0 也是一條規則） */
+                    isSet: v => !!v,
                     reset: () => studioClearProps(['order']),
                     view: function() {
                         const v = String(studioReadProp('order') || '0').trim();
@@ -13877,8 +13908,8 @@
                     desc: 'Specifies the ability of a flex item to grow, shrink, or set its initial size within a flex container.',
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/flex-grow',
-                    /* v = { grow: 數字, shrink: 數字, basis: 字串 } */
-                    isSet: v => v.grow !== 0 || v.shrink !== 1 || v.basis !== 'auto',
+                    /* v = { grow, shrink, basis } 皆為「原始宣告字串」，空字串＝未宣告 */
+                    isSet: v => !!(v.grow || v.shrink || v.basis),
                     reset: () => studioClearProps(['flex-grow', 'flex-shrink', 'flex-basis']),
                     view: function() {
                         const g = parseFloat(String(studioReadProp('flex-grow') || '0').trim());
@@ -13908,14 +13939,12 @@
                 if (!d) return false;
                 const sel = editor.getSelected();
                 if (key === 'sizing') {
-                    const g = parseFloat(String(studioReadProp('flex-grow') || '').trim());
-                    const sh = parseFloat(String(studioReadProp('flex-shrink') || '').trim());
-                    const b = String(studioReadProp('flex-basis') || 'auto').trim().toLowerCase();
-                    return d.isSet({
-                        grow: isNaN(g) ? 0 : g,
-                        shrink: isNaN(sh) ? 1 : sh,
-                        basis: b || 'auto',
-                    });
+                    /* 傳「原始宣告字串」：空字串＝未宣告，
+                       isSet 只看有沒有宣告值（不看數值是否等於 CSS 初始值）。 */
+                    const g = String(studioReadProp('flex-grow') || '').trim();
+                    const sh = String(studioReadProp('flex-shrink') || '').trim();
+                    const b = String(studioReadProp('flex-basis') || '').trim();
+                    return d.isSet({ grow: g, shrink: sh, basis: b });
                 }
                 if (key === 'position') {
                     const o = {};
@@ -14041,7 +14070,7 @@
                     values: {
                         'start': { code: 'text-align: start;', desc: 'Aligns the text to the left edge of its container.' },
                         'center': { code: 'text-align: center;', desc: 'Centers the text horizontally within its container.' },
-                        'right': { code: 'text-align: right;', desc: 'Aligns the text to the right edge of its container.' },
+                        'end': { code: 'text-align: end;', desc: 'Aligns the text to the right edge of its container.' },
                         'justify': { code: 'text-align: justify;', desc: 'Adjusts word spacing so the text is aligned to both the left and right edges of the container.' },
                     },
                     reset: () => { studioClearProps(['text-align']); document.dispatchEvent(new CustomEvent('studio:ty-ctrl-reset', { detail: { prop: 'text-align' } })); },
@@ -14292,6 +14321,14 @@
                         if (cfgKey === 'grid-position') {
                             return studioBlockIsSet('position') ? { kind: 'ctrl', key: cfgKey } : null;
                         }
+                        /* 納入統一雙態口徑的分頁群組：整組的 CSS 規則已套用時才提供
+                           Reset value（灰色＝未套用，沒有東西可還原）。
+                           套用時群組內任一分頁的說明框都附「Reset value」；
+                           按下 Reset value 即移除該 CSS 規則 → 灰色聚焦回首個分頁。 */
+                        const group = studioTabGroupOf(btn);
+                        if (group && group.hasAttribute('data-tab-applied')) {
+                            return studioTabApplied(group) ? { kind: 'ctrl', key: cfgKey } : null;
+                        }
                         /* 其他控制鍵：只有「目前生效且不是初始值」時才提供 Reset value */
                         if (!btn.classList.contains('is-on')) return null;
                         if (cfg.initial !== undefined && val === cfg.initial) return null;
@@ -14328,6 +14365,37 @@
                     };
                 }
                 if (ref.btn) ref.btn.classList.toggle('is-set', state);
+            }
+
+            /* ============================================================
+             * 分頁（分段按鍵）狀態 ─ 統一口徑
+             *   · 灰色 .is-default ＝未設置／已移除該 CSS 規則
+             *     （Reset value 視同移除該規則 → 聚焦回首個分頁）
+             *   · 紫色 .is-on      ＝已套用該 CSS 規則
+             * 群組容器以 data-tab-applied="1|0" 記錄目前的套用狀態，
+             * 讓「按鍵高亮」與「Popover 的 Reset value」永遠同一口徑。
+             * ============================================================ */
+            function studioTabGroupOf(btn) {
+                return btn ? btn.closest('[data-prop], [data-typrop], [data-tabs]') : null;
+            }
+            function studioTabApplied(group) {
+                return !!(group && group.getAttribute('data-tab-applied') === '1');
+            }
+            /* 依「是否套用」重畫一組分頁：
+               applied    ：該 CSS 規則目前是否套用
+               match(btn) ：該分頁是否對應目前套用的值（僅 applied 時才亮紫色）
+               defaultIdx ：未套用時接住灰色高亮的分頁（預設 0 ＝首個分頁）
+               灰色高亮只會落在 defaultIdx 這顆分頁上，其餘分頁不帶任何狀態。 */
+            function studioPaintTabs(group, applied, match, defaultIdx) {
+                if (!group) return;
+                group.setAttribute('data-tab-applied', applied ? '1' : '0');
+                const di = (defaultIdx === undefined || defaultIdx === null) ? 0 : defaultIdx;
+                const btns = group.querySelectorAll('.st-ly__btn');
+                Array.prototype.forEach.call(btns, function (btn, i) {
+                    const on = !!applied && !!(match ? match(btn) : false);
+                    btn.classList.toggle('is-on', on);
+                    btn.classList.toggle('is-default', !applied && i === di);
+                });
             }
 
             /* ============================================================
@@ -14604,9 +14672,9 @@
                 'grid-auto-flow':    { title: 'Grid auto flow', code: 'grid-auto-flow: row;',     desc: 'How auto-placed items flow through the grid (rows or columns).',     mdn: 'https://developer.mozilla.org/docs/Web/CSS/grid-auto-flow', init: 'row', defaults: ['row', ''] },
                 'row-gap':           { title: 'Row gap',       code: 'row-gap: 0;',               desc: 'Gutter between rows of a flex or grid container.',                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/row-gap', init: '0', defaults: ['0', '0px', ''], props: ['gap', 'row-gap', 'column-gap'] },
                 'column-gap':        { title: 'Column gap',    code: 'column-gap: 0;',            desc: 'Gutter between columns of a flex or grid container.',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/column-gap', init: '0', defaults: ['0', '0px', ''], props: ['gap', 'row-gap', 'column-gap'] },
-                'family':            { title: 'Family',        code: 'font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;', desc: 'Sets the font family used to render the text. Defaults to Arial.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-family',    init: 'Arial',       defaults: ['Arial', 'Arial, "Helvetica Neue", Helvetica, sans-serif', ''] },
-                'weight':            { title: 'Weight',        code: 'font-weight: normal;',           desc: 'Sets the boldness (weight) of the font.',                                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-weight',    init: 'normal', defaults: ['normal', ''] },
-                'color':             { title: 'Color',         code: 'color: currentcolor;',           desc: 'Sets the colour of the text and its decorations.',                               mdn: 'https://developer.mozilla.org/docs/Web/CSS/color',          init: 'currentcolor', defaults: ['currentcolor', ''] },
+                'family':            { title: 'Family',        code: 'font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;', desc: 'Sets the font family used to render the text. Defaults to Arial.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-family',    init: 'Arial',       defaults: ['Arial', 'Arial, "Helvetica Neue", Helvetica, sans-serif', ''], props: ['font-family'] },
+                'weight':            { title: 'Weight',        code: 'font-weight: normal;',           desc: 'Sets the boldness (weight) of the font.',                                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-weight',    init: 'normal', defaults: ['normal', '400', ''], props: ['font-weight'] },
+                'color':             { title: 'Color',         code: 'color: currentcolor;',           desc: 'Sets the colour of the text and its decorations.',                               mdn: 'https://developer.mozilla.org/docs/Web/CSS/color',          init: 'currentcolor', defaults: ['currentcolor', ''], props: ['color'] },
                 'font-size':         { title: 'Size',          code: 'font-size: medium;',             desc: 'Sets the size of the font. Accepts numbers (px/rem) or keywords (small/medium/large).', mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-size',     init: 'medium',   defaults: ['medium', ''] },
                 'line-height':       { title: 'Height',        code: 'line-height: normal;',           desc: 'Sets the height of a line box, controlling the vertical spacing between lines.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/line-height',    init: 'normal', defaults: ['normal', ''] },
                 'letter-spacing':    { title: 'Spacing',       code: 'letter-spacing: normal;',        desc: 'Sets the horizontal spacing between text characters (tracking).',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/letter-spacing', init: 'normal', defaults: ['normal', ''] }
@@ -17075,49 +17143,66 @@
                     if (!isFlexChild) return;
 
                     // Align 按钮高亮
-                    const alignRaw = read('align-self');
-                    const alignIsAuto = !alignRaw || alignRaw === 'auto';
-                    studioPaintBlock(root, 'align', STUDIO_BLOCKS.align.isSet(String(alignRaw || '').trim()));
-                    $$('.st-ly__btns[data-prop="align-self"] .st-ly__btn').forEach(btn => {
+                    /* 分頁高亮（統一雙態口徑）：
+                       灰色 .is-default ＝未設置／已移除該 CSS 規則 → 聚焦在代表 CSS 初始值的分頁
+                       紫色 .is-on      ＝已套用該 CSS 規則（宣告了就算套用，auto 也算） */
+                    const alignRaw = String(read('align-self') || '').trim();
+                    const alignSet = STUDIO_BLOCKS.align.isSet(alignRaw);
+                    studioPaintBlock(root, 'align', alignSet);
+                    studioPaintTabs($('.st-ly__btns[data-prop="align-self"]'), alignSet, (btn) => {
                         const val = btn.getAttribute('data-val');
-                        if (val === 'auto') btn.classList.toggle('is-on', alignIsAuto);
-                        else btn.classList.toggle('is-on', !alignIsAuto && normAlign(val) === normAlign(alignRaw));
+                        if (!val) return false;
+                        return normAlign(val) === normAlign(alignRaw);
                     });
 
                     // Sizing 按钮高亮
-                    const g = toNum(read('flex-grow'), 0);
-                    const sh = toNum(read('flex-shrink'), 1);
-                    const b = String(read('flex-basis') || 'auto').trim().toLowerCase();
+                    const gRaw = String(read('flex-grow') || '').trim();
+                    const shRaw = String(read('flex-shrink') || '').trim();
+                    const bRaw = String(read('flex-basis') || '').trim();
+                    const g = toNum(gRaw, 0);
+                    const sh = toNum(shRaw, 1);
+                    const b = (bRaw || 'auto').toLowerCase();
                     const isFixed = g === 0 && sh === 0 && b === 'auto';
                     const isGrow = g === 1 && sh === 0 && b === 'auto';
                     const isShrink = g === 0 && sh === 1 && b === 'auto';
                     const isCustom = !isFixed && !isGrow && !isShrink;
-                    studioPaintBlock(root, 'sizing', STUDIO_BLOCKS.sizing.isSet({ grow: g, shrink: sh, basis: b }));
+                    /* 套用判定：flex-grow / flex-shrink / flex-basis 任一有宣告值就算套用 */
+                    const sizingSet = STUDIO_BLOCKS.sizing.isSet({ grow: gRaw, shrink: shRaw, basis: bRaw });
+                    studioPaintBlock(root, 'sizing', sizingSet);
+                    const szGroup = $('.st-ly__btns[data-prop="flex-sizing"]');
                     const szBtns = $$('.st-ly__btns[data-prop="flex-sizing"] .st-ly__btn');
-                    szBtns.forEach(btn => {
+                    /* Sizing 組的「未設置」代表值是 flex-grow:0 / flex-shrink:1 /
+                       flex-basis:auto（= CSS 初始值），對應的按鍵是 Shrink；
+                       首鍵 Fixed（grow:0;shrink:0）本身是一組真實規則，
+                       不能拿來當灰色預設，故灰色高亮落在 Shrink 這顆。 */
+                    let szDefaultIdx = 0;
+                    for (let i = 0; i < szBtns.length; i++) {
+                        if (szBtns[i].getAttribute('data-preset') === 'shrink') { szDefaultIdx = i; break; }
+                    }
+                    studioPaintTabs(szGroup, sizingSet, (btn) => {
                         const preset = btn.getAttribute('data-preset');
-                        if (preset === 'fixed') btn.classList.toggle('is-on', isFixed);
-                        else if (preset === 'grow') btn.classList.toggle('is-on', isGrow);
-                        else if (preset === 'shrink') btn.classList.toggle('is-on', isShrink);
-                        else if (btn.getAttribute('data-act') === 'sizing-more') btn.classList.toggle('is-on', isCustom);
-                    });
+                        if (preset === 'fixed') return isFixed;
+                        if (preset === 'grow') return isGrow;
+                        if (preset === 'shrink') return isShrink;
+                        if (btn.getAttribute('data-act') === 'sizing-more') return isCustom;
+                        return false;
+                    }, szDefaultIdx);
                     setInput(growInp, g);
                     setInput(shrinkInp, sh);
-                    setInput(basisInp, b === 'auto' ? '' : b);
+                    setInput(basisInp, bRaw === '' ? '' : bRaw);
 
                     // Order 按钮高亮
-                    const orderRaw = read('order');
-                    const orderIsAuto = !orderRaw || orderRaw === '0';
-                    studioPaintBlock(root, 'order', STUDIO_BLOCKS.order.isSet(String(orderRaw || '').trim()));
-                    $$('.st-ly__btns[data-prop="order"] .st-ly__btn').forEach(btn => {
+                    const orderRaw = String(read('order') || '').trim();
+                    const orderSet = STUDIO_BLOCKS.order.isSet(orderRaw);
+                    studioPaintBlock(root, 'order', orderSet);
+                    studioPaintTabs($('.st-ly__btns[data-prop="order"]'), orderSet, (btn) => {
                         if (btn.getAttribute('data-act') === 'order-more') {
-                            const n = String(orderRaw);
-                            btn.classList.toggle('is-on', !!orderRaw && n !== '0' && n !== '-1' && n !== '1');
-                            return;
+                            const n = orderRaw;
+                            return !!n && n !== '0' && n !== '-1' && n !== '1';
                         }
                         const val = btn.getAttribute('data-val');
-                        if (val === '0') btn.classList.toggle('is-on', orderIsAuto);
-                        else btn.classList.toggle('is-on', !orderIsAuto && val === orderRaw);
+                        if (!val) return false;
+                        return val === orderRaw;
                     });
                     if (orderCustom) orderCustom.value = read('order');
                 }
@@ -17176,15 +17261,13 @@
                         return;
                     }
                     const val = btn.getAttribute('data-val');
+                    /* 每個分頁都是一條真實的 CSS 規則：auto、order:0 也是規則，
+                       點下去就寫入該規則（宣告了就算套用 → 紫色高亮）；
+                       移除規則請用 Popover 的 Reset value → 灰色聚焦預設分頁。 */
                     if (prop === 'order' && val === '0') {
                         write('order', '0');
-                    } else if (val === 'auto') {
-                        write(prop, '');
                     } else {
                         write(prop, val);
-                    }
-                    if (prop === 'align-self' && val === 'auto') {
-                        write('justify-self', '');
                     }
                     closePops();
                     paint();
@@ -17837,7 +17920,7 @@
                         inp.classList.toggle('is-set', !!v);
                     }
                 }
-                function paintPos(isGridChild) {
+                function paintPos(isGridChild, gridOn) {
                     if (!posBlock) return;
                     if (!isGridChild) return;
                     const sel = editor.getSelected();
@@ -17865,8 +17948,9 @@
                         }
                     }
                     if (!gcTouched) gcMode = positionMode();
-                    $$('.st-gc__tab', posTabs).forEach(t =>
-                        t.classList.toggle('is-on', t.getAttribute('data-mode') === gcMode));
+                    /* Position 三分頁：定位規則未套用 → 灰色聚焦首個分頁（Auto）；
+                       已套用 → 目前所在的模式紫色高亮 */
+                    studioPaintTabs(posTabs, gridOn, (t) => t.getAttribute('data-mode') === gcMode);
                     $$('.st-gc__panel', posBlock).forEach(p =>
                         p.hidden = p.getAttribute('data-panel') !== gcMode);
                     /* 九宮格快捷鍵與棋盤只在 Manual 模式顯示 */
@@ -17981,31 +18065,33 @@
                     /* 三組控鍵的值讀一次，按鈕高亮與區塊高亮共用 */
                     const btnsRaw = {};
                     studioPaintBlock(root, 'position', gridOn);
+                    /* 分頁高亮（統一雙態口徑）：
+                       灰色 .is-default ＝未設置／已移除該 CSS 規則 → 聚焦在代表 CSS 初始值的分頁
+                       紫色 .is-on      ＝已套用該 CSS 規則（宣告了就算套用，auto 也算） */
+                    const TAB_SET_BLOCK = { 'justify-self': 'justify', 'align-self': 'align', 'order': 'order' };
                     $$('.st-ly__btns').forEach(group => {
                         const prop = group.getAttribute('data-prop');
                         if (!prop) return;
-                        const raw = read(prop);
-                        btnsRaw[prop] = String(raw || '').trim();
-                        const isAuto = !raw || raw === 'auto' || (prop === 'order' && raw === '0');
-                        $$('.st-ly__btn', group).forEach(btn => {
+                        const raw = String(read(prop) || '').trim();
+                        btnsRaw[prop] = raw;
+                        /* 套用判定：該屬性有宣告值就算套用 */
+                        const blockKey = TAB_SET_BLOCK[prop];
+                        const isSet = blockKey ? STUDIO_BLOCKS[blockKey].isSet(raw) : false;
+                        studioPaintTabs(group, isSet, (btn) => {
                             if (btn.getAttribute('data-act') === 'order-more') {
-                                const n = String(raw);
-                                btn.classList.toggle('is-on', !!raw && n !== '0' && n !== '-1' && n !== '1');
-                                return;
+                                const n = btnsRaw[prop];
+                                return !!n && n !== '0' && n !== '-1' && n !== '1';
                             }
                             const val = btn.getAttribute('data-val');
-                            if (val === 'auto' || (prop === 'order' && val === '0')) {
-                                btn.classList.toggle('is-on', isAuto);
-                            } else {
-                                btn.classList.toggle('is-on', !isAuto && (val === raw || normAlign(val) === normAlign(raw)));
-                            }
+                            if (!val) return false;
+                            return val === btnsRaw[prop] || normAlign(val) === normAlign(btnsRaw[prop]);
                         });
                     });
                     studioPaintBlock(root, 'justify', STUDIO_BLOCKS.justify.isSet(btnsRaw['justify-self']));
                     studioPaintBlock(root, 'align', STUDIO_BLOCKS.align.isSet(btnsRaw['align-self']));
                     studioPaintBlock(root, 'order', STUDIO_BLOCKS.order.isSet(btnsRaw['order']));
                     if (orderCustom) orderCustom.value = read('order');
-                    paintPos(isGridChild);
+                    paintPos(isGridChild, gridOn);
                 }
 
                 root.addEventListener('click', e => {
@@ -18055,10 +18141,11 @@
                     if (!group) return;
                     const prop = group.getAttribute('data-prop');
                     const val = btn.getAttribute('data-val');
+                    /* 每個分頁都是一條真實的 CSS 規則：auto、order:0 也是規則，
+                       點下去就寫入該規則（宣告了就算套用 → 紫色高亮）；
+                       移除規則請用 Popover 的 Reset value → 灰色聚焦預設分頁。 */
                     if (prop === 'order' && val === '0') {
                         write('order', '0');
-                    } else if (val === 'auto') {
-                        write(prop, '');
                     } else {
                         write(prop, val);
                     }
@@ -18474,17 +18561,21 @@
                         const inp = f.querySelector('input[data-prop]');
                         f.classList.toggle('has-val', !!(inp && String(inp.value || '').trim()));
                     });
-                    /* Overflow：簡寫優先；只有 x / y 長屬性時回退顯示，兩者不同值時標成 mixed 並提示 */
+                    /* Overflow：簡寫優先；只有 x / y 長屬性時回退顯示，兩者不同值時標成 mixed 並提示
+                       分頁高亮（統一雙態口徑）：
+                       灰色 .is-default ＝未設置／已移除該 CSS 規則 → 聚焦回首個分頁（Visible）
+                       紫色 .is-on      ＝已套用該 CSS 規則 */
                     const ov = readOverflow(sel, idx);
                     const ovBtns = $$('[data-prop="overflow"] .st-ly__btn');
-                    const ovEff = ov.mixed ? '' : (ov.value || 'visible');
-                    ovBtns.forEach(btn => {
-                        btn.classList.toggle('is-on', btn.getAttribute('data-val') === ovEff);
-                        btn.classList.remove('is-mixed');
-                    });
+                    const ovVal = ov.mixed ? '' : String(ov.value || '').trim();
+                    /* mixed（x / y 長屬性不同值）也是「有宣告值」，故視為已套用，
+                       只是沒有單一分頁能對應，改由 is-mixed 的外框提示。 */
+                    const ovSet = ov.mixed ? true : (ovVal !== '' && ovVal !== 'visible');
+                    studioPaintTabs($('[data-prop="overflow"]'), ovSet, (btn) =>
+                        btn.getAttribute('data-val') === ovVal);
+                    ovBtns.forEach(btn => btn.classList.toggle('is-mixed', !!ov.mixed));
                     const ovRow = $('[data-prop="overflow"]').closest('.st-sz__row');
                     if (ov.mixed) {
-                        ovBtns.forEach(btn => btn.classList.add('is-mixed'));
                         ovRow.title = 'overflow-x: ' + (ov.x || 'auto') + ' / overflow-y: ' + (ov.y || 'auto')
                             + '（長屬性不同值），點任一按鈕會統一寫入簡寫';
                     } else {
@@ -19854,6 +19945,11 @@
                         btn.setAttribute('data-ctrl', 'font-style');
                         studioBindCtrlPop(btn, 'font-style', val);
                     });
+                    /* 扇區標題 Typography Popover */
+                    const titleBtn = root.querySelector('.st-tr__head .st-ly__head-title');
+                    if (titleBtn && typeof studioBindSectorPop === 'function') {
+                        studioBindSectorPop(titleBtn, 'typography');
+                    }
                 })();
 
                 /* 全域根元素＝選取元素往上追到最頂層的元件（畫布頁面的 root）。
@@ -20305,47 +20401,51 @@
                     const col = read('color');
                     colorText.value = col;
                     tyPaintSwatch(col || '#000000');
-                    /* 未設定屬性：首個按鍵以主色高亮（is-on，預設選中）；
-                       顯式 Reset（unset）後：首個按鍵切換成灰色高亮（is-default）。
-                       reset 狀態透過 tyIsReset/tyMarkReset 管理（定義在 paint 外）。 */
-                    const taRaw = String(studioEffProp(sel, 'text-align') || '').trim();
-                    const taReset = !taRaw && tyIsReset(sel, 'text-align');
-                    $$('[data-prop="text-align"] .st-ly__btn').forEach((btn, i) => {
-                        const isFirst = i === 0;
-                        const match = taRaw !== '' && btn.getAttribute('data-val') === taRaw;
-                        btn.classList.toggle('is-on', match || (!taRaw && isFirst && !taReset));
-                        btn.classList.toggle('is-default', !taRaw && isFirst && taReset);
-                    });
+                    /* 控件按键高亮規則（統一）：
+                       · 未設置／已移除 CSS 規則（沒有宣告值）→ 首鍵灰色高亮 is-default
+                       · 已宣告值（即使等於 CSS 初始值，例如 left / none / normal）
+                         → 匹配的按鍵紫色高亮 is-on
+                       · 每個分頁都代表一條真實的 CSS 規則，切過去就會套用該規則
+                       · Reset value 會清除 CSS 屬性，回落到灰色首鍵狀態。 */
+                    /* text-align：初始值依瀏覽器預設（通常 left），未設 CSS 時一律視為「未設置」 */
+                    const taRaw = sel ? String(studioEffProp(sel, 'text-align') || '').trim() : '';
+                    const taSet = taRaw !== '';
+                    studioPaintTabs($('[data-prop="text-align"]'), taSet, (btn) =>
+                        btn.getAttribute('data-val') === taRaw);
                     $$('[data-toggle]').forEach(btn => {
                         const prop = btn.getAttribute('data-toggle');
                         const on = btn.getAttribute('data-on');
                         if (prop === 'text-decoration') {
-                            const cur = String(studioEffProp(sel, 'text-decoration-line') || '');
+                            const cur = sel ? String(studioEffProp(sel, 'text-decoration-line') || '') : '';
                             const lines = cur.split(/\s+/).filter(Boolean);
                             btn.classList.toggle('is-on', lines.indexOf(on) !== -1);
                         } else {
-                            btn.classList.toggle('is-on', studioEffProp(sel, prop) === on);
+                            const cur = sel ? String(studioEffProp(sel, prop) || '') : '';
+                            btn.classList.toggle('is-on', cur === on);
                         }
                     });
-                    const tdRaw = String(studioEffProp(sel, 'text-decoration-line') || '').trim();
-                    const tdReset = (!tdRaw || tdRaw === 'none') && tyIsReset(sel, 'text-decoration-line');
-                    $$('[data-prop="text-decoration-line"] .st-ly__btn[data-decoclear]').forEach((btn, i) => {
-                        btn.classList.toggle('is-on', tdRaw === 'none' || (!tdRaw && !tdReset));
-                        btn.classList.toggle('is-default', (!tdRaw || tdRaw === 'none') && tdReset);
+                    /* text-decoration-line：「無裝飾」鍵（data-decoclear）代表 none 這條規則，
+                       underline / line-through 可累加，故逐個 data-on 比對。 */
+                    const tdRaw = sel ? String(studioEffProp(sel, 'text-decoration-line') || '').trim() : '';
+                    const tdSet = tdRaw !== '';
+                    const tdLines = tdRaw.split(/\s+/).filter(Boolean);
+                    studioPaintTabs($('[data-prop="text-decoration-line"]'), tdSet, (btn) => {
+                        if (btn.hasAttribute('data-decoclear')) return tdRaw === 'none';
+                        const on = btn.getAttribute('data-on');
+                        if (!on) return false;
+                        return tdLines.indexOf(on) !== -1;
                     });
-                    const ttRaw = String(studioEffProp(sel, 'text-transform') || '').trim();
-                    const ttReset = !ttRaw && tyIsReset(sel, 'text-transform');
-                    $$('[data-prop="text-transform"] .st-ly__btn').forEach((btn, i) => {
-                        const isFirst = i === 0;
-                        const match = ttRaw !== '' && btn.getAttribute('data-val') === ttRaw;
-                        btn.classList.toggle('is-on', match || (!ttRaw && isFirst && !ttReset));
-                        btn.classList.toggle('is-default', !ttRaw && isFirst && ttReset);
-                    });
-                    const fsRaw = String(studioEffProp(sel, 'font-style') || '').trim();
-                    const fsReset = (!fsRaw || fsRaw === 'normal') && tyIsReset(sel, 'font-style');
-                    $$('[data-typrop="font-style"] .st-ly__btn[data-val]').forEach(btn => {
-                        btn.classList.toggle('is-on', fsRaw === 'normal' || (!fsRaw && !fsReset));
-                        btn.classList.toggle('is-default', (!fsRaw || fsRaw === 'normal') && fsReset);
+                    /* text-transform：none 也是一條規則（宣告了就算「已套用」） */
+                    const ttRaw = sel ? String(studioEffProp(sel, 'text-transform') || '').trim() : '';
+                    const ttSet = ttRaw !== '';
+                    studioPaintTabs($('[data-prop="text-transform"]'), ttSet, (btn) =>
+                        btn.getAttribute('data-val') === ttRaw);
+                    /* font-style：normal（正體，首鍵）同樣是一條規則；italic 為斜體 */
+                    const fsRaw = sel ? String(studioEffProp(sel, 'font-style') || '').trim() : '';
+                    const fsSet = fsRaw !== '';
+                    studioPaintTabs($('[data-typrop="font-style"]'), fsSet, (btn) => {
+                        if (btn.hasAttribute('data-toggle')) return fsRaw === btn.getAttribute('data-on');
+                        return fsRaw === 'normal';
                     });
                     /* Adv panel 控件同步 */
                     function advSetVal(p, v) {
@@ -20438,9 +20538,11 @@
                     }
                     const decoClr = e.target.closest('[data-decoclear]');
                     if (decoClr) {
-                        write('text-decoration-line', '');
-                        write('text-decoration', '');
-                        if (sel) tyMarkReset(sel, 'text-decoration-line');
+                        /* 每個分頁都代表一條 CSS 規則：「無裝飾」寫入 none，
+                           而不是清空屬性（清空＝灰色，那是 Reset value 的工作）。 */
+                        write('text-decoration-line', 'none');
+                        write('text-decoration', 'none');
+                        if (sel) tyUnmarkReset(sel, 'text-decoration-line');
                         paint();
                         return;
                     }
@@ -20454,11 +20556,11 @@
                             let arr = cur.split(/\s+/).filter(v => v && v !== 'none');
                             const idx = arr.indexOf(on);
                             if (idx === -1) arr.push(on); else arr.splice(idx, 1);
-                            const next = arr.length ? arr.join(' ') : '';
+                            /* 全部拿掉時寫 none（而非清空），維持「有宣告值 → 紫色」的雙態口徑 */
+                            const next = arr.length ? arr.join(' ') : 'none';
                             write('text-decoration-line', next);
                             write('text-decoration', next);
-                            if (!next && sel) tyMarkReset(sel, 'text-decoration-line');
-                            else if (sel) tyUnmarkReset(sel, 'text-decoration-line');
+                            if (sel) tyUnmarkReset(sel, 'text-decoration-line');
                         } else {
                             /* font-style 的 Italic：點擊切換 normal/italic */
                             const cur = String(studioEffProp(sel, prop) || '');
@@ -20474,17 +20576,13 @@
                     const group = btn.closest('[data-prop], [data-typrop]');
                     if (!group) return;
                     const prop = group.getAttribute('data-prop') || group.getAttribute('data-typrop');
-                    const val = btn.getAttribute('data-val');
-                    /* 首鍵：寫空屬性＝reset 到預設，同時記住 reset 狀態使首鍵呈灰色高亮；
-                       其他鍵：寫入該值，unmark reset。 */
-                    const isFirst = Array.prototype.indexOf.call(group.querySelectorAll('.st-ly__btn[data-val]'), btn) === 0;
-                    if (isFirst) {
-                        write(prop, '');
-                        if (sel) tyMarkReset(sel, prop);
-                    } else {
-                        write(prop, val);
-                        if (sel) tyUnmarkReset(sel, prop);
-                    }
+                    const rawVal = btn.getAttribute('data-val');
+                    /* 每個分頁都是一條真實的 CSS 規則，首鍵也要寫入自己的值
+                       （left / none / normal 這些具體值，不是「清除」）。
+                       移除規則請用 Popover 的 Reset value → 灰色聚焦回首個分頁。 */
+                    const val = (prop === 'font-style' && rawVal === '') ? 'normal' : rawVal;
+                    write(prop, val);
+                    if (sel) tyUnmarkReset(sel, prop);
                     paint();
                 });
                 $$('select[data-prop], u-combobox[data-prop]').forEach(el => {
