@@ -3581,13 +3581,78 @@
         }
 
         .st-ty__unit {
+            flex: 0 0 auto;
+            margin-left: auto;
+            height: 20px;
+            min-width: 28px;
+            padding: 0 6px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
             color: var(--studio-text-3);
+            font-family: inherit;
             font-size: 10px;
             letter-spacing: .4px;
             text-transform: uppercase;
-            padding-right: 4px;
-            flex: 0 0 auto;
+            cursor: pointer;
         }
+        .st-ty__unit:hover { background: var(--studio-hover); color: var(--studio-text-1); }
+        .st-ty__unit.is-on { color: var(--studio-accent); }
+        .st-ty__unit.is-dash { color: var(--studio-text-3); opacity: .6; }
+        .st-ty__unit.is-clickable { cursor: pointer; }
+        .st-sz__control.st-ty__field { position: relative; }
+        .st-sz__control.st-ty__field.is-invalid { border-color: #e5484d; }
+        /* Typography 關鍵字選單（Size / Height / Spacing 共用） */
+        .st-ty__kw-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: var(--studio-elev-1, white);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            padding: 4px 0;
+        }
+        .st-ty__kw-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            font-size: 12px;
+            color: var(--studio-text-1);
+            cursor: pointer;
+            user-select: none;
+        }
+        .st-ty__kw-item:hover { background: var(--studio-hover); }
+        .st-ty__kw-item.is-active { color: var(--studio-text-1); }
+        .st-ty__kw-check {
+            margin-left: auto;
+            color: var(--studio-accent, #4285f4);
+            font-size: 12px;
+            line-height: 1;
+        }
+        /* Family Reset 按鈕 */
+        .st-ty__fam-reset {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 100%;
+            padding: 0;
+            border: 0;
+            border-left: 1px solid var(--studio-border, #333338);
+            background: transparent;
+            color: var(--studio-text-3);
+            cursor: pointer;
+        }
+        .st-ty__fam-reset:hover {
+            background: var(--studio-hover-soft, rgba(255, 255, 255, .08));
+            color: var(--studio-accent);
+        }
+        .st-ty__fam-reset svg { width: 14px; height: 14px; display: block; }
 
         .st-ty__more[hidden] {
             display: none !important;
@@ -13979,7 +14044,7 @@
                         'right': { code: 'text-align: right;', desc: 'Aligns the text to the right edge of its container.' },
                         'justify': { code: 'text-align: justify;', desc: 'Adjusts word spacing so the text is aligned to both the left and right edges of the container.' },
                     },
-                    reset: () => studioClearProps(['text-align']),
+                    reset: () => { studioClearProps(['text-align']); document.dispatchEvent(new CustomEvent('studio:ty-ctrl-reset', { detail: { prop: 'text-align' } })); },
                 },
                 'text-decoration-line': {
                     prop: 'text-decoration-line',
@@ -13992,7 +14057,7 @@
                         'underline': 'Adds a horizontal line underneath the text.',
                         'line-through': 'Draws a horizontal line through the middle of the text.',
                     },
-                    reset: () => studioClearProps(['text-decoration-line']),
+                    reset: () => { studioClearProps(['text-decoration-line', 'text-decoration']); document.dispatchEvent(new CustomEvent('studio:ty-ctrl-reset', { detail: { prop: 'text-decoration-line' } })); },
                 },
                 'text-transform': {
                     prop: 'text-transform',
@@ -14006,7 +14071,7 @@
                         'capitalize': 'Transforms the first character of each word to uppercase, while the remaining characters are in lowercase.',
                         'lowercase': 'Transforms the text to appear in all lowercase letters.',
                     },
-                    reset: () => studioClearProps(['text-transform']),
+                    reset: () => { studioClearProps(['text-transform']); document.dispatchEvent(new CustomEvent('studio:ty-ctrl-reset', { detail: { prop: 'text-transform' } })); },
                 },
                 'font-style': {
                     prop: 'font-style',
@@ -14018,7 +14083,7 @@
                         'normal': 'The default value. The text appears in a normal, upright style.',
                         'italic': 'The text appears in italic style, where it is slanted to the right.',
                     },
-                    reset: () => studioClearProps(['font-style']),
+                    reset: () => { studioClearProps(['font-style']); document.dispatchEvent(new CustomEvent('studio:ty-ctrl-reset', { detail: { prop: 'font-style' } })); },
                 }
                 
             };
@@ -14539,12 +14604,12 @@
                 'grid-auto-flow':    { title: 'Grid auto flow', code: 'grid-auto-flow: row;',     desc: 'How auto-placed items flow through the grid (rows or columns).',     mdn: 'https://developer.mozilla.org/docs/Web/CSS/grid-auto-flow', init: 'row', defaults: ['row', ''] },
                 'row-gap':           { title: 'Row gap',       code: 'row-gap: 0;',               desc: 'Gutter between rows of a flex or grid container.',                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/row-gap', init: '0', defaults: ['0', '0px', ''], props: ['gap', 'row-gap', 'column-gap'] },
                 'column-gap':        { title: 'Column gap',    code: 'column-gap: 0;',            desc: 'Gutter between columns of a flex or grid container.',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/column-gap', init: '0', defaults: ['0', '0px', ''], props: ['gap', 'row-gap', 'column-gap'] },
-                'family':            { title: 'Family',        code: 'font-family: inherit;',          desc: 'Sets the font family used to render the text.',                                  mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-family',    init: '',       defaults: [''] },
+                'family':            { title: 'Family',        code: 'font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;', desc: 'Sets the font family used to render the text. Defaults to Arial.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-family',    init: 'Arial',       defaults: ['Arial', 'Arial, "Helvetica Neue", Helvetica, sans-serif', ''] },
                 'weight':            { title: 'Weight',        code: 'font-weight: normal;',           desc: 'Sets the boldness (weight) of the font.',                                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-weight',    init: 'normal', defaults: ['normal', ''] },
                 'color':             { title: 'Color',         code: 'color: currentcolor;',           desc: 'Sets the colour of the text and its decorations.',                               mdn: 'https://developer.mozilla.org/docs/Web/CSS/color',          init: 'currentcolor', defaults: ['currentcolor', ''] },
-                'font-size':         { title: 'Size',          code: 'font-size: 16px;',               desc: 'Sets the size of the font.',                                                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-size',      init: '16px',   defaults: ['16px'] },
-                'line-height':       { title: 'Height',        code: 'line-height: normal;',           desc: 'Sets the height of a line box, controlling the vertical spacing between lines.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/line-height',    init: 'normal', defaults: ['normal'] },
-                'letter-spacing':    { title: 'Spacing',       code: 'letter-spacing: normal;',        desc: 'Sets the horizontal spacing between text characters (tracking).',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/letter-spacing', init: 'normal', defaults: ['normal'] }
+                'font-size':         { title: 'Size',          code: 'font-size: medium;',             desc: 'Sets the size of the font. Accepts numbers (px/rem) or keywords (small/medium/large).', mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-size',     init: 'medium',   defaults: ['medium', ''] },
+                'line-height':       { title: 'Height',        code: 'line-height: normal;',           desc: 'Sets the height of a line box, controlling the vertical spacing between lines.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/line-height',    init: 'normal', defaults: ['normal', ''] },
+                'letter-spacing':    { title: 'Spacing',       code: 'letter-spacing: normal;',        desc: 'Sets the horizontal spacing between text characters (tracking).',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/letter-spacing', init: 'normal', defaults: ['normal', ''] }
             };
             function studioPropIsDefault(propKey, value) {
                 const d = STUDIO_PROP_DOC[propKey];
@@ -19598,6 +19663,7 @@
                    類別本身不是有效 font-family，故每項都對應一組 CSS 字體堆疊；
                    輸入框顯示 label、寫入元件的是 value。 */
                 const FAMILY_ITEMS = [
+                    { label: 'Arial',                value: 'Arial, "Helvetica Neue", Helvetica, sans-serif' },
                     { label: 'System',               value: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', info: true },
                     { label: 'System UI',            value: 'system-ui, sans-serif' },
                     { label: 'Transitional',         value: 'Baskerville, "Times New Roman", Times, serif' },
@@ -19641,7 +19707,7 @@
                     '    <div class="st-ly__label">Family</div>',
                     '    <div role="combobox" aria-haspopup="listbox" class="st-ty__fam" data-ty="family-field">',
                     '      <div class="st-ty__fam-ctrl st-sel-input-height">',
-                    '        <input type="text" class="st-ty__fam-input" data-ty="family-input" placeholder="Default" autocomplete="off" spellcheck="false" aria-label="Font family" />',
+                    '        <input type="text" class="st-ty__fam-input" data-ty="family-input" autocomplete="off" spellcheck="false" aria-label="Font family" />',
                     '        <div class="st-ty__fam-actions">',
                     '          <button type="button" class="st-ty__fam-btn" data-ty="family-open" title="選擇字體" aria-label="選擇字體" aria-expanded="false">' + ICO.famChev + '</button>',
                     '        </div>',
@@ -19664,9 +19730,9 @@
                     '    </div>',
                     '  </div>',
                     '  <div class="st-ty__trio">',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Size</span><span class="st-sz__control"><input data-prop="font-size" placeholder="16"><span class="st-ty__unit">PX</span><button type="button" class="st-ly__iconbtn" data-clear="font-size" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Height</span><span class="st-sz__control"><input data-prop="line-height" placeholder="1.2"><button type="button" class="st-ly__iconbtn" data-clear="line-height" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Spacing</span><span class="st-sz__control"><input data-prop="letter-spacing" placeholder="normal"><button type="button" class="st-ly__iconbtn" data-clear="letter-spacing" title="清除">' + ICO.minus + '</button></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label">Size</span><span class="st-sz__control st-ty__field" data-ty="size-field"><input type="text" data-ty="size-input" data-prop="font-size" value="medium" spellcheck="false" aria-label="Font size" title="font-size"><button type="button" class="st-ty__unit is-dash" data-ty="size-unit" title="切換單位">-</button><div class="st-ty__kw-menu" data-ty="size-kw-menu" style="display:none;"><div class="st-ty__kw-item" data-kw="initial">initial</div><div class="st-ty__kw-item" data-kw="inherit">inherit</div><div class="st-ty__kw-item" data-kw="large">large</div><div class="st-ty__kw-item" data-kw="larger">larger</div><div class="st-ty__kw-item" data-kw="math">math</div><div class="st-ty__kw-item" data-kw="medium">medium</div><div class="st-ty__kw-item" data-kw="small">small</div><div class="st-ty__kw-item" data-kw="smaller">smaller</div><div class="st-ty__kw-item" data-kw="unset">unset</div><div class="st-ty__kw-item" data-kw="x-large">x-large</div><div class="st-ty__kw-item" data-kw="x-small">x-small</div><div class="st-ty__kw-item" data-kw="xx-large">xx-large</div><div class="st-ty__kw-item" data-kw="xx-small">xx-small</div><div class="st-ty__kw-item" data-kw="xxx-large">xxx-large</div></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label">Height</span><span class="st-sz__control st-ty__field" data-ty="height-field"><input type="text" data-ty="height-input" data-prop="line-height" value="normal" spellcheck="false" aria-label="Line height" title="line-height"><button type="button" class="st-ty__unit is-dash" data-ty="height-unit" title="切換單位">-</button><div class="st-ty__kw-menu" data-ty="height-kw-menu" style="display:none;"><div class="st-ty__kw-item" data-kw="inherit">inherit</div><div class="st-ty__kw-item" data-kw="initial">initial</div><div class="st-ty__kw-item" data-kw="normal">normal</div><div class="st-ty__kw-item" data-kw="unset">unset</div></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label">Spacing</span><span class="st-sz__control st-ty__field" data-ty="spacing-field"><input type="text" data-ty="spacing-input" data-prop="letter-spacing" value="normal" spellcheck="false" aria-label="Letter spacing" title="letter-spacing"><button type="button" class="st-ty__unit is-dash" data-ty="spacing-unit" title="切換單位">-</button><div class="st-ty__kw-menu" data-ty="spacing-kw-menu" style="display:none;"><div class="st-ty__kw-item" data-kw="inherit">inherit</div><div class="st-ty__kw-item" data-kw="initial">initial</div><div class="st-ty__kw-item" data-kw="normal">normal</div><div class="st-ty__kw-item" data-kw="unset">unset</div></div></span></label>',
                     '  </div>',
                     '  <div class="st-gtc-col">',
                     '  <div role="group" dir="1tr" tabindex="0" class=" st-ly__row st-ly__btns" data-prop="text-align" style="outline: none;">',
@@ -19740,14 +19806,11 @@
 
                 /* ============================================================
                  * Typography 扇區的 Popover 綁定
-                 *   · 標題晶片：整個扇區的 CSS 規則說明（STUDIO_SECTOR_DOC.typography）
-                 *   · 屬性標籤晶片：Family／Weight／Color（Size／Height／Spacing 走通用自動綁定）
+                 *   · 屬性標籤晶片：Family／Weight／Color
                  *   · 控制鍵晶片：text-align／text-decoration-line／text-transform／font-style 四組分段按鈕
+                 * （扇區標題晶片依需求移除）
                  * ============================================================ */
                 (function bindTypographyPopovers() {
-                    /* 扇區標題晶片 */
-                    studioBindSectorPop($('.st-ly__head-title'), 'typography');
-
                     /* 依標籤文字找屬性標籤晶片（略過已綁定與進階排版浮層內的） */
                     function labelByText(t) {
                         return $$('.st-ly__label').filter(el =>
@@ -19759,6 +19822,12 @@
                     studioBindPropPop(labelByText('family'), 'family');
                     studioBindPropPop(labelByText('weight'), 'weight');
                     studioBindPropPop(labelByText('color'), 'color');
+                    /* Size／Height／Spacing 三個屬性標籤晶片 */
+                    root.querySelectorAll('.st-ty__trio .st-sz__field-label').forEach(lbl => {
+                        const text = (lbl.textContent || '').trim().toLowerCase();
+                        const keyMap = { 'size': 'font-size', 'height': 'line-height', 'spacing': 'letter-spacing' };
+                        if (keyMap[text]) studioBindPropPop(lbl, keyMap[text]);
+                    });
 
                     /* 四組分段按鈕：逐鍵綁定說明（Reset value 由 studioBindCtrlPop 依狀態決定） */
                     $$('[data-prop="text-align"] .st-ly__btn').forEach(btn => {
@@ -19945,11 +20014,260 @@
                     return '#000000';
                 }
 
+                /* ---- Size / Height / Spacing：可比照 Border width 的數字＋關鍵字雙模式 ---- */
+                const TY_UNITS = {
+                    size: ['rem', 'px'],
+                    height: [''],
+                    spacing: ['em', 'px'],
+                };
+                const TY_KW = {
+                    size: ['initial', 'inherit', 'large', 'larger', 'math', 'medium', 'small', 'smaller', 'unset', 'x-large', 'x-small', 'xx-large', 'xx-small', 'xxx-large'],
+                    height: ['inherit', 'initial', 'normal', 'unset'],
+                    spacing: ['inherit', 'initial', 'normal', 'unset'],
+                };
+                const TY_DEFAULTS = { size: 'medium', height: 'normal', spacing: 'normal' };
+
+                /* 拆「數字 + 單位」；關鍵字或無法解析時回 null（與 Border 扇區同口徑） */
+                function tySplitLen(v) {
+                    const m = /^(-?(?:\d+|\d*\.\d+))\s*([a-z%]*)$/i.exec(String(v == null ? '' : v).trim());
+                    if (!m) return null;
+                    return { num: parseFloat(m[1]), raw: m[1], unit: (m[2] || '').toLowerCase() };
+                }
+                const tyFmtNum = n => String(Math.round(n * 1000) / 1000);
+
+                /* 記住「上一次輸入的值」（關鍵字或數字），供清空後還原 */
+                function tyNewKwState() { return { lastKw: '', lastNum: null, lastUnit: '' }; }
+                const tyKwState = { size: tyNewKwState(), height: tyNewKwState(), spacing: tyNewKwState() };
+                const tyIsDeleteInput = t => /^delete/i.test(String(t || ''));
+                function tyRememberValue(state, rawVal, kws, inputType) {
+                    if (tyIsDeleteInput(inputType)) return;
+                    const raw = String(rawVal == null ? '' : rawVal).trim();
+                    if (raw === '') return;
+                    const low = raw.toLowerCase();
+                    if (kws.indexOf(low) !== -1) { state.lastKw = low; state.lastNum = null; return; }
+                    const s = tySplitLen(raw);
+                    if (s && s.num >= 0) { state.lastNum = s.num; state.lastUnit = s.unit || state.lastUnit || ''; state.lastKw = ''; }
+                }
+                function tyMarkKw(items, value) {
+                    const v = String(value == null ? '' : value).trim().toLowerCase();
+                    let hit = '';
+                    items.forEach(item => {
+                        const kw = item.getAttribute('data-kw');
+                        const on = kw === v;
+                        item.classList.toggle('is-active', on);
+                        let chk = item.querySelector('.st-ty__kw-check');
+                        if (on && !chk) { chk = document.createElement('span'); chk.className = 'st-ty__kw-check'; chk.textContent = '✓'; item.appendChild(chk); }
+                        else if (!on && chk) { chk.remove(); }
+                        if (on) hit = kw;
+                    });
+                    return hit;
+                }
+
+                const tyFieldOf = k => root.querySelector('[data-ty="' + k + '-field"]');
+                const tyInputOf = k => root.querySelector('[data-ty="' + k + '-input"]');
+                const tyUnitOf  = k => root.querySelector('[data-ty="' + k + '-unit"]');
+                const tyMenuOf  = k => root.querySelector('[data-ty="' + k + '-kw-menu"]');
+                const tyPropOf  = k => ({ size: 'font-size', height: 'line-height', spacing: 'letter-spacing' }[k]);
+                let tyCurUnit = { size: 'px', height: '', spacing: 'em' };
+
+                /* 更新單位鈕：數字時顯示單位、關鍵字/空值時顯示「-」 */
+                function tyPaintUnit(k) {
+                    const btn = tyUnitOf(k);
+                    const inp = tyInputOf(k);
+                    if (!btn || !inp) return;
+                    const v = String(inp.value || '').trim().toLowerCase();
+                    const units = TY_UNITS[k];
+                    const kws = TY_KW[k];
+                    const s = tySplitLen(v);
+                    const isNum = !!(s && s.num >= 0 && (!s.unit || units.indexOf(s.unit) !== -1 || units.indexOf('') === -1));
+                    const isKw = kws.indexOf(v) !== -1;
+                    if (isNum && units.length) {
+                        const u = (s && s.unit) || tyCurUnit[k];
+                        btn.textContent = u.toUpperCase();
+                        btn.classList.remove('is-dash');
+                        btn.classList.add('is-unit');
+                        if (units.length > 1) btn.classList.add('is-clickable'); else btn.classList.remove('is-clickable');
+                    } else {
+                        btn.textContent = '-';
+                        btn.classList.add('is-dash');
+                        btn.classList.remove('is-unit');
+                        btn.classList.remove('is-clickable');
+                    }
+                    tyMarkKw($$('.st-ty__kw-item', tyMenuOf(k)), v);
+                }
+
+                /* 點單位鈕循環切換單位（比照 Border width 的 cycleEdgeUnit） */
+                function tyCycleUnit(k) {
+                    const units = TY_UNITS[k];
+                    const inp = tyInputOf(k);
+                    if (!units || units.length < 2 || !inp) return;
+                    const i = units.indexOf(tyCurUnit[k]);
+                    tyCurUnit[k] = units[(i + 1) % units.length];
+                    const s = tySplitLen(inp.value);
+                    if (s) {
+                        inp.value = tyFmtNum(s.num) + tyCurUnit[k];
+                        tyCommit(k);
+                    }
+                    tyPaintUnit(k);
+                }
+
+                /* 提交輸入框值到樣式 */
+                function tyCommit(k) {
+                    const inp = tyInputOf(k);
+                    if (!inp) return false;
+                    const prop = tyPropOf(k);
+                    const v = String(inp.value || '').trim();
+                    const kws = TY_KW[k];
+                    const units = TY_UNITS[k];
+                    const low = v.toLowerCase();
+                    if (v === '') { write(prop, ''); return true; }
+                    /* 關鍵字直接寫入 */
+                    if (kws.indexOf(low) !== -1) { write(prop, low); return true; }
+                    /* 數值＋單位：若為純數字，補上預設單位 */
+                    const s = tySplitLen(v);
+                    if (s && s.num >= 0) {
+                        let u = s.unit || tyCurUnit[k];
+                        if (u && units.indexOf(u) === -1) u = tyCurUnit[k];
+                        const val = tyFmtNum(s.num) + u;
+                        if (u) tyCurUnit[k] = u;
+                        write(prop, val);
+                        return true;
+                    }
+                    /* 其他無法解析的值，仍原樣寫入讓瀏覽器決定 */
+                    write(prop, v);
+                    return true;
+                }
+
+                function flashInvalid(el) {
+                    if (!el) return;
+                    el.classList.add('is-invalid');
+                    window.setTimeout(() => el.classList.remove('is-invalid'), 900);
+                }
+
+                /* 三個輸入框綁定事件 */
+                ['size', 'height', 'spacing'].forEach(k => {
+                    const prop = tyPropOf(k);
+                    const inp = tyInputOf(k);
+                    const unitBtn = tyUnitOf(k);
+                    const menu = tyMenuOf(k);
+                    const field = tyFieldOf(k);
+                    if (!inp || !unitBtn || !menu || !field) return;
+                    const kws = TY_KW[k];
+                    /* 單位鈕點擊：循環切換 */
+                    unitBtn.addEventListener('mousedown', e => e.preventDefault());
+                    unitBtn.addEventListener('click', e => {
+                        e.preventDefault();
+                        if (TY_UNITS[k].length > 1) { tyCycleUnit(k); tyPaintUnit(k); }
+                    });
+                    /* 點擊輸入框時展開關鍵字選單：輸入框為空才顯示 */
+                    inp.addEventListener('focus', () => {
+                        /* 關閉其他三個選單 */
+                        ['size', 'height', 'spacing'].filter(x => x !== k).forEach(x => { const m = tyMenuOf(x); if (m) m.style.display = 'none'; });
+                        if (String(inp.value || '').trim() === '') {
+                            menu.style.display = 'block';
+                            tyMarkKw($$('.st-ty__kw-item', menu), inp.value);
+                        } else {
+                            menu.style.display = 'none';
+                        }
+                    });
+                    inp.addEventListener('blur', () => {
+                        const trimmed = inp.value.trim();
+                        if (trimmed !== '' && trimmed !== TY_DEFAULTS[k]) {
+                            if (!tyCommit(k)) flashInvalid(field);
+                            else tyRememberValue(tyKwState[k], inp.value, kws);
+                        } else {
+                            /* 空值或預設值＝清空屬性回到預設 */
+                            write(prop, '');
+                        }
+                        setTimeout(() => { menu.style.display = 'none'; }, 150);
+                        paint();
+                    });
+                    /* 輸入時同步單位鈕、打勾狀態；輸入框為空時打開選單 */
+                    inp.addEventListener('input', e => {
+                        const v = inp.value;
+                        const s = tySplitLen(v);
+                        const units = TY_UNITS[k];
+                        if (s && s.unit && units.indexOf(s.unit) !== -1) tyCurUnit[k] = s.unit;
+                        tyPaintUnit(k);
+                        tyRememberValue(tyKwState[k], v, kws, e.inputType);
+                        if (String(v || '').trim() === '') menu.style.display = 'block';
+                        else menu.style.display = 'none';
+                    });
+                    /* 清空後按 Backspace → Reset value：清空屬性回到預設值，熄滅高亮 */
+                    inp.addEventListener('keydown', e => {
+                        if (e.key === 'Enter') { e.preventDefault(); inp.blur(); }
+                        else if (e.key === 'Escape') { e.preventDefault(); menu.style.display = 'none'; }
+                        else if (e.key === 'Backspace' && (inp.value === '' || inp.value === TY_DEFAULTS[k])) {
+                            e.preventDefault();
+                            write(prop, '');
+                            inp.value = TY_DEFAULTS[k];
+                            menu.style.display = 'none';
+                            paint();
+                        }
+                    });
+                    /* 點選關鍵字選單項目 */
+                    $$('.st-ty__kw-item', menu).forEach(item => {
+                        item.addEventListener('mousedown', e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const kw = item.getAttribute('data-kw');
+                            inp.value = kw;
+                            tyKwState[k].lastNum = null;
+                            tyKwState[k].lastKw = kw;
+                            tyCommit(k);
+                            menu.style.display = 'none';
+                            if (document.activeElement === inp) inp.blur();
+                            paint();
+                        });
+                    });
+                    /* 點選外部關閉選單 */
+                    document.addEventListener('mousedown', e => {
+                        if (menu.style.display === 'none') return;
+                        if (!field.contains(e.target)) menu.style.display = 'none';
+                    });
+                });
+
+                /* 透過元件上的 data-tyreset 屬性記住哪些屬性被顯式 Reset，跨 paint 仍保留。 */
+                function tyIsReset(sel, prop) {
+                    if (!sel) return false;
+                    try {
+                        const m = String(sel.getAttributes && sel.getAttributes()['data-tyreset'] || '');
+                        return m.split(',').indexOf(prop) !== -1;
+                    } catch (e) { return false; }
+                }
+                function tyMarkReset(sel, prop) {
+                    if (!sel) return;
+                    try {
+                        const m = String(sel.getAttributes && sel.getAttributes()['data-tyreset'] || '');
+                        const set = m.split(',').filter(Boolean);
+                        if (set.indexOf(prop) === -1) set.push(prop);
+                        sel.addAttributes({ 'data-tyreset': set.join(',') });
+                    } catch (e) {}
+                }
+                function tyUnmarkReset(sel, prop) {
+                    if (!sel) return;
+                    try {
+                        const m = String(sel.getAttributes && sel.getAttributes()['data-tyreset'] || '');
+                        const set = m.split(',').filter(Boolean).filter(p => p !== prop);
+                        sel.addAttributes({ 'data-tyreset': set.join(',') });
+                    } catch (e) {}
+                }
+
+                /* 監聽 ctrl reset 事件（Popover 內 Reset value / Alt+Click）→ 標記 reset 狀態 */
+                document.addEventListener('studio:ty-ctrl-reset', e => {
+                    const p = e.detail && e.detail.prop;
+                    const sel = editor.getSelected();
+                    if (!p || !sel) return;
+                    tyMarkReset(sel, p);
+                    paint();
+                });
+
                 function paint() {
                     const sel = editor.getSelected();
                     root.classList.toggle('is-disabled', !sel);
                     const sid = sel ? String(sel.getId ? sel.getId() : '') : '';
                     if (sid !== fpLastSel) { fpLastSel = sid; if (fpOpen) fpClose(); }
+
                     $$('select[data-prop], u-combobox[data-prop]').forEach(el => {
                         const v = read(el.getAttribute('data-prop'));
                         const opts = el.options;
@@ -19958,52 +20276,76 @@
                     });
                     $$('input[data-prop]').forEach(el => {
                         if (el === colorText) return;
+                        /* Size／Height／Spacing 已改由下方 tyPaintTrio 統一渲染，這裡略過 */
+                        if (el.getAttribute('data-ty')) return;
                         const prop = el.getAttribute('data-prop');
-                        const own = read(prop);
-                        /* Size／Height 未在選取元素上宣告時，自動填入繼承自全域根元素的值 */
-                        const inherited = (prop === 'font-size' || prop === 'line-height') ? tyRootProp(prop) : '';
-                        const shown = own || inherited;
-                        el.value = String(shown).replace(/px$/i, '');
-                        /* 值來自繼承（非本元素宣告）時標記，欄位改以次要文字色顯示 */
-                        el.classList.toggle('is-inherited', !own && !!shown);
+                        const v = read(prop);
+                        el.value = v;
                     });
+                    /* Size／Height／Spacing 渲染：屬性未宣告時直接顯示預設值（medium/normal），已設值顯示目前值 */
+                    function tyPaintTrio(k) {
+                        const inp = tyInputOf(k);
+                        if (!inp) return;
+                        const prop = tyPropOf(k);
+                        const sel = editor.getSelected();
+                        const own = sel ? String(studioEffProp(sel, prop) || '').trim() : '';
+                        const isEditing = document.activeElement === inp;
+                        if (!isEditing) {
+                            inp.value = own || TY_DEFAULTS[k];
+                        }
+                        inp.classList.toggle('is-inherited', !own);
+                        tyPaintUnit(k);
+                        /* 有值時整個 field 高亮，Reset value 會熄滅 */
+                        const fld = tyFieldOf(k);
+                        if (fld) fld.closest('.st-sz__field').classList.toggle('has-val', own !== '');
+                    }
+                    tyPaintTrio('size');
+                    tyPaintTrio('height');
+                    tyPaintTrio('spacing');
                     const col = read('color');
                     colorText.value = col;
                     tyPaintSwatch(col || '#000000');
-                    /* 未設定屬性：首個按鍵以灰底（is-default）標示目前是預設狀態；
-                       已設定：對應值的按鍵以主色高亮（is-on）。 */
-                    const taRaw = String(read('text-align') || '').trim();
+                    /* 未設定屬性：首個按鍵以主色高亮（is-on，預設選中）；
+                       顯式 Reset（unset）後：首個按鍵切換成灰色高亮（is-default）。
+                       reset 狀態透過 tyIsReset/tyMarkReset 管理（定義在 paint 外）。 */
+                    const taRaw = String(studioEffProp(sel, 'text-align') || '').trim();
+                    const taReset = !taRaw && tyIsReset(sel, 'text-align');
                     $$('[data-prop="text-align"] .st-ly__btn').forEach((btn, i) => {
-                        btn.classList.toggle('is-on', taRaw !== '' && btn.getAttribute('data-val') === taRaw);
-                        btn.classList.toggle('is-default', taRaw === '' && i === 0);
+                        const isFirst = i === 0;
+                        const match = taRaw !== '' && btn.getAttribute('data-val') === taRaw;
+                        btn.classList.toggle('is-on', match || (!taRaw && isFirst && !taReset));
+                        btn.classList.toggle('is-default', !taRaw && isFirst && taReset);
                     });
                     $$('[data-toggle]').forEach(btn => {
                         const prop = btn.getAttribute('data-toggle');
                         const on = btn.getAttribute('data-on');
                         if (prop === 'text-decoration') {
-                            const cur = String(read('text-decoration-line') || '');
+                            const cur = String(studioEffProp(sel, 'text-decoration-line') || '');
                             const lines = cur.split(/\s+/).filter(Boolean);
                             btn.classList.toggle('is-on', lines.indexOf(on) !== -1);
                         } else {
-                            btn.classList.toggle('is-on', read(prop) === on);
+                            btn.classList.toggle('is-on', studioEffProp(sel, prop) === on);
                         }
                     });
-                    $$('[data-prop="text-decoration-line"] .st-ly__btn[data-decoclear]').forEach(btn => {
-                        const cur = String(read('text-decoration-line') || '').trim();
-                        btn.classList.toggle('is-on', cur === 'none');
-                        btn.classList.toggle('is-default', cur === '');
+                    const tdRaw = String(studioEffProp(sel, 'text-decoration-line') || '').trim();
+                    const tdReset = (!tdRaw || tdRaw === 'none') && tyIsReset(sel, 'text-decoration-line');
+                    $$('[data-prop="text-decoration-line"] .st-ly__btn[data-decoclear]').forEach((btn, i) => {
+                        btn.classList.toggle('is-on', tdRaw === 'none' || (!tdRaw && !tdReset));
+                        btn.classList.toggle('is-default', (!tdRaw || tdRaw === 'none') && tdReset);
                     });
+                    const ttRaw = String(studioEffProp(sel, 'text-transform') || '').trim();
+                    const ttReset = !ttRaw && tyIsReset(sel, 'text-transform');
                     $$('[data-prop="text-transform"] .st-ly__btn').forEach((btn, i) => {
-                        const cur = String(read('text-transform') || '').trim();
-                        btn.classList.toggle('is-on', cur !== '' && btn.getAttribute('data-val') === cur);
-                        btn.classList.toggle('is-default', cur === '' && i === 0);
+                        const isFirst = i === 0;
+                        const match = ttRaw !== '' && btn.getAttribute('data-val') === ttRaw;
+                        btn.classList.toggle('is-on', match || (!ttRaw && isFirst && !ttReset));
+                        btn.classList.toggle('is-default', !ttRaw && isFirst && ttReset);
                     });
-                    /* font-style 左側的「Normal（X）」：設為 normal 時以主色高亮，
-                       未設值時改以灰底標示；右側 Italic 由上方 [data-toggle] 的邏輯負責 */
+                    const fsRaw = String(studioEffProp(sel, 'font-style') || '').trim();
+                    const fsReset = (!fsRaw || fsRaw === 'normal') && tyIsReset(sel, 'font-style');
                     $$('[data-typrop="font-style"] .st-ly__btn[data-val]').forEach(btn => {
-                        const cur = String(read('font-style') || '').trim();
-                        btn.classList.toggle('is-on', cur === 'normal');
-                        btn.classList.toggle('is-default', cur === '');
+                        btn.classList.toggle('is-on', fsRaw === 'normal' || (!fsRaw && !fsReset));
+                        btn.classList.toggle('is-default', (!fsRaw || fsRaw === 'normal') && fsReset);
                     });
                     /* Adv panel 控件同步 */
                     function advSetVal(p, v) {
@@ -20085,6 +20427,7 @@
                 });
 
                 root.addEventListener('click', e => {
+                    const sel = editor.getSelected();
                     if (e.target.closest('[data-act="toggle"]')) {
                         root.classList.toggle('is-collapsed');
                         return;
@@ -20093,16 +20436,11 @@
                         openAdv();
                         return;
                     }
-                    const clr = e.target.closest('[data-clear]');
-                    if (clr) {
-                        write(clr.getAttribute('data-clear'), '');
-                        paint();
-                        return;
-                    }
                     const decoClr = e.target.closest('[data-decoclear]');
                     if (decoClr) {
-                        write('text-decoration-line', 'none');
-                        write('text-decoration', 'none');
+                        write('text-decoration-line', '');
+                        write('text-decoration', '');
+                        if (sel) tyMarkReset(sel, 'text-decoration-line');
                         paint();
                         return;
                     }
@@ -20112,15 +20450,21 @@
                         const on = tog.getAttribute('data-on');
                         if (prop === 'text-decoration') {
                             /* 修飾線可累加：underline / line-through / overline */
-                            const cur = String(read('text-decoration-line') || '');
+                            const cur = String(studioEffProp(sel, 'text-decoration-line') || '');
                             let arr = cur.split(/\s+/).filter(v => v && v !== 'none');
                             const idx = arr.indexOf(on);
                             if (idx === -1) arr.push(on); else arr.splice(idx, 1);
-                            const next = arr.length ? arr.join(' ') : 'none';
+                            const next = arr.length ? arr.join(' ') : '';
                             write('text-decoration-line', next);
                             write('text-decoration', next);
+                            if (!next && sel) tyMarkReset(sel, 'text-decoration-line');
+                            else if (sel) tyUnmarkReset(sel, 'text-decoration-line');
                         } else {
-                        write(prop, read(prop) === on ? '' : on);
+                            /* font-style 的 Italic：點擊切換 normal/italic */
+                            const cur = String(studioEffProp(sel, prop) || '');
+                            const next = cur === on ? 'normal' : on;
+                            write(prop, next);
+                            if (sel) tyUnmarkReset(sel, prop);
                         }
                         paint();
                         return;
@@ -20131,10 +20475,16 @@
                     if (!group) return;
                     const prop = group.getAttribute('data-prop') || group.getAttribute('data-typrop');
                     const val = btn.getAttribute('data-val');
-                    const empty = (prop === 'text-align' && val === 'left') ||
-                                  (prop === 'text-transform' && val === 'none') ||
-                                  (prop === 'text-decoration-line' && val === 'none');
-                    write(prop, empty ? '' : val);
+                    /* 首鍵：寫空屬性＝reset 到預設，同時記住 reset 狀態使首鍵呈灰色高亮；
+                       其他鍵：寫入該值，unmark reset。 */
+                    const isFirst = Array.prototype.indexOf.call(group.querySelectorAll('.st-ly__btn[data-val]'), btn) === 0;
+                    if (isFirst) {
+                        write(prop, '');
+                        if (sel) tyMarkReset(sel, prop);
+                    } else {
+                        write(prop, val);
+                        if (sel) tyUnmarkReset(sel, prop);
+                    }
                     paint();
                 });
                 $$('select[data-prop], u-combobox[data-prop]').forEach(el => {
@@ -20150,6 +20500,8 @@
                     });
                 });
                 $$('input[data-prop]').forEach(el => {
+                    /* Size／Height／Spacing 已由專屬 input/blur 處理，避免重複 commit */
+                    if (el.getAttribute('data-ty')) return;
                     el.addEventListener('change', () => {
                         const prop = el.getAttribute('data-prop');
                         let v = el.value.trim();
@@ -20207,16 +20559,28 @@
                     const keep = hits.filter(it => it.label.toLowerCase() === pref)[0];
                     return (keep || hits[0]).label;
                 }
+                const FAMILY_DEFAULT_VALUE = 'Arial, "Helvetica Neue", Helvetica, sans-serif';
+                const FAMILY_DEFAULT_LABEL = 'Arial';
                 function famPaint() {
                     /* 正在打字時不覆蓋輸入框，避免 styleUpdate 事件洗掉內容 */
                     if (document.activeElement !== famInput) {
-                        /* 未在選取元素上宣告時，自動填入繼承自全域根元素的字體 */
-                        famInput.value = famLabelOf(read('font-family') || tyRootProp('font-family'), famInput.value);
+                        const own = String(read('font-family') || '').trim();
+                        if (!own) {
+                            /* 未宣告時：預設顯示 Arial，並以次要文字色標示預設狀態 */
+                            famInput.value = FAMILY_DEFAULT_LABEL;
+                            famInput.classList.add('is-inherited');
+                        } else {
+                            famInput.value = famLabelOf(own, famInput.value);
+                            famInput.classList.remove('is-inherited');
+                        }
                     }
+                    /* fam-btn 未選字體時以預設態標示（Arial） */
+                    const own = String(read('font-family') || '').trim();
+                    if (famBtn) famBtn.classList.toggle('is-default-family', !own);
                     if (fpOpen) fpSyncCurrent();
                 }
                 function fpSyncCurrent() {
-                    const cur = String(read('font-family') || '').trim();
+                    const cur = String(read('font-family') || '').trim() || FAMILY_DEFAULT_VALUE;
                     $$('.st-fp__item', fp).forEach(b => {
                         const it = FAMILY_ITEMS[parseInt(b.getAttribute('data-fp-idx'), 10)];
                         b.classList.toggle('is-on', !!it && it.value === cur);
@@ -20224,7 +20588,7 @@
                 }
                 function fpRenderList(q) {
                     const kw = String(q || '').trim().toLowerCase();
-                    const cur = String(read('font-family') || '').trim();
+                    const cur = String(read('font-family') || '').trim() || FAMILY_DEFAULT_VALUE;
                     fpList.innerHTML = '';
                     let n = 0;
                     FAMILY_ITEMS.forEach((it, idx) => {
@@ -20290,7 +20654,11 @@
                 });
                 famInput.addEventListener('change', () => {
                     const raw = String(famInput.value || '').trim();
-                    if (!raw) { write('font-family', ''); paint(); return; }
+                    if (!raw || raw.toLowerCase() === FAMILY_DEFAULT_LABEL.toLowerCase()) {
+                        write('font-family', FAMILY_DEFAULT_VALUE);
+                        paint();
+                        return;
+                    }
                     const hit = FAMILY_ITEMS.filter(it => it.label.toLowerCase() === raw.toLowerCase())[0];
                     write('font-family', hit ? hit.value : raw);
                     paint();
