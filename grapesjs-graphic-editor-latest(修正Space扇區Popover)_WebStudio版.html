@@ -10022,7 +10022,7 @@
             position: relative;
             grid-column: 1 / -1;   /* 橫跨 Position／Z Index 兩欄，使用整個面板寬度 */
             width: 100%;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 400 / 260;
             margin-top: 2px;
             box-sizing: border-box;
             border-radius: 8px;
@@ -10048,60 +10048,84 @@
             height: 100%;
         }
 
-        /* 四片梯形 flap：不使用 board.html 的深色底，改用面板淺色＋淡主色。
-           hover／點擊由梯形本身接收，數值只負責顯示。 */
+        /* 四片梯形 flap：對照Space版型設計，梯形作為點擊熱區 */
         .st-ps__flap {
+            pointer-events: auto;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .st-ps__flap-poly {
             fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 4%, var(--studio-bg-1, #ffffff));
             stroke: var(--studio-border, #d8d8dc);
             stroke-width: 1.2;
             stroke-linejoin: round;
-            pointer-events: auto;
-            cursor: pointer;
-            outline: none;
             transition: fill .15s ease, stroke .15s ease, stroke-width .15s ease;
         }
 
-        .st-ps__flap:hover,
-        .st-ps__flap:focus-visible {
+        .st-ps__flap:hover .st-ps__flap-poly,
+        .st-ps__flap:focus-visible .st-ps__flap-poly {
             fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 10%, var(--studio-bg-1, #ffffff));
             stroke: var(--studio-accent, #6d5cf6);
         }
 
         /* 該側已有宣告值 */
-        .st-ps__flap.is-set {
+        .st-ps__flap.is-set .st-ps__flap-poly {
             fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 7%, var(--studio-bg-1, #ffffff));
             stroke: color-mix(in srgb, var(--studio-accent, #6d5cf6) 55%, var(--studio-border, #d8d8dc));
         }
 
         /* 浮層正在編輯的那一側 */
-        .st-ps__flap.is-active {
+        .st-ps__flap.is-active .st-ps__flap-poly {
             fill: color-mix(in srgb, var(--studio-accent, #6d5cf6) 14%, var(--studio-bg-1, #ffffff));
             stroke: var(--studio-accent, #6d5cf6);
             stroke-width: 1.8;
         }
 
-        .st-ps__board {
-            fill: var(--studio-bg-1, #ffffff);
-            stroke: var(--studio-border, #d8d8dc);
-            stroke-width: 1.2;
+        .st-ps__flap-hit {
+            fill: rgba(109, 92, 246, 0);
+            rx: 6;
+            transition: fill .15s ease;
             pointer-events: none;
         }
 
-        .st-ps__dashed {
-            fill: none;
-            stroke: var(--studio-text-3, #b9b9c2);
-            stroke-width: 1.2;
-            stroke-dasharray: 6 4;
-            opacity: .8;
-            pointer-events: none;
+        .st-ps__flap:hover .st-ps__flap-hit,
+        .st-ps__flap:focus-visible .st-ps__flap-hit {
+            fill: rgba(109, 92, 246, .08);
         }
 
-        .st-ps__element {
-            fill: url(#st-ps-elem-grad);
-            stroke: none;
-            filter: drop-shadow(0 2px 6px rgba(109, 92, 246, .18));
-            pointer-events: none;
+        .st-ps__flap.is-active .st-ps__flap-hit {
+            fill: rgba(109, 92, 246, .15);
         }
+
+        .st-ps__flap-num {
+            pointer-events: none;
+            font-family: inherit;
+            font-weight: 500;
+            fill: var(--studio-text-2, #585861);
+            transition: fill .15s ease, font-weight .15s ease;
+        }
+
+        .st-ps__flap:hover .st-ps__flap-num,
+        .st-ps__flap:focus-visible .st-ps__flap-num,
+        .st-ps__flap.is-active .st-ps__flap-num {
+            fill: var(--studio-accent, #6d5cf6);
+            font-weight: 600;
+        }
+
+        .st-ps__flap.is-set .st-ps__flap-num {
+            fill: var(--studio-accent, #6d5cf6);
+        }
+
+        /* SVG內矩形、線條、文字禁止滑鼠事件 */
+        .st-ps__skel-svg rect:not(.st-ps__flap-hit),
+        .st-ps__skel-svg line,
+        .st-ps__skel-svg text:not(.st-ps__flap-num) { pointer-events: none; }
+
+        /* 舊版class保留兼容，不影響邏輯 */
+        .st-ps__board { display: none; }
+        .st-ps__dashed { display: none; }
+        .st-ps__element { display: none; }
 
         .st-ps__edge {
             position: absolute;
@@ -10112,13 +10136,13 @@
             pointer-events: none;   /* 只顯示 value，點擊交給下方的梯形 */
         }
 
-        .st-ps__edge--top { top: 20%; left: 50%; transform: translate(-50%, -50%); }
-        .st-ps__edge--bottom { top: 80%; left: 50%; transform: translate(-50%, -50%); }
-        .st-ps__edge--left { top: 50%; left: 20%; transform: translate(-50%, -50%); }
-        .st-ps__edge--right { top: 50%; left: 80%; transform: translate(-50%, -50%); }
+        .st-ps__edge--top { top: 7.7%; left: 50%; transform: translate(-50%, -50%); }
+        .st-ps__edge--bottom { top: 92.3%; left: 50%; transform: translate(-50%, -50%); }
+        .st-ps__edge--left { top: 50%; left: 7.5%; transform: translate(-50%, -50%); }
+        .st-ps__edge--right { top: 50%; left: 92.5%; transform: translate(-50%, -50%); }
 
         .st-ps__edge-value {
-            width: 48px;
+            width: fit-content;
             height: 18px;
             padding: 0 5px;
             box-sizing: border-box;
@@ -13931,6 +13955,51 @@
                     },
                     reset: () => studioClearProps(['overflow', 'overflow-x', 'overflow-y']),
                 },
+                'text-align': {
+                    prop: 'text-align',
+                    initial: '', /* No initial value */
+                    mdn: '',
+                    values: {
+                        'start': { code: 'text-align: start;', desc: 'Aligns the text base on the writing direction.'},
+                        'center': { code: 'text-align: center;', desc: 'Centers the text horizontally within its container.'},
+                        'end': { code: 'text-align: end', desc: 'Aligns the text based on the writing direction.'},
+                        'justify': { code: 'text-align: justify;', desc: 'Adjusts word spacing to align text to both the left and right edges of the container'},
+                    }
+                },
+                'text-decoration-line': {
+                    prop: 'text-decoration-line',
+                    initial: 'none',
+                    desc: '',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/text-decoration-line',
+                    values: {
+                        'none': "No decoration is applied to the text.",
+                        'underline': 'Adds a horizontal line underneath the text.',
+                        'stroke': 'Draws a horizontal line through the middle of the text.',
+                    },
+                    reset: () => studioClearProps(['text-decoration-line']),
+                },
+                'text-transform': {
+                    prop: 'text-transform',
+                    initial: 'none',
+                    desc: '',
+                    values: {
+                        'none': 'No transformation is applied to the text. The text appears as it is.',
+                        'uppercase': 'Transforms the text to appear in all uppercase letters.',
+                        'capitalize': 'Transforms the first character of each word to uppercase, while the remaining characters are in lowercase.',
+                        'lowercase': ' Transforms the text to appear in all lowercase letters.',
+                    }
+                },
+                'font-style': {
+                    prop: 'font-style',
+                    initial: 'normal',
+                    desc: '',
+                    values: {
+                        'normal': 'The default value. The text appears in a normal, upright style.',
+                        'italic': 'The text appears in italic style, where it is slanted to the right.',
+                    }
+                }
+                
             };
 
             /* Popover 觸發鍵 → 重置目標的對照表（Reset value 按鈕掛在 document.body 上，
@@ -14248,6 +14317,13 @@
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/position',
                     props: ['position', 'z-index', 'top', 'right', 'bottom', 'left'],
+                },
+                typography: {
+                    title: 'Typography',
+                    code: '',
+                    desc: '',
+                    mdn: '',
+                    props: ['font-size', 'line-height', 'letter-spacing', 'text-align', 'text-decoration-line', 'text-transform', 'font-style'],
                 },
                 border: {
                     title: 'Border',
@@ -19211,21 +19287,46 @@
                     '    <button type="button" class="st-ly__iconbtn" data-clear="z-index" title="清除">' + ICO.minus + '</button>',
                     '  </div>',
                     '  <div class="st-ps__skel" data-offsets hidden>',
-                    '    <svg class="st-ps__skel-svg" viewBox="0 0 500 500" preserveAspectRatio="none">',
-                    '      <defs>',
-                    '        <linearGradient id="st-ps-elem-grad" x1="0" y1="0" x2="1" y2="1">',
-                    '          <stop offset="0%" stop-color="#c9b6ff"/>',
-                    '          <stop offset="50%" stop-color="#a78bfa"/>',
-                    '          <stop offset="100%" stop-color="#7c5cff"/>',
-                    '        </linearGradient>',
-                    '      </defs>',
-                    '      <polygon class="st-ps__flap" data-side="top" data-edge-anchor data-prop="top" role="button" tabindex="0" aria-label="Top 偏移" points="130,130 370,130 340,70 160,70"/>',
-                    '      <polygon class="st-ps__flap" data-side="bottom" data-edge-anchor data-prop="bottom" role="button" tabindex="0" aria-label="Bottom 偏移" points="130,370 370,370 340,430 160,430"/>',
-                    '      <polygon class="st-ps__flap" data-side="left" data-edge-anchor data-prop="left" role="button" tabindex="0" aria-label="Left 偏移" points="130,130 130,370 70,340 70,160"/>',
-                    '      <polygon class="st-ps__flap" data-side="right" data-edge-anchor data-prop="right" role="button" tabindex="0" aria-label="Right 偏移" points="370,130 370,370 430,340 430,160"/>',
-                    '      <rect class="st-ps__board" x="130" y="130" width="240" height="240"/>',
-                    '      <rect class="st-ps__dashed" x="148" y="148" width="204" height="204" rx="16"/>',
-                    '      <rect class="st-ps__element" x="175" y="175" width="150" height="150" rx="14"/>',
+                    '    <svg class="st-ps__skel-svg" viewBox="0 0 400 260">',
+                    '      <g id="layer-viewport" class="box-layer" data-type="viewport">',
+                    '        <rect x="0" y="0" width="400" height="260" fill="#e8e0ff" opacity="0.3"/>',
+                    '        <rect x="0.5" y="0.5" width="399" height="259" fill="none" stroke="#b8a4e8" stroke-width="1"/>',
+                    '        <line x1="0" y1="0" x2="60" y2="40" stroke="#b8a4e8" stroke-width="1"/>',
+                    '        <line x1="400" y1="0" x2="340" y2="40" stroke="#b8a4e8" stroke-width="1"/>',
+                    '        <line x1="400" y1="260" x2="340" y2="220" stroke="#b8a4e8" stroke-width="1"/>',
+                    '        <line x1="0" y1="260" x2="60" y2="220" stroke="#b8a4e8" stroke-width="1"/>',
+                    '        <text x="10" y="20" font-size="16" fill="#7c5cff" font-weight="bold">VIEWPORT</text>',
+                    '        <g class="st-ps__flap" data-side="top" data-edge-anchor data-prop="top" role="button" tabindex="0" aria-label="Top 偏移" transform="translate(200, 20)">',
+                    '          <polygon class="st-ps__flap-poly" points="-200,-20 200,-20 140,20 -140,20"/>',
+                    '          <rect class="st-ps__flap-hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
+                    '          <text class="st-ps__flap-num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">auto</text>',
+                    '        </g>',
+                    '        <g class="st-ps__flap" data-side="right" data-edge-anchor data-prop="right" role="button" tabindex="0" aria-label="Right 偏移" transform="translate(370, 130)">',
+                    '          <polygon class="st-ps__flap-poly" points="30,-130 30,130 -30,90 -30,-90"/>',
+                    '          <rect class="st-ps__flap-hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
+                    '          <text class="st-ps__flap-num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">auto</text>',
+                    '        </g>',
+                    '        <g class="st-ps__flap" data-side="bottom" data-edge-anchor data-prop="bottom" role="button" tabindex="0" aria-label="Bottom 偏移" transform="translate(200, 240)">',
+                    '          <polygon class="st-ps__flap-poly" points="200,20 -200,20 -140,-20 140,-20"/>',
+                    '          <rect class="st-ps__flap-hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
+                    '          <text class="st-ps__flap-num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">auto</text>',
+                    '        </g>',
+                    '        <g class="st-ps__flap" data-side="left" data-edge-anchor data-prop="left" role="button" tabindex="0" aria-label="Left 偏移" transform="translate(30, 130)">',
+                    '          <polygon class="st-ps__flap-poly" points="-30,130 -30,-130 30,-90 30,90"/>',
+                    '          <rect class="st-ps__flap-hit" x="-20" y="-12" width="40" height="24" rx="6"/>',
+                    '          <text class="st-ps__flap-num" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#333">auto</text>',
+                    '        </g>',
+                    '      </g>',
+                    '      <g id="layer-offset" class="box-layer" data-type="offset">',
+                    '        <rect x="60" y="40" width="280" height="180" fill="#d4c4ff" opacity="0.4"/>',
+                    '        <rect x="60.5" y="40.5" width="279" height="179" fill="none" stroke="#a78bfa" stroke-width="1"/>',
+                    '        <text x="64" y="53" font-size="13" fill="#6d4bc4" font-weight="bold">OFFSET</text>',
+                    '      </g>',
+                    '      <g id="layer-element" class="box-layer" data-type="element">',
+                    '        <rect x="90" y="70" width="220" height="120" fill="#c9b6ff" opacity="0.5"/>',
+                    '        <rect x="90.5" y="70.5" width="219" height="119" fill="none" stroke="#7c5cff" stroke-width="1" stroke-dasharray="2,2"/>',
+                    '        <text x="200" y="130" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#333" font-weight="bold">ELEMENT</text>',
+                    '      </g>',
                     '    </svg>',
                     '    <div class="st-ps__edge st-ps__edge--top" data-prop="top"><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
                     '    <div class="st-ps__edge st-ps__edge--bottom" data-prop="bottom"><span class="st-ps__edge-value" data-ps-val>auto</span></div>',
@@ -19354,7 +19455,14 @@
                     $$('.st-ps__edge[data-prop]').forEach(el => {
                         const prop = el.getAttribute('data-prop');
                         const v = el.querySelector('[data-ps-val]');
-                        if (v) v.textContent = psEditor.display(prop);
+                        const displayValue = psEditor.display(prop);
+                        if (v) v.textContent = displayValue;
+                        // 同步更新SVG梯形內的數值文字
+                        const flap = root.querySelector('.st-ps__flap[data-edge-anchor][data-prop="' + prop + '"]');
+                        if (flap) {
+                            const flapNum = flap.querySelector('.st-ps__flap-num');
+                            if (flapNum) flapNum.textContent = displayValue;
+                        }
                         psEditor.sync(prop);
                     });
                     if (!sel) psEditor.close();
