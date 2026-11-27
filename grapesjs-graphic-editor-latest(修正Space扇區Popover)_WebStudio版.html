@@ -10207,6 +10207,18 @@
             color: #fff;
         }
 
+        /* 未設定該屬性時，分段按鈕的首個按鍵以灰底標示「目前採用預設值」；
+           一旦明確設定（或有值），改以主色 .is-on 高亮對應按鍵。 */
+        .st-ly__btn.is-default {
+            background: var(--studio-hover-strong, rgba(134, 134, 158, .34));
+            color: var(--studio-text-1, #e4e4e7);
+        }
+
+        /* 值繼承自全域根元素（未在選取元素上宣告）時，欄位以次要文字色顯示 */
+        .st-sz__control input.is-inherited {
+            color: var(--studio-text-3, #8b8b95);
+        }
+
         .st-ly__btn svg {
             width: 15px;
             height: 15px;
@@ -13957,47 +13969,56 @@
                 },
                 'text-align': {
                     prop: 'text-align',
-                    initial: '', /* No initial value */
-                    mdn: '',
+                    initial: '',
+                    desc: 'Sets the horizontal alignment of the text inside the element.',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/text-align',
                     values: {
-                        'start': { code: 'text-align: start;', desc: 'Aligns the text base on the writing direction.'},
-                        'center': { code: 'text-align: center;', desc: 'Centers the text horizontally within its container.'},
-                        'end': { code: 'text-align: end', desc: 'Aligns the text based on the writing direction.'},
-                        'justify': { code: 'text-align: justify;', desc: 'Adjusts word spacing to align text to both the left and right edges of the container'},
-                    }
+                        'left': { code: 'text-align: left;', desc: 'Aligns the text to the left edge of its container.' },
+                        'center': { code: 'text-align: center;', desc: 'Centers the text horizontally within its container.' },
+                        'right': { code: 'text-align: right;', desc: 'Aligns the text to the right edge of its container.' },
+                        'justify': { code: 'text-align: justify;', desc: 'Adjusts word spacing so the text is aligned to both the left and right edges of the container.' },
+                    },
+                    reset: () => studioClearProps(['text-align']),
                 },
                 'text-decoration-line': {
                     prop: 'text-decoration-line',
-                    initial: 'none',
-                    desc: '',
+                    initial: '',
+                    desc: 'Sets the kind of line decoration drawn on the text.',
                     foot: STUDIO_BLOCK_FOOT,
                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/text-decoration-line',
                     values: {
-                        'none': "No decoration is applied to the text.",
+                        'none': 'No decoration is applied to the text.',
                         'underline': 'Adds a horizontal line underneath the text.',
-                        'stroke': 'Draws a horizontal line through the middle of the text.',
+                        'line-through': 'Draws a horizontal line through the middle of the text.',
                     },
                     reset: () => studioClearProps(['text-decoration-line']),
                 },
                 'text-transform': {
                     prop: 'text-transform',
-                    initial: 'none',
-                    desc: '',
+                    initial: '',
+                    desc: 'Controls the capitalization of the text.',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/text-transform',
                     values: {
                         'none': 'No transformation is applied to the text. The text appears as it is.',
                         'uppercase': 'Transforms the text to appear in all uppercase letters.',
                         'capitalize': 'Transforms the first character of each word to uppercase, while the remaining characters are in lowercase.',
-                        'lowercase': ' Transforms the text to appear in all lowercase letters.',
-                    }
+                        'lowercase': 'Transforms the text to appear in all lowercase letters.',
+                    },
+                    reset: () => studioClearProps(['text-transform']),
                 },
                 'font-style': {
                     prop: 'font-style',
-                    initial: 'normal',
-                    desc: '',
+                    initial: '',
+                    desc: 'Sets whether the text is rendered in a normal, italic or oblique face.',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-style',
                     values: {
                         'normal': 'The default value. The text appears in a normal, upright style.',
                         'italic': 'The text appears in italic style, where it is slanted to the right.',
-                    }
+                    },
+                    reset: () => studioClearProps(['font-style']),
                 }
                 
             };
@@ -14320,9 +14341,10 @@
                 },
                 typography: {
                     title: 'Typography',
-                    code: '',
-                    desc: '',
-                    mdn: '',
+                    code: 'font-family: inherit;<br>font-size: inherit;<br>line-height: inherit;',
+                    desc: 'How the text inside the element is rendered: its font family, size and line height, and the alignment, decoration, transformation and style applied to the text.',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/font',
                     props: ['font-size', 'line-height', 'letter-spacing', 'text-align', 'text-decoration-line', 'text-transform', 'font-style'],
                 },
                 border: {
@@ -14517,9 +14539,12 @@
                 'grid-auto-flow':    { title: 'Grid auto flow', code: 'grid-auto-flow: row;',     desc: 'How auto-placed items flow through the grid (rows or columns).',     mdn: 'https://developer.mozilla.org/docs/Web/CSS/grid-auto-flow', init: 'row', defaults: ['row', ''] },
                 'row-gap':           { title: 'Row gap',       code: 'row-gap: 0;',               desc: 'Gutter between rows of a flex or grid container.',                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/row-gap', init: '0', defaults: ['0', '0px', ''], props: ['gap', 'row-gap', 'column-gap'] },
                 'column-gap':        { title: 'Column gap',    code: 'column-gap: 0;',            desc: 'Gutter between columns of a flex or grid container.',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/column-gap', init: '0', defaults: ['0', '0px', ''], props: ['gap', 'row-gap', 'column-gap'] },
-                'family':            { title: 'Family',        code: 'font-family: Arial, Roboto, sans-serif;', desc: 'Set the font family of text content.'},
-                'weight':            { title: 'Weight',        code: 'font-weight: normal;', desc: 'The weight (boldness) of font.'},
-                'color':             { title: 'Color',         code: 'font-color: black;', desc: ''}
+                'family':            { title: 'Family',        code: 'font-family: inherit;',          desc: 'Sets the font family used to render the text.',                                  mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-family',    init: '',       defaults: [''] },
+                'weight':            { title: 'Weight',        code: 'font-weight: normal;',           desc: 'Sets the boldness (weight) of the font.',                                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-weight',    init: 'normal', defaults: ['normal', ''] },
+                'color':             { title: 'Color',         code: 'color: currentcolor;',           desc: 'Sets the colour of the text and its decorations.',                               mdn: 'https://developer.mozilla.org/docs/Web/CSS/color',          init: 'currentcolor', defaults: ['currentcolor', ''] },
+                'font-size':         { title: 'Size',          code: 'font-size: 16px;',               desc: 'Sets the size of the font.',                                                     mdn: 'https://developer.mozilla.org/docs/Web/CSS/font-size',      init: '16px',   defaults: ['16px'] },
+                'line-height':       { title: 'Height',        code: 'line-height: normal;',           desc: 'Sets the height of a line box, controlling the vertical spacing between lines.',  mdn: 'https://developer.mozilla.org/docs/Web/CSS/line-height',    init: 'normal', defaults: ['normal'] },
+                'letter-spacing':    { title: 'Spacing',       code: 'letter-spacing: normal;',        desc: 'Sets the horizontal spacing between text characters (tracking).',                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/letter-spacing', init: 'normal', defaults: ['normal'] }
             };
             function studioPropIsDefault(propKey, value) {
                 const d = STUDIO_PROP_DOC[propKey];
@@ -19713,6 +19738,72 @@
                 const $ = (sel, el = root) => el.querySelector(sel);
                 const $$ = (sel, el = root) => Array.prototype.slice.call(el.querySelectorAll(sel));
 
+                /* ============================================================
+                 * Typography 扇區的 Popover 綁定
+                 *   · 標題晶片：整個扇區的 CSS 規則說明（STUDIO_SECTOR_DOC.typography）
+                 *   · 屬性標籤晶片：Family／Weight／Color（Size／Height／Spacing 走通用自動綁定）
+                 *   · 控制鍵晶片：text-align／text-decoration-line／text-transform／font-style 四組分段按鈕
+                 * ============================================================ */
+                (function bindTypographyPopovers() {
+                    /* 扇區標題晶片 */
+                    studioBindSectorPop($('.st-ly__head-title'), 'typography');
+
+                    /* 依標籤文字找屬性標籤晶片（略過已綁定與進階排版浮層內的） */
+                    function labelByText(t) {
+                        return $$('.st-ly__label').filter(el =>
+                            !el.classList.contains('st-prop-label') &&
+                            !el.classList.contains('st-ly__label--btn') &&
+                            !el.closest('.st-tr__head') &&
+                            (el.textContent || '').trim().toLowerCase() === t)[0];
+                    }
+                    studioBindPropPop(labelByText('family'), 'family');
+                    studioBindPropPop(labelByText('weight'), 'weight');
+                    studioBindPropPop(labelByText('color'), 'color');
+
+                    /* 四組分段按鈕：逐鍵綁定說明（Reset value 由 studioBindCtrlPop 依狀態決定） */
+                    $$('[data-prop="text-align"] .st-ly__btn').forEach(btn => {
+                        const val = btn.getAttribute('data-val');
+                        if (!val) return;
+                        btn.setAttribute('data-ctrl', 'text-align');
+                        studioBindCtrlPop(btn, 'text-align', val);
+                    });
+                    $$('[data-prop="text-decoration-line"] .st-ly__btn').forEach(btn => {
+                        const val = btn.hasAttribute('data-decoclear') ? 'none' : btn.getAttribute('data-on');
+                        if (!val) return;
+                        btn.setAttribute('data-ctrl', 'text-decoration-line');
+                        studioBindCtrlPop(btn, 'text-decoration-line', val);
+                    });
+                    $$('[data-prop="text-transform"] .st-ly__btn').forEach(btn => {
+                        const val = btn.getAttribute('data-val');
+                        if (!val) return;
+                        btn.setAttribute('data-ctrl', 'text-transform');
+                        studioBindCtrlPop(btn, 'text-transform', val);
+                    });
+                    $$('[data-typrop="font-style"] .st-ly__btn').forEach(btn => {
+                        const val = btn.hasAttribute('data-toggle') ? btn.getAttribute('data-on') : 'normal';
+                        if (!val) return;
+                        btn.setAttribute('data-ctrl', 'font-style');
+                        studioBindCtrlPop(btn, 'font-style', val);
+                    });
+                })();
+
+                /* 全域根元素＝選取元素往上追到最頂層的元件（畫布頁面的 root）。
+                   Family／Size／Height 未在選取元素上宣告時，其值繼承自它。 */
+                function tyRootProp(prop) {
+                    let comp = editor.getSelected();
+                    if (!comp) return '';
+                    while (comp.parent && comp.parent()) comp = comp.parent();
+                    /* 先讀根元素自己宣告的值（最乾淨），讀不到再退回瀏覽器計算值（＝實際繼承結果） */
+                    const declared = studioEffProp(comp, prop);
+                    if (declared) return String(declared);
+                    try {
+                        const el = comp.getEl && comp.getEl();
+                        const win = el && el.ownerDocument && el.ownerDocument.defaultView;
+                        if (win) return String(win.getComputedStyle(el).getPropertyValue(prop) || '');
+                    } catch (e) { /* 畫布未就緒或非瀏覽器環境時忽略 */ }
+                    return '';
+                }
+
                 /* ---------------- Font Family：按鍵選單浮層 ---------------- */
 
                 const famField = $('[data-ty="family-field"]');
@@ -19867,14 +19958,24 @@
                     });
                     $$('input[data-prop]').forEach(el => {
                         if (el === colorText) return;
-                        const v = read(el.getAttribute('data-prop'));
-                        el.value = String(v).replace(/px$/i, '');
+                        const prop = el.getAttribute('data-prop');
+                        const own = read(prop);
+                        /* Size／Height 未在選取元素上宣告時，自動填入繼承自全域根元素的值 */
+                        const inherited = (prop === 'font-size' || prop === 'line-height') ? tyRootProp(prop) : '';
+                        const shown = own || inherited;
+                        el.value = String(shown).replace(/px$/i, '');
+                        /* 值來自繼承（非本元素宣告）時標記，欄位改以次要文字色顯示 */
+                        el.classList.toggle('is-inherited', !own && !!shown);
                     });
                     const col = read('color');
                     colorText.value = col;
                     tyPaintSwatch(col || '#000000');
-                    $$('[data-prop="text-align"] .st-ly__btn').forEach(btn => {
-                        btn.classList.toggle('is-on', btn.getAttribute('data-val') === (read('text-align') || 'left'));
+                    /* 未設定屬性：首個按鍵以灰底（is-default）標示目前是預設狀態；
+                       已設定：對應值的按鍵以主色高亮（is-on）。 */
+                    const taRaw = String(read('text-align') || '').trim();
+                    $$('[data-prop="text-align"] .st-ly__btn').forEach((btn, i) => {
+                        btn.classList.toggle('is-on', taRaw !== '' && btn.getAttribute('data-val') === taRaw);
+                        btn.classList.toggle('is-default', taRaw === '' && i === 0);
                     });
                     $$('[data-toggle]').forEach(btn => {
                         const prop = btn.getAttribute('data-toggle');
@@ -19889,17 +19990,20 @@
                     });
                     $$('[data-prop="text-decoration-line"] .st-ly__btn[data-decoclear]').forEach(btn => {
                         const cur = String(read('text-decoration-line') || '').trim();
-                        btn.classList.toggle('is-on', cur === '' || cur === 'none');
+                        btn.classList.toggle('is-on', cur === 'none');
+                        btn.classList.toggle('is-default', cur === '');
                     });
-                    $$('[data-prop="text-transform"] .st-ly__btn').forEach(btn => {
-                        const cur = read('text-transform') || 'none';
-                        btn.classList.toggle('is-on', btn.getAttribute('data-val') === cur);
+                    $$('[data-prop="text-transform"] .st-ly__btn').forEach((btn, i) => {
+                        const cur = String(read('text-transform') || '').trim();
+                        btn.classList.toggle('is-on', cur !== '' && btn.getAttribute('data-val') === cur);
+                        btn.classList.toggle('is-default', cur === '' && i === 0);
                     });
-                    /* font-style 左側的「Normal（X）」：未設值或設為 normal 時高亮；
-                       右側 Italic 由上方 [data-toggle] 的邏輯負責 */
+                    /* font-style 左側的「Normal（X）」：設為 normal 時以主色高亮，
+                       未設值時改以灰底標示；右側 Italic 由上方 [data-toggle] 的邏輯負責 */
                     $$('[data-typrop="font-style"] .st-ly__btn[data-val]').forEach(btn => {
                         const cur = String(read('font-style') || '').trim();
-                        btn.classList.toggle('is-on', cur === '' || cur === 'normal');
+                        btn.classList.toggle('is-on', cur === 'normal');
+                        btn.classList.toggle('is-default', cur === '');
                     });
                     /* Adv panel 控件同步 */
                     function advSetVal(p, v) {
@@ -20106,7 +20210,8 @@
                 function famPaint() {
                     /* 正在打字時不覆蓋輸入框，避免 styleUpdate 事件洗掉內容 */
                     if (document.activeElement !== famInput) {
-                        famInput.value = famLabelOf(read('font-family'), famInput.value);
+                        /* 未在選取元素上宣告時，自動填入繼承自全域根元素的字體 */
+                        famInput.value = famLabelOf(read('font-family') || tyRootProp('font-family'), famInput.value);
                     }
                     if (fpOpen) fpSyncCurrent();
                 }
