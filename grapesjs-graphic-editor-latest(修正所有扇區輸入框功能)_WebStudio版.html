@@ -2357,9 +2357,6 @@
             width: 100%;
             background: color-mix(in oklab, var(--background-primary) 86%, var(--foreground-primary));
             color: var(--foreground-primary);
-            border: 0;
-            outline: none;
-            appearance: none;
 
             box-sizing: border-box;
             min-width: 0px;
@@ -5360,6 +5357,65 @@
             margin-left: auto;
             font-size: 12px;
             line-height: 1;
+        }
+
+        /* Size 扇區：單位鈕貼齊輸入框右端（比照 Gap / Border 的單位鈕），
+           用 flex 佔位，不再用 padding-right 預留空間（否則數字會被裁掉）。
+           顯示分工：輸入框只放數字（aspect-ratio 放比值），單位由單位鈕呈現。 */
+        .st-sz__len-unit {
+            flex: 0 0 auto;
+            margin-left: auto;
+            height: 20px;
+            min-width: 0;
+            padding: 0 6px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            font-family: inherit;
+            font-size: 10px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: var(--studio-text-3);
+            transition: color 0.15s;
+        }
+        .st-sz__len-unit.is-unit { color: var(--studio-text-2); opacity: 1; }
+        .st-sz__len-unit.is-unit:hover { background: var(--studio-hover); color: var(--studio-text-1); }
+        .st-sz__len-unit.is-dash { color: var(--studio-text-3); opacity: 0.6; }
+        .st-sz__len-unit.is-dash:hover { background: var(--studio-hover-soft); color: var(--studio-text-2); }
+        .st-sz__control.st-sz__len.is-invalid { border-color: #e5484d; }
+        .st-sz__len { position: relative; }
+        .st-sz__kw-menu .st-ly__btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            font-size: 12px;
+            color: var(--studio-text-1);
+            cursor: pointer;
+            user-select: none;
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: left;
+            border-radius: 0;
+        }
+        .st-sz__kw-menu .st-ly__btn:hover { background: var(--studio-hover); }
+        .st-sz__kw-menu .st-ly__btn.is-on {
+            color: var(--studio-accent);
+            background: var(--studio-active, rgba(109, 92, 246, 0.08));
+            font-weight: 500;
+        }
+        .st-sz__kw-menu .st-ly__btn.is-on::after {
+            content: '✓';
+            margin-left: auto;
+            font-size: 12px;
+            line-height: 1;
+        }
+        /* 輸入框為關鍵字值時，邊框高亮提示 */
+        .st-sz__control.is-kw {
+            border-color: var(--studio-accent, #6d5cf6) !important;
+            box-shadow: 0 0 0 1px var(--studio-accent, #6d5cf6);
         }
 
         /* ---------- Border Color 色票選單 ---------- */
@@ -14054,6 +14110,23 @@
                     },
                     reset: () => studioClearProps(['flex-grow', 'flex-shrink', 'flex-basis']),
                 },
+                'border-style': {
+                    prop: 'border-style',
+                    /* border-style 是簡寫，四邊長屬性（border-*-style）也算同一條規則；
+                       宣告了就算「已套用」（連 border-style: none 也是一條規則）→ 需要 Reset value */
+                    declaredProps: ['border-style', 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'],
+                    initial: 'none',
+                    desc: 'Sets the line style of the border (solid, dashed, dotted ...). No style = no border.',
+                    foot: STUDIO_BLOCK_FOOT,
+                    mdn: 'https://developer.mozilla.org/docs/Web/CSS/border-style',
+                    values: {
+                        'none': { code: 'border-style: none;', desc: 'No border is drawn.' },
+                        'solid': { code: 'border-style: solid;', desc: 'A single solid line is drawn.' },
+                        'dashed': { code: 'border-style: dashed;', desc: 'The border is drawn as a series of dashes.' },
+                        'dotted': { code: 'border-style: dotted;', desc: 'The border is drawn as a series of dots.' },
+                    },
+                    reset: () => studioClearProps(['border-style', 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style']),
+                },
                 'grid-position': {
                     prop: 'grid-area',
                     initial: 'auto',
@@ -14658,13 +14731,13 @@
              * 屬性級 Popover（無「+」扇區展開後的子控制項標籤晶片）
              * ============================================================ */
             const STUDIO_PROP_DOC = {
-                'width':             { title: 'Width',         code: 'width: auto;',              desc: 'Sets the width of an element.',                       mdn: 'https://developer.mozilla.org/docs/Web/CSS/width',         init: 'auto',  defaults: ['auto'] },
-                'height':            { title: 'Height',        code: 'height: auto;',             desc: 'Defines the height of an element.',                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/height',        init: 'auto',  defaults: ['auto'] },
-                'min-width':         { title: 'Min Width',     code: 'min-width: auto;',          desc: 'Sets the minimum width of an element.',    mdn: 'https://developer.mozilla.org/docs/Web/CSS/min-width',     init: 'auto',  defaults: ['auto'] },
-                'min-height':        { title: 'Min Height',    code: 'min-height: auto;',         desc: 'Sets the minimum height of an element.',   mdn: 'https://developer.mozilla.org/docs/Web/CSS/min-height',    init: 'auto',  defaults: ['auto'] },
-                'max-width':         { title: 'Max Width',     code: 'max-width: none;',          desc: 'Sets the maximum width of an element.',                          mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-width',     init: 'none',  defaults: ['none'] },
-                'max-height':        { title: 'Max Height',    code: 'max-height: none;',         desc: 'Sets the maximum height of an element.',                         mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-height',    init: 'none',  defaults: ['none'] },
-                'aspect-ratio':      { title: 'Aspect ratio',  code: 'aspect-ratio: auto;',       desc: `Controls the aspect ratio of an element's box.`,                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/aspect-ratio',  init: 'auto',  defaults: ['auto'] },
+                'width':             { title: 'Width',         code: 'width: auto;',              desc: 'Sets the width of an element.',                       mdn: 'https://developer.mozilla.org/docs/Web/CSS/width',         init: 'auto',  defaults: [''] },
+                'height':            { title: 'Height',        code: 'height: auto;',             desc: 'Defines the height of an element.',                        mdn: 'https://developer.mozilla.org/docs/Web/CSS/height',        init: 'auto',  defaults: [''] },
+                'min-width':         { title: 'Min Width',     code: 'min-width: auto;',          desc: 'Sets the minimum width of an element.',    mdn: 'https://developer.mozilla.org/docs/Web/CSS/min-width',     init: 'auto',  defaults: [''] },
+                'min-height':        { title: 'Min Height',    code: 'min-height: auto;',         desc: 'Sets the minimum height of an element.',   mdn: 'https://developer.mozilla.org/docs/Web/CSS/min-height',    init: 'auto',  defaults: [''] },
+                'max-width':         { title: 'Max Width',     code: 'max-width: none;',          desc: 'Sets the maximum width of an element.',                          mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-width',     init: 'none',  defaults: [''] },
+                'max-height':        { title: 'Max Height',    code: 'max-height: none;',         desc: 'Sets the maximum height of an element.',                         mdn: 'https://developer.mozilla.org/docs/Web/CSS/max-height',    init: 'none',  defaults: [''] },
+                'aspect-ratio':      { title: 'Aspect ratio',  code: 'aspect-ratio: auto;',       desc: `Controls the aspect ratio of an element's box.`,                 mdn: 'https://developer.mozilla.org/docs/Web/CSS/aspect-ratio',  init: 'auto',  defaults: [''] },
                 'overflow':          { title: 'Overflow',      code: 'overflow-x: visible;<br>overflow-y: visible;',        desc: 'Content is fully visible and extends beyond the container if it exceeds its size.',       mdn: 'https://developer.mozilla.org/docs/Web/CSS/overflow',      init: 'visible', defaults: [''],
                     /* overflow 與 longhand 視為同一條規則 → Reset value 三個一起清 */
                     props: ['overflow', 'overflow-x', 'overflow-y'],
@@ -14689,7 +14762,10 @@
                 'right':             { title: 'Right',         code: 'right: auto;',              desc: 'Distance from the right edge of the containing block.',               mdn: 'https://developer.mozilla.org/docs/Web/CSS/right', init: 'auto', defaults: ['auto'] },
                 'bottom':            { title: 'Bottom',        code: 'bottom: auto;',             desc: 'Distance from the bottom edge of the containing block.',              mdn: 'https://developer.mozilla.org/docs/Web/CSS/bottom', init: 'auto', defaults: ['auto'] },
                 'left':              { title: 'Left',          code: 'left: auto;',               desc: 'Distance from the left edge of the containing block.',                mdn: 'https://developer.mozilla.org/docs/Web/CSS/left', init: 'auto', defaults: ['auto'] },
-                'border-style':      { title: 'Style',         code: 'border-style: none;',       desc: 'The line style of the border (solid, dashed, dotted ...). No style = no border.', mdn: 'https://developer.mozilla.org/docs/Web/CSS/border-style', init: 'none', defaults: ['none', ''], multi: ['border-top-style','border-right-style','border-bottom-style','border-left-style'] },
+                'border-style':      { title: 'Style',         code: 'border-style: none;',       desc: 'The line style of the border (solid, dashed, dotted ...). No style = no border.', mdn: 'https://developer.mozilla.org/docs/Web/CSS/border-style', init: 'none', defaults: [''],
+                    /* 簡寫與四邊長屬性是同一條規則 → Reset value 一次全清；
+                       宣告就算套用（連 border-style: none 也是一條規則）→ 晶片會亮 */
+                    props: ['border-style', 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'] },
                 'border-color':      { title: 'Color',         code: 'border-color: currentcolor;', desc: 'Colour of the border; defaults to the current text colour.',         mdn: 'https://developer.mozilla.org/docs/Web/CSS/border-color', init: 'currentcolor', defaults: ['currentcolor', ''], multi: ['border-top-color','border-right-color','border-bottom-color','border-left-color'] },
                 'border-width':      { title: 'Width',         code: 'border-width: medium;',     desc: 'Thickness of the border on each side.',                               mdn: 'https://developer.mozilla.org/docs/Web/CSS/border-width', init: 'medium', defaults: ['medium', ''], multi: ['border-top-width','border-right-width','border-bottom-width','border-left-width'] },
                 'border-radius':     { title: 'Radius',        code: 'border-radius: 0;',         desc: 'How rounded each corner of the element is.',                          mdn: 'https://developer.mozilla.org/docs/Web/CSS/border-radius', init: '0', defaults: ['0'], multi: ['border-top-left-radius','border-top-right-radius','border-bottom-left-radius','border-bottom-right-radius'] },
@@ -17369,18 +17445,15 @@
                 const growInp = $('input[data-prop="flex-grow"]');
                 const shrinkInp = $('input[data-prop="flex-shrink"]');
                 const basisInp = $('input[data-prop="flex-basis"]');
-                const FC_PROPS = ['justify-self', 'align-self', 'order', 'flex-grow', 'flex-shrink', 'flex-basis'];
+                const FC_PROPS = ['align-self', 'order', 'flex-grow', 'flex-shrink', 'flex-basis'];
 
                 /* 區塊按鍵（Justify / Align / Sizing / Order）的 Popover */
                 $$('[data-blk]').forEach(btn => studioBindBlockPop(btn, btn.getAttribute('data-blk')));
-                /* 控制鍵的 Popover：Justify / Align / Sizing / Order 四組圖示按鈕各一個。
-                   data-act="sizing-more" / "order-more" 開的是自訂面板，故略過。 */
-                $$('.st-ly__btns[data-prop="justify-self"] .st-ly__btn').forEach(btn => {
-                    const val = btn.getAttribute('data-val');
-                    if (!val) return;
-                    btn.setAttribute('data-ctrl', 'justify-self');
-                    studioBindCtrlPop(btn, 'justify-self', val);
-                });
+                /* 控制鍵的 Popover：Align / Sizing / Order 三組圖示按鈕各一個。
+                   data-act="sizing-more" / "order-more" 開的是自訂面板，故略過。
+                   ※ 沒有 Justify 群組：justify-self 不適用於 flex item
+                     （css-align-3 §6.1.4 / MDN：flexbox 會忽略 justify-self），
+                     flex 主軸的分配是容器的 justify-content，屬於 Layout 扇區。 */
                 $$('.st-ly__btns[data-prop="align-self"] .st-ly__btn').forEach(btn => {
                     const val = btn.getAttribute('data-val');
                     if (!val) return;
@@ -17439,12 +17512,6 @@
                     if (!sel) return '';
                     return studioRawProp(sel, prop) || '';
                 }
-                /* 預設 Reset 狀態：各群組的預設鍵 */
-                const GROUP_DEFAULTS = {
-                    'justify-self': 'auto',
-                    'align-self': 'auto',
-                    'order': '0',
-                };
                 /* Sizing 預設：grow=0 shrink=1 basis=auto（Shrink 預設） */
                 const SIZING_DEFAULT = { grow: 0, shrink: 1, basis: 'auto' };
                 function selectedParent() {
@@ -17474,27 +17541,6 @@
                     const isFlexChild = parentIsFlex();
                     root.hidden = !isFlexChild;
                     if (!isFlexChild) return;
-
-                    // Justify 按钮高亮
-                    const jRaw = rawProp('justify-self');
-                    const jEff = read('justify-self');
-                    const jVal = String(jRaw || jEff || 'auto').toLowerCase();
-                    /* Reset 狀態＝這個屬性完全沒有宣告（inline 與樣式規則都沒有）。
-                       只看 inline 的話，值來自樣式規則時會同時亮「灰色首鍵」與「紫色值鍵」兩顆。 */
-                    const jIsReset = !jEff;
-                    studioPaintBlock(root, 'justify', STUDIO_BLOCKS.justify.isSet(String(jRaw || jEff || '').trim()));
-                    $$('.st-ly__btns[data-prop="justify-self"] .st-ly__btn').forEach(btn => {
-                        const val = btn.getAttribute('data-val');
-                        btn.classList.remove('is-on', 'is-default');
-                        const isDefault = val === 'auto';
-                        if (isDefault && jIsReset) {
-                            // Reset 状态：首键灰色高亮
-                            btn.classList.add('is-default');
-                        } else if (normAlign(val) === normAlign(jVal)) {
-                            // 匹配当前值：紫色高亮
-                            btn.classList.add('is-on');
-                        }
-                    });
 
                     // Align 按钮高亮
                     const alignRaw = rawProp('align-self');
@@ -18717,13 +18763,13 @@
                     '<div class="st-ly-size__body st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch st-ly-panel-paddingBlock">',
                     '   <div class="c-dbZYJE st-pos-paddingInline st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch">',
                     '  <div class="st-sz__grid">',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Width</span><span class="st-sz__control"><input data-prop="width" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="width" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Height</span><span class="st-sz__control"><input data-prop="height" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="height" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Min Width</span><span class="st-sz__control"><input data-prop="min-width" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="min-width" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Min Height</span><span class="st-sz__control"><input data-prop="min-height" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="min-height" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Max Width</span><span class="st-sz__control"><input data-prop="max-width" placeholder="none"><button type="button" class="st-ly__iconbtn" data-clear="max-width" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field"><span class="st-sz__field-label">Max Height</span><span class="st-sz__control"><input data-prop="max-height" placeholder="none"><button type="button" class="st-ly__iconbtn" data-clear="max-height" title="清除">' + ICO.minus + '</button></span></label>',
-                    '    <label class="st-sz__field st-sz__field--span"><span class="st-sz__field-label">Aspect ratio</span><span class="st-sz__control"><input data-prop="aspect-ratio" placeholder="auto"><button type="button" class="st-ly__iconbtn" data-clear="aspect-ratio" title="清除">' + ICO.minus + '</button></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label st-prop-label" data-sz-label="width">Width<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="width" style="position: relative;"><input data-prop="width" inputmode="decimal" placeholder="auto" spellcheck="false"><button type="button" class="st-sz__len-unit" data-sz-unit="width" title="切換單位">-</button><button type="button" class="st-ly__iconbtn" data-clear="width" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="width" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="auto"><span class="st-ly__dd-label">auto</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="fit-content"><span class="st-ly__dd-label">fit-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="max-content"><span class="st-ly__dd-label">max-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="min-content"><span class="st-ly__dd-label">min-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label st-prop-label" data-sz-label="height">Height<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="height" style="position: relative;"><input data-prop="height" inputmode="decimal" placeholder="auto" spellcheck="false"><button type="button" class="st-sz__len-unit" data-sz-unit="height" title="切換單位">-</button><button type="button" class="st-ly__iconbtn" data-clear="height" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="height" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="auto"><span class="st-ly__dd-label">auto</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="fit-content"><span class="st-ly__dd-label">fit-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="max-content"><span class="st-ly__dd-label">max-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="min-content"><span class="st-ly__dd-label">min-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label st-prop-label" data-sz-label="min-width">Min Width<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="min-width" style="position: relative;"><input data-prop="min-width" inputmode="decimal" placeholder="auto" spellcheck="false"><button type="button" class="st-sz__len-unit" data-sz-unit="min-width" title="切換單位">-</button><button type="button" class="st-ly__iconbtn" data-clear="min-width" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="min-width" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="auto"><span class="st-ly__dd-label">auto</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="fit-content"><span class="st-ly__dd-label">fit-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="max-content"><span class="st-ly__dd-label">max-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="min-content"><span class="st-ly__dd-label">min-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label st-prop-label" data-sz-label="min-height">Min Height<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="min-height" style="position: relative;"><input data-prop="min-height" inputmode="decimal" placeholder="auto" spellcheck="false"><button type="button" class="st-sz__len-unit" data-sz-unit="min-height" title="切換單位">-</button><button type="button" class="st-ly__iconbtn" data-clear="min-height" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="min-height" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="auto"><span class="st-ly__dd-label">auto</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="fit-content"><span class="st-ly__dd-label">fit-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="max-content"><span class="st-ly__dd-label">max-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="min-content"><span class="st-ly__dd-label">min-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label st-prop-label" data-sz-label="max-width">Max Width<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="max-width" style="position: relative;"><input data-prop="max-width" inputmode="decimal" placeholder="none" spellcheck="false"><button type="button" class="st-sz__len-unit" data-sz-unit="max-width" title="切換單位">-</button><button type="button" class="st-ly__iconbtn" data-clear="max-width" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="max-width" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="fit-content"><span class="st-ly__dd-label">fit-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="max-content"><span class="st-ly__dd-label">max-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="min-content"><span class="st-ly__dd-label">min-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="none"><span class="st-ly__dd-label">none</span></button></div></span></label>',
+                    '    <label class="st-sz__field"><span class="st-sz__field-label st-prop-label" data-sz-label="max-height">Max Height<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="max-height" style="position: relative;"><input data-prop="max-height" inputmode="decimal" placeholder="none" spellcheck="false"><button type="button" class="st-sz__len-unit" data-sz-unit="max-height" title="切換單位">-</button><button type="button" class="st-ly__iconbtn" data-clear="max-height" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="max-height" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="fit-content"><span class="st-ly__dd-label">fit-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="max-content"><span class="st-ly__dd-label">max-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="min-content"><span class="st-ly__dd-label">min-content</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="none"><span class="st-ly__dd-label">none</span></button></div></span></label>',
+                    '    <label class="st-sz__field st-sz__field--span"><span class="st-sz__field-label st-prop-label" data-sz-label="aspect-ratio">Aspect ratio<span class="st-prop-label__dot"></span></span><span class="st-sz__control st-sz__len" data-sz-field="aspect-ratio" style="position: relative;"><input data-prop="aspect-ratio" placeholder="auto" spellcheck="false"><button type="button" class="st-ly__iconbtn" data-clear="aspect-ratio" title="清除">' + ICO.minus + '</button><div class="st-ly__dd-menu st-ly__btns st-sz__kw-menu" data-sz-kw="aspect-ratio" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;"><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="auto"><span class="st-ly__dd-label">auto</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button><button type="button" class="st-ly__btn st-sz__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button></div></span></label>',
                     '  </div>',
                     '  <div data-orientation="horizontal" role="separator" class="st-sep"></div>',
                     '  <div class="st-sz__grid st-sz__grid--rows">',
@@ -18808,7 +18854,113 @@
                 }
                 /* Size 欄位白名單：數字＋單位、百分比、關鍵字、calc/clamp/min/max/var；
                    負值與其他非法字串一律拒收（回傳 null），避免把 abc / -10 這類值寫進樣式 */
+                const SIZE_LEN_PROPS = ['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height'];
                 const SIZE_FIELD_PROPS = ['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height', 'aspect-ratio'];
+
+                /* 長度欄位（width/height/min/max）：單位循環 px → em → rem → %，關鍵字按各欄位白名單 */
+                const SZ_UNITS = ['px', 'em', 'rem', '%'];
+                const SZ_KW_LEN = ['auto', 'fit-content', 'initial', 'inherit', 'max-content', 'min-content', 'unset'];
+                const SZ_KW_MAX = ['fit-content', 'initial', 'inherit', 'max-content', 'min-content', 'unset', 'none'];
+                const SZ_KW_AR = ['auto', 'initial', 'inherit', 'unset'];
+                function szKwOf(prop) {
+                    if (prop === 'max-width' || prop === 'max-height') return SZ_KW_MAX;
+                    if (prop === 'aspect-ratio') return SZ_KW_AR;
+                    return SZ_KW_LEN;
+                }
+                /* 長度欄位的預設單位（Backspace 清空時填入 0 px）；aspect-ratio 不使用 */
+                const szUnit = { 'width': 'px', 'height': 'px', 'min-width': 'px', 'min-height': 'px', 'max-width': 'px', 'max-height': 'px' };
+                /* 記憶上次輸入值，用於清空後還原 */
+                const szKwState = {};
+                SIZE_FIELD_PROPS.forEach(p => { szKwState[p] = { lastNum: null, lastUnit: 'px', lastKw: '' }; });
+
+                /* 拆「數字 + 單位」，支持數字和單位之間帶空格；關鍵字或無法解析時回 null */
+                function szSplitLen(v) {
+                    const m = /^(-?(?:\d+|\d*\.\d+))\s*([a-z%]*)$/i.exec(String(v == null ? '' : v).trim().replace(/\s+/g, ''));
+                    if (!m) return null;
+                    return { num: parseFloat(m[1]), raw: m[1], unit: (m[2] || '').toLowerCase() };
+                }
+                function fmtSzNum(n) { return String(Math.round(n * 1000) / 1000); }
+                /* 標記／取消標記關鍵字選單 */
+                function markSzKw(items, value) {
+                    const v = String(value == null ? '' : value).trim().toLowerCase();
+                    items.forEach(item => {
+                        const kw = item.getAttribute('data-kw');
+                        item.classList.toggle('is-on', kw === v);
+                    });
+                }
+                /* 記憶上次輸入值 */
+                function rememberSzValue(prop, rawVal, inputType) {
+                    if (/^delete/i.test(String(inputType || ''))) return;
+                    const state = szKwState[prop];
+                    if (!state) return;
+                    const raw = String(rawVal == null ? '' : rawVal).trim();
+                    if (raw === '') return;
+                    const kws = szKwOf(prop);
+                    const low = raw.toLowerCase();
+                    if (kws.indexOf(low) !== -1) { state.lastKw = low; state.lastNum = null; return; }
+                    if (SIZE_LEN_PROPS.indexOf(prop) !== -1) {
+                        const s = szSplitLen(raw);
+                        if (s && s.num >= 0) { state.lastNum = s.num; state.lastUnit = s.unit || state.lastUnit || 'px'; state.lastKw = ''; }
+                    }
+                }
+                /* 更新單位按鈕狀態 */
+                function updateSzUnitBtn(prop, val) {
+                    const btn = $('[data-sz-unit="' + prop + '"]');
+                    if (!btn) return;
+                    const v = String(val || '').trim().toLowerCase();
+                    const kws = szKwOf(prop);
+                    if (kws.indexOf(v) !== -1 || v === '') {
+                        btn.textContent = '-';
+                        btn.classList.add('is-dash'); btn.classList.remove('is-unit');
+                    } else {
+                        const s = szSplitLen(v);
+                        if (s && s.num >= 0) {
+                            btn.textContent = (szUnit[prop] || 'px').toUpperCase();
+                            btn.classList.remove('is-dash'); btn.classList.add('is-unit');
+                        } else {
+                            btn.textContent = '-';
+                            btn.classList.add('is-dash'); btn.classList.remove('is-unit');
+                        }
+                    }
+                }
+                /* 提交長度欄位輸入值 */
+                function commitSzLen(prop) {
+                    const inp = $('input[data-prop="' + prop + '"]');
+                    if (!inp) return true;
+                    const raw = inp.value.trim();
+                    const kws = szKwOf(prop);
+                    if (raw === '') { write(prop, ''); return true; }
+                    const low = raw.toLowerCase();
+                    if (kws.indexOf(low) !== -1) { write(prop, low); return true; }
+                    const s = szSplitLen(raw);
+                    if (s && s.num >= 0) {
+                        if (s.unit && SZ_UNITS.indexOf(s.unit) !== -1) szUnit[prop] = s.unit;
+                        const val = fmtSzNum(s.num) + (s.unit && SZ_UNITS.indexOf(s.unit) !== -1 ? s.unit : szUnit[prop]);
+                        write(prop, val);
+                        return true;
+                    }
+                    return false;
+                }
+                /* 提交 aspect-ratio 輸入（只有關鍵字與比值，無單位） */
+                function commitSzAr() {
+                    const prop = 'aspect-ratio';
+                    const inp = $('input[data-prop="' + prop + '"]');
+                    if (!inp) return true;
+                    const raw = inp.value.trim();
+                    const kws = szKwOf(prop);
+                    if (raw === '') { write(prop, ''); return true; }
+                    const low = raw.toLowerCase();
+                    if (kws.indexOf(low) !== -1) { write(prop, low); return true; }
+                    /* 比值：16/9、1.5、1 等 */
+                    const ar = raw.replace(/\s*\/\s*/, '/');
+                    if (/^\d+(\.\d+)?(\/\d+(\.\d+)?)?$/.test(ar)) { write(prop, ar); return true; }
+                    return false;
+                }
+                function commitSzInput(prop) {
+                    if (prop === 'aspect-ratio') return commitSzAr();
+                    return commitSzLen(prop);
+                }
+
                 function validateSize(prop, raw) {
                     const v = String(raw || '').trim();
                     if (!v) return '';
@@ -18956,9 +19108,67 @@
                     const sel = editor.getSelected();
                     root.classList.toggle('is-disabled', !sel);
                     const idx = sel ? studioRuleIndex() : null;
-                    $$('input[data-prop]').forEach(inp => {
-                        inp.value = read(inp.getAttribute('data-prop'), idx);
+                    /* 長度欄位（width/height/min/max）：輸入框只回填數字，單位由單位鈕顯示；
+                       關鍵字（auto/none/...）原樣顯示；空值清空。
+                       欄位窄，兩處都寫單位會把數字裁掉（與 Gap 扇區同一問題）。 */
+                    SIZE_LEN_PROPS.forEach(prop => {
+                        const inp = $('input[data-prop="' + prop + '"]');
+                        const ctrl = inp ? inp.closest('.st-sz__control') : null;
+                        if (!inp) return;
+                        if (document.activeElement === inp) {
+                            /* 正在輸入時不打斷，只同步單位鈕與關鍵字高亮 */
+                            updateSzUnitBtn(prop, inp.value);
+                            const menu = $('[data-sz-kw="' + prop + '"]');
+                            if (menu) markSzKw($$('.st-sz__kw-item', menu), inp.value);
+                            if (ctrl) {
+                                const kws = szKwOf(prop);
+                                ctrl.classList.toggle('is-kw', kws.indexOf(String(inp.value || '').trim().toLowerCase()) !== -1);
+                            }
+                            return;
+                        }
+                        const raw = String(read(prop, idx) || '').trim();
+                        const kws = szKwOf(prop);
+                        let isKwVal = false;
+                        if (!raw) {
+                            inp.value = '';
+                        } else {
+                            const low = raw.toLowerCase();
+                            if (kws.indexOf(low) !== -1) {
+                                inp.value = low;
+                                isKwVal = true;
+                            } else {
+                                const s = szSplitLen(raw);
+                                if (s) {
+                                    if (s.unit && SZ_UNITS.indexOf(s.unit) !== -1) szUnit[prop] = s.unit;
+                                    inp.value = fmtSzNum(s.num);
+                                } else {
+                                    inp.value = raw; /* calc/clamp/var 等複雜值原樣顯示 */
+                                }
+                            }
+                        }
+                        if (ctrl) ctrl.classList.toggle('is-kw', isKwVal);
+                        updateSzUnitBtn(prop, inp.value);
+                        const menu = $('[data-sz-kw="' + prop + '"]');
+                        if (menu) markSzKw($$('.st-sz__kw-item', menu), inp.value);
                     });
+                    /* Aspect ratio：只有關鍵字與比值，無單位鈕 */
+                    const arInp = $('input[data-prop="aspect-ratio"]');
+                    const arCtrl = arInp ? arInp.closest('.st-sz__control') : null;
+                    if (arInp) {
+                        let arIsKw = false;
+                        if (document.activeElement !== arInp) {
+                            const raw = String(read('aspect-ratio', idx) || '').trim();
+                            arInp.value = raw;
+                            const arKws = szKwOf('aspect-ratio');
+                            arIsKw = arKws.indexOf(String(raw || '').trim().toLowerCase()) !== -1;
+                        } else {
+                            const arKws = szKwOf('aspect-ratio');
+                            arIsKw = arKws.indexOf(String(arInp.value || '').trim().toLowerCase()) !== -1;
+                        }
+                        if (arCtrl) arCtrl.classList.toggle('is-kw', arIsKw);
+                        const arMenu = $('[data-sz-kw="aspect-ratio"]');
+                        if (arMenu) markSzKw($$('.st-sz__kw-item', arMenu), arInp.value);
+                    }
                     /* 清除鈕只在欄位有值時出現（聚焦時由 CSS 另行顯示） */
                     $$('.st-sz__field').forEach(f => {
                         const inp = f.querySelector('input[data-prop]');
@@ -19012,6 +19222,14 @@
                     $$('.st-sz__pos').forEach(btn => {
                         btn.classList.toggle('is-on', !!posKey && btn.getAttribute('data-val') === posKey);
                     });
+                    /* 同步七個欄位的屬性標籤晶片高亮：有值（數值或關鍵字）就 is-set */
+                    SIZE_FIELD_PROPS.forEach(prop => {
+                        const lbl = root.querySelector('.st-prop-label[data-sz-label="' + prop + '"]');
+                        const inp = root.querySelector('input[data-prop="' + prop + '"]');
+                        if (!lbl || !inp) return;
+                        const v = String(inp.value || '').trim();
+                        lbl.classList.toggle('is-set', v !== '');
+                    });
                 }
                 root.addEventListener('click', e => {
                     const tog = e.target.closest('[data-act="toggle"]');
@@ -19022,6 +19240,42 @@
                     const clr = e.target.closest('[data-clear]');
                     if (clr) {
                         write(clr.getAttribute('data-clear'), '');
+                        paint();
+                        return;
+                    }
+                    /* 長度欄位的單位鈕：點一下循環切換單位（px → em → rem → %），
+                       參考 Border 扇區 cycleUnit：只有當前是數字值時才允許切換，數值不變一起寫回 */
+                    const szUnitBtn = e.target.closest('[data-sz-unit]');
+                    if (szUnitBtn) {
+                        e.preventDefault(); e.stopPropagation();
+                        const prop = szUnitBtn.getAttribute('data-sz-unit');
+                        const inp = $('input[data-prop="' + prop + '"]');
+                        if (!inp) return;
+                        const curVal = String(inp.value || '').trim();
+                        const s = szSplitLen(curVal);
+                        if (s && s.num >= 0) {
+                            const curU = szUnit[prop] || 'px';
+                            const nextU = SZ_UNITS[(SZ_UNITS.indexOf(curU) + 1) % SZ_UNITS.length];
+                            szUnit[prop] = nextU;
+                            write(prop, fmtSzNum(s.num) + nextU);
+                            paint();
+                        }
+                        return;
+                    }
+                    /* 關鍵字選單點選 */
+                    const szKwItem = e.target.closest('.st-sz__kw-item');
+                    if (szKwItem) {
+                        e.preventDefault(); e.stopPropagation();
+                        const menu = szKwItem.closest('[data-sz-kw]');
+                        const prop = menu.getAttribute('data-sz-kw');
+                        const inp = $('input[data-prop="' + prop + '"]');
+                        const kw = szKwItem.getAttribute('data-kw');
+                        inp.value = kw;
+                        const state = szKwState[prop];
+                        if (state) { state.lastNum = null; state.lastKw = kw; }
+                        if (commitSzInput(prop)) rememberSzValue(prop, kw);
+                        menu.style.display = 'none';
+                        if (document.activeElement === inp) inp.blur();
                         paint();
                         return;
                     }
@@ -19046,20 +19300,86 @@
                         paint();
                     }
                 });
+                /* 綁定長度欄位與 aspect-ratio 的輸入事件（focus/blur/input/keydown），
+                   邏輯與 Layout 扇區 Gap 欄位一致：空值時顯示關鍵字選單、輸入非空隱藏、
+                   blur 校驗、Backspace 清空後填預設值。 */
+                const bindSzInput = (prop) => {
+                    const inp = $('input[data-prop="' + prop + '"]');
+                    const kwMenu = $('[data-sz-kw="' + prop + '"]');
+                    const state = szKwState[prop];
+                    if (!inp || !kwMenu) return;
+                    const isLen = SIZE_LEN_PROPS.indexOf(prop) !== -1;
+
+                    inp.addEventListener('focus', () => {
+                        /* 只在輸入框為空時顯示彈窗選單 */
+                        if (inp.value.trim() === '') kwMenu.style.display = 'block';
+                    });
+                    inp.addEventListener('blur', () => {
+                        const trimmed = inp.value.trim();
+                        if (trimmed === '') {
+                            /* 清空時優先還原上次數字值，其次還原關鍵字 */
+                            if (isLen && state.lastNum != null) {
+                                const unit = state.lastUnit || szUnit[prop] || 'px';
+                                inp.value = fmtSzNum(state.lastNum);
+                                szUnit[prop] = unit;
+                            } else if (state.lastKw) {
+                                inp.value = state.lastKw;
+                            }
+                        }
+                        if (commitSzInput(prop)) rememberSzValue(prop, inp.value);
+                        else {
+                            const field = inp.closest('.st-sz__len');
+                            if (field) { field.classList.add('is-invalid'); setTimeout(() => field.classList.remove('is-invalid'), 900); }
+                        }
+                        setTimeout(() => { kwMenu.style.display = 'none'; }, 150);
+                        paint();
+                    });
+                    inp.addEventListener('input', e => {
+                        const v = inp.value;
+                        const ctrl = inp.closest('.st-sz__control');
+                        if (isLen) updateSzUnitBtn(prop, v);
+                        markSzKw($$('.st-sz__kw-item', kwMenu), v);
+                        rememberSzValue(prop, v, e.inputType);
+                        const kws = szKwOf(prop);
+                        if (ctrl) ctrl.classList.toggle('is-kw', kws.indexOf(String(v || '').trim().toLowerCase()) !== -1);
+                        /* 即時同步標籤晶片高亮 */
+                        const lbl = inp.closest('.st-sz__field').querySelector('.st-prop-label[data-sz-label]');
+                        if (lbl) lbl.classList.toggle('is-set', String(v || '').trim() !== '');
+                        /* 輸入內容不為空時隱藏選單，為空時顯示 */
+                        kwMenu.style.display = v.trim() === '' ? 'block' : 'none';
+                    });
+                    inp.addEventListener('keydown', e => {
+                        if (e.key !== 'Backspace') return;
+                        if (inp.value !== '') return;
+                        e.preventDefault();
+                        if (isLen) {
+                            inp.value = '0';
+                            szUnit[prop] = 'px';
+                        } else {
+                            inp.value = 'auto';
+                        }
+                        if (commitSzInput(prop)) rememberSzValue(prop, inp.value);
+                        paint();
+                    });
+                };
+                SIZE_FIELD_PROPS.forEach(p => bindSzInput(p));
+                /* 點擊面板外時關閉所有 Size 關鍵字選單 */
+                document.addEventListener('click', e => {
+                    if (!root.contains(e.target)) {
+                        $$('.st-sz__kw-menu', root).forEach(m => { m.style.display = 'none'; });
+                    }
+                });
+                /* 非尺寸欄位（目前沒有其他 data-prop 輸入，保留以備擴充）仍走 change 事件 */
                 $$('input[data-prop]').forEach(inp => {
+                    const prop = inp.getAttribute('data-prop');
+                    if (SIZE_FIELD_PROPS.indexOf(prop) !== -1) return; /* 尺寸欄位已由 bindSzInput 處理 */
                     inp.addEventListener('change', () => {
-                        const prop = inp.getAttribute('data-prop');
-                        /* 尺寸欄位走白名單校驗：不合格就不寫入、值回滾並短暫標紅 */
                         if (SIZE_FIELD_PROPS.indexOf(prop) !== -1) {
                             const val = validateSize(prop, inp.value);
                             if (val === null) {
                                 const field = inp.closest('.st-sz__field');
-                                if (field) {
-                                    field.classList.add('is-invalid');
-                                    window.setTimeout(() => field.classList.remove('is-invalid'), 900);
-                                }
-                                paint();
-                                return;
+                                if (field) { field.classList.add('is-invalid'); window.setTimeout(() => field.classList.remove('is-invalid'), 900); }
+                                paint(); return;
                             }
                             write(prop, val);
                         } else {
@@ -24075,7 +24395,7 @@
                 };
                 /* Style 鈕：第一顆是「無邊框（清除）」，其餘對應 border-style 關鍵字 */
                 const STYLE_BTNS = [
-                    { val: 'none', title: 'No border（清除 border-style）', ico: 'x' },
+                    { val: 'none', title: 'No border（border-style: none）', ico: 'x' },
                     { val: 'solid', title: 'Solid', ico: 'solid' },
                     { val: 'dashed', title: 'Dashed', ico: 'dashed' },
                     { val: 'dotted', title: 'Dotted', ico: 'dotted' },
@@ -24998,16 +25318,47 @@
                     }
                 }
 
+                /* 讀取目前生效的 border-style：
+                   inline 存的是簡寫（border-style: solid），
+                   但 GrapesJS 把樣式規則裡的簡寫展開成四邊長屬性
+                   （border-top-style / border-right-style / …），
+                   所以簡寫讀不到時改讀四邊長屬性（四邊一致才採用，不一致取第一個有值的）。 */
+                function readBorderStyle() {
+                    const sh = String(read('border-style') || '').trim().toLowerCase();
+                    if (sh) return sh;
+                    const longs = ['border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style']
+                        .map(p => String(read(p) || '').trim().toLowerCase());
+                    const vals = longs.filter(v => v);
+                    if (!vals.length) return '';
+                    return vals[0];
+                }
+
+                let paintRaf = 0;
+                /* css:mount 觸發較密，用 rAF 合併，避免同一輪重複重繪 */
+                function schedulePaint() {
+                    if (paintRaf) return;
+                    paintRaf = window.requestAnimationFrame(() => { paintRaf = 0; paint(); });
+                }
+
                 function paint() {
                     const sel = editor.getSelected();
                     syncLinkedFromStyle(sel);
                     root.classList.toggle('is-disabled', !sel);
 
-                    /* Style */
-                    const style = String(read('border-style') || '').trim().toLowerCase();
+                    /* Style：雙態模型——沒有 border-style 規則 → 灰色落在首鍵（none）；
+                       有規則 → 紫色落在對應的鍵（none 也是一條真實規則，宣告後就是紫色）。
+                       border-style 是簡寫：inline 存簡寫，但 GrapesJS 寫進樣式規則時會
+                       展開成四邊長屬性，所以兩邊都要讀。 */
+                    const style = readBorderStyle();
                     const styleVal = style;
                     $$('button[data-val]', $('[data-bd="style"]')).forEach(btn => {
-                        btn.classList.toggle('is-on', btn.getAttribute('data-val') === styleVal);
+                        const bv = btn.getAttribute('data-val');
+                        btn.classList.remove('is-on', 'is-default');
+                        if (!styleVal) {
+                            if (bv === 'none') btn.classList.add('is-default');
+                        } else if (bv === styleVal) {
+                            btn.classList.add('is-on');
+                        }
                     });
 
                     /* Color */
@@ -25115,6 +25466,15 @@
                         if (inp && ckwMenu) markKw($$('.st-bd__kw-item', ckwMenu), inp.value, kwState.corner[k]);
                     });
                 }
+
+                /* 控制鍵的 Popover：Style 四顆圖示按鈕各一個（CSS 規則說明 + Reset value），
+                   與 Flex child / Grid child / Size 的分頁按鍵同一套口徑。 */
+                $$('button[data-val]', $('[data-bd="style"]')).forEach(btn => {
+                    const val = btn.getAttribute('data-val');
+                    if (!val) return;
+                    btn.setAttribute('data-ctrl', 'border-style');
+                    studioBindCtrlPop(btn, 'border-style', val);
+                });
 
                 /* ---------------- 事件 ---------------- */
 
@@ -25467,6 +25827,12 @@
                 editor.on('style:target', paint);
                 editor.on('device:select', paint);
                 editor.on('styleable:change', paint);
+                /* 樣式規則被新增 / 刪除 / 改寫時同步重繪：面板取值含規則回退，
+                   否則在 Style Catalog 改完 border-style 要重新點選才會更新 */
+                editor.on('css:rules:add', paint);
+                editor.on('css:rules:remove', paint);
+                editor.on('css:rule:update', paint);
+                editor.on('css:mount', schedulePaint);
                 paint();
             })();
 
@@ -25833,7 +26199,6 @@
                 }
 
                 /* ---------------- 規則列 ---------------- */
-
                 function renderList() {
                     listEl.innerHTML = '';
                     model.forEach((sh, i) => {
@@ -27731,7 +28096,83 @@
 
             /*============= Transforms 扇區 ================= */
             (function mountStudioTransforms() {
+                const host = smEl || rightBody;
+                if (!host || host.querySelector('.st-tf')) return;
+
+                const ICO = {
+                    chev: '<svg class="st-ly__chev" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>',
+                    advTf: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M7.112 8a.888.888 0 1 0 1.777 0 .888.888 0 0 0-1.777 0ZM12.724 8a.888.888 0 1 0 1.777 0 .888.888 0 0 0-1.777 0ZM1.499 8a.888.888 0 1 0 1.777 0 .888.888 0 0 0-1.777 0Z"></path></svg>',
+                    plus: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/></svg>',
+                    close: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>',
+                    info: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,17H11V11H13V17M13,9H11V7H13V9Z"/></svg>',
+                    copy: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/></svg>',
+                    trash: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>',
+                    tranalateX: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.68v8.275h8.275M2.09 14.502l3.546-3.547"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m12.134 8.591 2.364 2.364-2.364 2.365"></path></svg>',
+                    translateY: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.68v8.275h8.275M2.09 14.502l3.546-3.547"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3.272 3.862 2.364-2.364L8 3.862"></path></svg>',
+                    translateZ: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.09v8.274h8.275M2.09 13.91l3.546-3.546m-3.547 3.547h3.547m-3.547 0v-3.744"></path></svg>',
+                    scaleX: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.68v8.275h8.275M2.09 14.502l3.546-3.547"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m12.134 8.591 2.364 2.364-2.364 2.365"></path></svg>',
+                    scaleY: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.68v8.275h8.275M2.09 14.502l3.546-3.547"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3.272 3.862 2.364-2.364L8 3.862"></path></svg>',
+                    scaleZ: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.09v8.274h8.275M2.09 13.91l3.546-3.546m-3.547 3.547h3.547m-3.547 0v-3.744"></path></svg>',
+                    rotateX: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 17" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M9.473 12.528c-.579 1.944-1.563 3.222-2.681 3.222-1.78 0-3.223-3.246-3.223-7.25s1.442-7.25 3.223-7.25c1.78 0 3.222 3.246 3.222 7.25"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M7.597 6.083 10.014 8.5l2.417-2.417"></path></svg>',
+                    rotateY: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 17" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M12.028 9.973c1.944-.579 3.222-1.563 3.222-2.681 0-1.78-3.246-3.223-7.25-3.223S.75 5.511.75 7.292c0 1.78 3.246 3.222 7.25 3.222"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.583 8.097 8 10.514 5.583 12.93"></path></svg>',
+                    rotateZ: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 17" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M14 9.28a5.993 5.993 0 0 1-2.007 3.736 6.04 6.04 0 0 1-7.962-.024 5.98 5.98 0 0 1-.988-7.867A6.025 6.025 0 0 1 6.526 2.69a6.049 6.049 0 0 1 4.23.462 6.01 6.01 0 0 1 2.868 3.129M14 2.53v3.75h-3.766"></path></svg>',
+                    skewX: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.68v8.275h8.275M2.09 14.502l3.546-3.547"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m12.134 8.591 2.364 2.364-2.364 2.365"></path></svg>',
+                    skewY: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.636 2.68v8.275h8.275M2.09 14.502l3.546-3.547"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m3.272 3.862 2.364-2.364L8 3.862"></path></svg>'
+                };
+
+                /* ---------------- 扇區骨架（只顯示） ---------------- */
+                const root = document.createElement('div');
+                root.className = 'st-ly st-tf gjs-sm-sector';
+                root.innerHTML = [
+                    '<div class="st-tf__head st-justify-flex-start st-flex-nowrap st-align-center st-direction-row" data-act="toggle">',
+                    '  <button type="button" class="st-ly__head st-align-center st-justify-flex-start st-flex-nowrap st-direction-row" aria-label="收合/展開 Transitions">',
+                    ICO.chev,
+                    '  </button>',
+                    '  <button type="button" class="st-ly__head-title">Transforms</button>',
+                    '  <div class="st-ly__addDiv">',
+                    '    <button type="button" class="st-tf-advanceTf" title="進階變形" aria-label="進階變形">',
+                    ICO.advTf,
+                    '    </button>',
+                    '    <button type="button" class="st-tf__add" data-act="add" title="新增變形" aria-label="新增變形">',
+                    ICO.plus,
+                    '    </button>',
+                    '  </div>',
+                    '</div>',
+                    '<div class="st-ly__body st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch st-ly-panel-paddingBlock">',
+                    '   <div class="c-dbZYJE st-pos-paddingInline st-justify-flex-start st-direction-column st-flex-nowrap st-align-stretch">',
+                    '  <div class="st-tf__list" data-list></div>',
+                    '  <div class="st-tf__empty" data-empty hidden>尚未新增轉場，按右上的「+」新增一條。</div>',
+                    '   </div>',
+                    '  </div>',
+                ].join('');
+                host.appendChild(root);
                 
+                /* 規則彈窗選單 */
+                const rulePop = [
+                    '<div class="st-ly__dd-menu">',
+                    '<div class="st-ly__dd-list>',
+                    '<button class="">Translate</button>',
+                    '<button class="">Scale</button>',
+                    '<button class="">Rotate</button>',
+                    '<button class="">Skew</button>',
+                    '</div>',
+                    '</div>'
+                ]
+
+
+                /* 編輯彈窗*/
+                const tfpop = document.createElement('div');
+                pop.className = 'st-tp st-trp';
+                pop.setAttribute('role', 'dialog');
+                pop.setAttribute('aria-label', 'Transitions');
+                pop.innerHTML = [
+                    '<div class="st-tp__head">',
+                    '  <span class="st-tp__title">Transitions</span>',
+                    '  <button type="button" class="st-tp__close" data-act="close" title="關閉">' + ICO.close + '</button>',
+                    '</div>',
+                    
+                ]
+
             })();
 
             /*============= Outline 扇區 ================= */
