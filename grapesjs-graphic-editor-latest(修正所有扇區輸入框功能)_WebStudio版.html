@@ -2357,6 +2357,9 @@
             width: 100%;
             background: color-mix(in oklab, var(--background-primary) 86%, var(--foreground-primary));
             color: var(--foreground-primary);
+            border: 0;
+            outline: none;
+            appearance: none;
 
             box-sizing: border-box;
             min-width: 0px;
@@ -5302,6 +5305,59 @@
         .st-bd__kw-check {
             margin-left: auto;
             color: var(--studio-accent, #4285f4);
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        /* ---------- Gap 輸入框單位按鈕與關鍵字選單 ---------- */
+        /* 單位鈕貼齊編輯框最右端（比照 Border 的 .st-bd__unit / Typography 的 .st-ty__unit），
+           用 flex 佔位；欄位本來就窄（右側面板 239px 下單格輸入框僅約 46px），
+           因此不可再用 padding-right 疊加預留空間，否則輸入框內容區會被壓到幾乎為 0、
+           選中元素的數值整段被裁掉看不到。
+           顯示分工：輸入框只放數字，單位由這顆按鈕呈現（輸入框再帶一次單位會變成「24 PX PX」）。 */
+        .st-gap__unit {
+            flex: 0 0 auto;
+            margin-left: auto;
+            height: 20px;
+            min-width: 0;
+            padding: 0 6px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            font-family: inherit;
+            font-size: 10px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: var(--studio-text-3);
+            transition: color 0.15s;
+        }
+        .st-gap__unit.is-unit { color: var(--studio-text-2); opacity: 1; }
+        .st-gap__unit.is-unit:hover { background: var(--studio-hover); color: var(--studio-text-1); }
+        .st-gap__unit.is-dash { color: var(--studio-text-3); opacity: 0.6; }
+        .st-gap__unit.is-dash:hover { background: var(--studio-hover-soft); color: var(--studio-text-2); }
+        .st-sz__control.st-gap__field.is-invalid { border-color: #e5484d; }
+        .st-gap__field { position: relative; }
+        .st-gap__kw-menu .st-ly__btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            font-size: 12px;
+            color: var(--studio-text-1);
+            cursor: pointer;
+            user-select: none;
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: left;
+            border-radius: 0;
+        }
+        .st-gap__kw-menu .st-ly__btn:hover { background: var(--studio-hover); }
+        .st-gap__kw-menu .st-ly__btn.is-on { color: var(--studio-accent); }
+        .st-gap__kw-menu .st-ly__btn.is-on::after {
+            content: '✓';
+            margin-left: auto;
             font-size: 12px;
             line-height: 1;
         }
@@ -15247,10 +15303,32 @@
                     '    </div>',
                     '    <div class="st-ly__gap2" data-gap-row>',
                     '      <span class="st-ly__gapico" title="Row gap">' + ICO.gapRow + '</span>',
-                    '      <span class="st-sz__control"><input data-prop="row-gap" inputmode="decimal" placeholder="0"><span class="st-sz__unit">PX</span></span>',
+                    '      <span class="st-sz__control st-gap__field" data-gap-field="row" style="position: relative;">',
+                    '        <input data-prop="row-gap" inputmode="decimal" placeholder="0" spellcheck="false">',
+                    '        <button type="button" class="st-gap__unit" data-gap-unit="row" title="切換單位">PX</button>',
+                    '        <div class="st-ly__dd-menu st-ly__btns st-gap__kw-menu" data-gap-kw="row" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;">',
+                    '          <div class="st-ly__dd-list">',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button>',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button>',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button>',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="normal"><span class="st-ly__dd-label">normal</span></button>',
+                    '          </div>',
+                    '        </div>',
+                    '      </span>',
                     '      <button type="button" class="st-ly__iconbtn st-ly__linkbtn" data-act="gap-link" title="連動列／欄間距">' + ICO.link + '</button>',
                     '      <span class="st-ly__gapico" title="Column gap">' + ICO.gapCol + '</span>',
-                    '      <span class="st-sz__control"><input data-prop="column-gap" inputmode="decimal" placeholder="0"><span class="st-sz__unit">PX</span></span>',
+                    '      <span class="st-sz__control st-gap__field" data-gap-field="col" style="position: relative;">',
+                    '        <input data-prop="column-gap" inputmode="decimal" placeholder="0" spellcheck="false">',
+                    '        <button type="button" class="st-gap__unit" data-gap-unit="col" title="切換單位">PX</button>',
+                    '        <div class="st-ly__dd-menu st-ly__btns st-gap__kw-menu" data-gap-kw="col" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--studio-elev-1, white); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; padding: 4px 0;">',
+                    '          <div class="st-ly__dd-list">',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="inherit"><span class="st-ly__dd-label">inherit</span></button>',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="initial"><span class="st-ly__dd-label">initial</span></button>',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="unset"><span class="st-ly__dd-label">unset</span></button>',
+                    '            <button type="button" class="st-ly__btn st-gap__kw-item" data-kw="normal"><span class="st-ly__dd-label">normal</span></button>',
+                    '          </div>',
+                    '        </div>',
+                    '      </span>',
                     '    </div>',
                     '  </div>',
                     '</div>',
@@ -15511,7 +15589,24 @@
                 const padEl = $('[data-pad]');
                 const gapRowInp = $('input[data-prop="row-gap"]');
                 const gapColInp = $('input[data-prop="column-gap"]');
+                const gapRowUnitBtn = $('[data-gap-unit="row"]');
+                const gapColUnitBtn = $('[data-gap-unit="col"]');
+                const gapRowKwMenu = $('[data-gap-kw="row"]');
+                const gapColKwMenu = $('[data-gap-kw="col"]');
+                const gapRowKwItems = $$('.st-gap__kw-item', gapRowKwMenu);
+                const gapColKwItems = $$('.st-gap__kw-item', gapColKwMenu);
                 let gapLinked = true;
+
+                /* Gap 单位与关键字常量 */
+                const GAP_UNITS = ['px', 'em', 'rem', '%'];
+                const GAP_KW = ['inherit', 'initial', 'unset', 'normal'];
+                let gapRowUnit = 'px';
+                let gapColUnit = 'px';
+                /* 記憶上次輸入值，用於清空後還原 */
+                const gapKwState = {
+                    row: { lastNum: null, lastUnit: 'px', lastKw: '' },
+                    col: { lastNum: null, lastUnit: 'px', lastKw: '' }
+                };
 
                 /* Justify self / Align self / Order 已移至 Flex / Grid child 扇區（見 mountStudioChild） */
                 const LAYOUT_PROPS = ['display', 'flex-direction', 'grid-auto-flow', 'justify-content', 'justify-items', 'align-items', 'align-content', 'gap', 'row-gap', 'column-gap', 'flex-wrap'];
@@ -15659,10 +15754,102 @@
                         sel.addStyle({ [prop]: value });
                     }
                 }
+                /* 拆「數字 + 單位」，支持數字和單位之間帶空格；關鍵字或無法解析時回 null，與 Border 扇區一致 */
+                function gapSplitLen(v) {
+                    const m = /^(-?(?:\d+|\d*\.\d+))\s*([a-z%]*)$/i.exec(String(v == null ? '' : v).trim().replace(/\s+/g, ''));
+                    if (!m) return null;
+                    return { num: parseFloat(m[1]), raw: m[1], unit: (m[2] || '').toLowerCase() };
+                }
                 function parseGap(v) {
                     if (!v) return '';
-                    const n = parseFloat(v);
-                    return isNaN(n) ? '' : String(n);
+                    const s = String(v).trim().toLowerCase();
+                    if (GAP_KW.indexOf(s) !== -1) return s;
+                    const p = gapSplitLen(v);
+                    if (p) {
+                        return fmtGapNum(p.num) + (p.unit || 'px');
+                    }
+                    return '';
+                }
+                function fmtGapNum(n) { return String(Math.round(n * 1000) / 1000); }
+                /* 標記／取消標記gap關鍵字選單 */
+                function markGapKw(items, value, state) {
+                    const v = String(value == null ? '' : value).trim().toLowerCase();
+                    const isKw = (v !== '' && items.some(it => it.getAttribute('data-kw') === v));
+                    items.forEach(item => {
+                        const kw = item.getAttribute('data-kw');
+                        const on = isKw && kw === v;
+                        item.classList.toggle('is-on', on);
+                    });
+                    return isKw ? v : '';
+                }
+                /* 記憶gap上次輸入值 */
+                function rememberGapValue(state, rawVal, inputType) {
+                    if (/^delete/i.test(String(inputType || ''))) return;
+                    const raw = String(rawVal == null ? '' : rawVal).trim();
+                    if (raw === '') return;
+                    const low = raw.toLowerCase();
+                    if (GAP_KW.indexOf(low) !== -1) {
+                        state.lastKw = low;
+                        state.lastNum = null;
+                        return;
+                    }
+                    const s = gapSplitLen(raw);
+                    if (s && s.num >= 0) {
+                        state.lastNum = s.num;
+                        state.lastUnit = s.unit || state.lastUnit || 'px';
+                        state.lastKw = '';
+                    }
+                }
+                /* 更新gap單位按鈕狀態 */
+                function updateGapUnitBtn(btn, unit, val) {
+                    if (!btn) return;
+                    const v = String(val || '').trim().toLowerCase();
+                    if (GAP_KW.indexOf(v) !== -1 || v === '') {
+                        btn.textContent = '-';
+                        btn.classList.add('is-dash');
+                        btn.classList.remove('is-unit');
+                    } else {
+                        const s = gapSplitLen(v);
+                        if (s && s.num >= 0) {
+                            btn.textContent = unit.toUpperCase();
+                            btn.classList.remove('is-dash');
+                            btn.classList.add('is-unit');
+                        } else {
+                            btn.textContent = '-';
+                            btn.classList.add('is-dash');
+                            btn.classList.remove('is-unit');
+                        }
+                    }
+                }
+                /* 提交gap輸入值 */
+                function commitGapInput(kind) {
+                    const inp = kind === 'row' ? gapRowInp : gapColInp;
+                    const raw = inp.value.trim();
+                    const prop = kind === 'row' ? 'row-gap' : 'column-gap';
+                    const unit = kind === 'row' ? gapRowUnit : gapColUnit;
+                    if (raw === '') {
+                        if (gapLinked) writeGap('gap', '');
+                        else writeGap(prop, '');
+                        return true;
+                    }
+                    const low = raw.toLowerCase();
+                    if (GAP_KW.indexOf(low) !== -1) {
+                        if (gapLinked) writeGap('gap', low);
+                        else writeGap(prop, low);
+                        return true;
+                    }
+                    const s = gapSplitLen(raw);
+                    if (s && s.num >= 0) {
+                        if (s.unit) {
+                            if (kind === 'row') gapRowUnit = s.unit;
+                            else gapColUnit = s.unit;
+                        }
+                        const val = fmtGapNum(s.num) + (s.unit || unit);
+                        if (gapLinked) writeGap('gap', val);
+                        else writeGap(prop, val);
+                        return true;
+                    }
+                    return false;
                 }
                 function isFlex(display) {
                     return !!FLEX_DISPLAY[display];
@@ -16754,16 +16941,43 @@
                         const on = !!dd.querySelector('.st-ly__dd-opt.is-on');
                         trig.classList.toggle('is-set', on);
                     });
-                    const rg = parseGap(read('row-gap'));
-                    const cg = parseGap(read('column-gap'));
-                    let g = parseGap(read('gap'));
-                    if (g === '' && rg !== '' && cg !== '' && rg === cg) g = rg;
-                    if (gapRowInp) gapRowInp.value = rg || g;
-                    if (gapColInp) gapColInp.value = cg || g;
+                    const rgRaw = String(read('row-gap') || '').trim();
+                    const cgRaw = String(read('column-gap') || '').trim();
+                    let gRaw = String(read('gap') || '').trim();
+                    /* 解析gap值：優先讀分開的row/column-gap，簡寫gap在兩者相同時才讀取 */
+                    const parseGapVal = (raw, curUnit) => {
+                        if (!raw) return { val: '', isKw: false, isNum: false, unit: curUnit };
+                        const low = raw.toLowerCase();
+                        if (GAP_KW.indexOf(low) !== -1) return { val: low, isKw: true, isNum: false, unit: curUnit };
+                        const s = gapSplitLen(raw);
+                        if (s) {
+                            const unit = s.unit || curUnit;
+                            return { val: s.raw + ' ' + unit.toUpperCase(), isKw: false, isNum: true, num: s.num, unit: unit };
+                        }
+                        return { val: raw, isKw: false, isNum: false, unit: curUnit };
+                    };
+                    let rg = parseGapVal(rgRaw, gapRowUnit);
+                    let cg = parseGapVal(cgRaw, gapColUnit);
+                    let g = parseGapVal(gRaw, gapRowUnit);
+                    if (!rg.val && !cg.val && g.val) { rg = g; cg = g; }
+                    /* 輸入框只回填數字，單位一律由右端單位鈕顯示；
+                       欄位窄，兩處都寫單位會擠成「24 PX PX」且把數字裁掉。 */
+                    if (gapRowInp && document.activeElement !== gapRowInp) {
+                        gapRowInp.value = rg.isNum ? fmtGapNum(rg.num) : rg.val;
+                        gapRowUnit = rg.unit;
+                    }
+                    if (gapColInp && document.activeElement !== gapColInp) {
+                        gapColInp.value = cg.isNum ? fmtGapNum(cg.num) : cg.val;
+                        gapColUnit = cg.unit;
+                    }
+                    updateGapUnitBtn(gapRowUnitBtn, gapRowUnit, gapRowInp.value);
+                    updateGapUnitBtn(gapColUnitBtn, gapColUnit, gapColInp.value);
+                    markGapKw(gapRowKwItems, gapRowInp.value, gapKwState.row);
+                    markGapKw(gapColKwItems, gapColInp.value, gapKwState.col);
                     const linkBtn = $('[data-act="gap-link"]');
                     if (linkBtn) linkBtn.classList.toggle('is-on', gapLinked);
-                    const gapRow = $('[data-gap-row]');
-                    if (gapRow) gapRow.title = (showFlex || isGrid) ? '' : 'Gap 僅在 Flex / Grid 下生效';
+                    const gapRowWrap = $('[data-gap-row]');
+                    if (gapRowWrap) gapRowWrap.title = (showFlex || isGrid) ? '' : 'Gap 僅在 Flex / Grid 下生效';
                     /* Grid settings 彈窗開著時，同步分區數量與軌道列；
                        使用者正在彈窗內輸入時跳過，避免重繪搶走焦點 */
                     if (gsEl.classList.contains('is-open') && !gsEl.contains(document.activeElement)) renderGs();
@@ -16850,11 +17064,63 @@
                         return;
                     }
                     if (e.target.closest('[data-act="gap-link"]')) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         gapLinked = !gapLinked;
                         if (gapLinked) {
-                            const n = (gapRowInp.value || gapColInp.value || '').trim();
-                            writeGap('gap', n === '' ? '' : n + 'px');
+                            /* 連動時以row值為準寫入簡寫gap */
+                            const raw = gapRowInp.value.trim();
+                            let val = '';
+                            if (raw !== '') {
+                                const low = raw.toLowerCase();
+                                if (GAP_KW.indexOf(low) !== -1) val = low;
+                                else {
+                                    const s = gapSplitLen(raw);
+                                    if (s) val = fmtGapNum(s.num) + (s.unit || gapRowUnit);
+                                }
+                            }
+                            writeGap('gap', val);
                         }
+                        paint();
+                        return;
+                    }
+                    /* gap單位按鈕循環切換 */
+                    const gapUnitBtn = e.target.closest('[data-gap-unit]');
+                    if (gapUnitBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const kind = gapUnitBtn.getAttribute('data-gap-unit');
+                        const inp = kind === 'row' ? gapRowInp : gapColInp;
+                        const curVal = String(inp.value || '').trim();
+                        const s = gapSplitLen(curVal);
+                        if (s && s.num >= 0) {
+                            let curUnit = kind === 'row' ? gapRowUnit : gapColUnit;
+                            const nextUnit = GAP_UNITS[(GAP_UNITS.indexOf(curUnit) + 1) % GAP_UNITS.length];
+                            if (kind === 'row') gapRowUnit = nextUnit;
+                            else gapColUnit = nextUnit;
+                            const val = fmtGapNum(s.num) + nextUnit;
+                            if (gapLinked) writeGap('gap', val);
+                            else writeGap(kind === 'row' ? 'row-gap' : 'column-gap', val);
+                            paint();
+                        }
+                        return;
+                    }
+                    /* gap關鍵字選單點選 */
+                    const gapKwItem = e.target.closest('.st-gap__kw-item');
+                    if (gapKwItem) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const menu = gapKwItem.closest('[data-gap-kw]');
+                        const kind = menu.getAttribute('data-gap-kw');
+                        const inp = kind === 'row' ? gapRowInp : gapColInp;
+                        const state = gapKwState[kind];
+                        const kw = gapKwItem.getAttribute('data-kw');
+                        inp.value = kw;
+                        state.lastNum = null;
+                        state.lastKw = kw;
+                        if (commitGapInput(kind)) rememberGapValue(state, kw);
+                        menu.style.display = 'none';
+                        if (document.activeElement === inp) inp.blur();
                         paint();
                         return;
                     }
@@ -16929,14 +17195,67 @@
                     write('display', displaySel.value);
                     paint();
                 });
-                [gapRowInp, gapColInp].forEach(inp => {
-                    inp.addEventListener('change', () => {
-                        const n = inp.value.trim();
-                        const px = n === '' ? '' : n + 'px';
-                        if (gapLinked) writeGap('gap', px);
-                        else writeGap(inp.getAttribute('data-prop'), px);
+                /* Gap輸入框事件綁定 */
+                const bindGapInput = (kind) => {
+                    const inp = kind === 'row' ? gapRowInp : gapColInp;
+                    const unitBtn = kind === 'row' ? gapRowUnitBtn : gapColUnitBtn;
+                    const kwMenu = kind === 'row' ? gapRowKwMenu : gapColKwMenu;
+                    const kwItems = kind === 'row' ? gapRowKwItems : gapColKwItems;
+                    const state = gapKwState[kind];
+                    if (!inp) return;
+
+                    inp.addEventListener('focus', () => {
+                        /* 只在輸入框為空時顯示彈窗選單 */
+                        if (inp.value.trim() === '') {
+                            kwMenu.style.display = 'block';
+                        }
+                    });
+                    inp.addEventListener('blur', () => {
+                        const trimmed = inp.value.trim();
+                        if (trimmed === '') {
+                            /* 清空時優先還原上次數字值，其次還原關鍵字 */
+                            if (state.lastNum != null) {
+                                const unit = state.lastUnit || (kind === 'row' ? gapRowUnit : gapColUnit) || 'px';
+                                inp.value = fmtGapNum(state.lastNum) + ' ' + unit.toUpperCase();
+                            } else if (state.lastKw) {
+                                inp.value = state.lastKw;
+                            }
+                        }
+                        if (commitGapInput(kind)) rememberGapValue(state, inp.value);
+                        else {
+                            const field = kind === 'row' ? $('[data-gap-field="row"]') : $('[data-gap-field="col"]');
+                            if (field) field.classList.add('is-invalid');
+                            setTimeout(() => field && field.classList.remove('is-invalid'), 900);
+                        }
+                        setTimeout(() => { kwMenu.style.display = 'none'; }, 150);
                         paint();
                     });
+                    inp.addEventListener('input', e => {
+                        const v = inp.value;
+                        updateGapUnitBtn(unitBtn, kind === 'row' ? gapRowUnit : gapColUnit, v);
+                        markGapKw(kwItems, v, state);
+                        rememberGapValue(state, v, e.inputType);
+                        /* 輸入內容不為空時隱藏選單，為空時顯示 */
+                        kwMenu.style.display = v.trim() === '' ? 'block' : 'none';
+                    });
+                    /* Backspace清空後按預設值0 */
+                    inp.addEventListener('keydown', e => {
+                        if (e.key !== 'Backspace') return;
+                        if (inp.value !== '') return;
+                        e.preventDefault();
+                        inp.value = '0 px';
+                        if (commitGapInput(kind)) rememberGapValue(state, inp.value);
+                        paint();
+                    });
+                };
+                bindGapInput('row');
+                bindGapInput('col');
+                /* 點擊頁面其他地方關閉gap關鍵字選單 */
+                document.addEventListener('click', e => {
+                    if (!root.contains(e.target)) {
+                        gapRowKwMenu.style.display = 'none';
+                        gapColKwMenu.style.display = 'none';
+                    }
                 });
 
                 editor.on('component:selected', () => { closeDrops(); closeGg(); closeGs(); paint(); });
